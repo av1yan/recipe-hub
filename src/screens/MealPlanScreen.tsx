@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Coffee, Salad, Moon, Cookie, ShoppingCart, X } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { mealPlanAPI, recipeAPI } from '../utils/api'
@@ -10,12 +10,35 @@ interface Props {
 
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-const MEAL_TYPES = ['breakfast', 'lunch', 'dinner']
 
-const MEAL_COLORS: { [key: string]: string } = {
-  breakfast: '#f4b860',
-  lunch: '#6ba356',
-  dinner: '#c67139',
+const MEALS = [
+  { key: 'breakfast', label: 'Breakfast', Icon: Coffee, color: '#f59e0b', tint: '#fef3c7', emoji: '🍳' },
+  { key: 'lunch', label: 'Lunch', Icon: Salad, color: '#6ba356', tint: '#eaf6e0', emoji: '🥗' },
+  { key: 'dinner', label: 'Dinner', Icon: Moon, color: '#6366f1', tint: '#e5e9ff', emoji: '🍽️' },
+  { key: 'snack', label: 'Snack', Icon: Cookie, color: '#ec4899', tint: '#fce7f3', emoji: '🍎' },
+]
+
+// Layout constants keep the fixed label column aligned with the scrolling day cells.
+const HEADER_H = 46
+const CELL_H = 62
+const ROW_GAP = 10
+const DAY_COL_W = 86
+const LABEL_W = 58
+
+function getMeal(plan: MealPlan | undefined, dayName: string, mealType: string): any {
+  const dayMeals: any = plan?.meals?.[dayName]
+  if (!dayMeals) return null
+  const value = mealType === 'snack' ? dayMeals.snacks : dayMeals[mealType]
+  return Array.isArray(value) ? value[0] || null : value || null
+}
+
+function weekLabel(weekStart: Date): string {
+  const s = new Date(weekStart)
+  const e = new Date(s)
+  e.setDate(e.getDate() + 6)
+  const mo = (d: Date) => d.toLocaleDateString('en-US', { month: 'short' })
+  const endPart = mo(e) !== mo(s) ? `${mo(e)} ${e.getDate()}` : `${e.getDate()}`
+  return `${mo(s)} ${s.getDate()} – ${endPart}, ${e.getFullYear()}`
 }
 
 export default function MealPlanScreen({ onNavigate }: Props) {
@@ -34,15 +57,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   async function loadData() {
     try {
       setIsLoading(true)
-      const [plansData, recipesData] = await Promise.all([
-        mealPlanAPI.list(),
-        recipeAPI.list(),
-      ])
+      const [plansData, recipesData] = await Promise.all([mealPlanAPI.list(), recipeAPI.list()])
       setMealPlans(plansData)
       setRecipes(recipesData)
-      if (plansData.length > 0) {
-        setCurrentPlanId(plansData[0].id)
-      }
+      if (plansData.length > 0) setCurrentPlanId(plansData[0].id)
     } catch (error) {
       console.error('Failed to load meal plan data:', error)
     } finally {
@@ -55,7 +73,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       const weekStart = new Date()
       weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1)
       const plan = await mealPlanAPI.create(weekStart)
-      setMealPlans([...mealPlans, plan])
+      setMealPlans(prev => [...prev, plan])
       setCurrentPlanId(plan.id)
     } catch (error) {
       console.error('Failed to create meal plan:', error)
@@ -75,13 +93,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
-  function getWeekDateRange(weekStart: Date) {
-    const start = new Date(weekStart)
-    const end = new Date(start)
-    end.setDate(end.getDate() + 6)
-    return { start, end }
-  }
-
   function getDayNumber(index: number, weekStart: Date) {
     const date = new Date(weekStart)
     date.setDate(date.getDate() + index)
@@ -89,12 +100,34 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   }
 
   const currentPlan = mealPlans.find(p => p.id === currentPlanId)
+  const weekStart = new Date(currentPlan?.weekStart || new Date())
+
+  // Planning summary
+  let plannedCount = 0
+  let totalCalories = 0
+  DAY_NAMES.forEach(dayName => {
+    MEALS.forEach(m => {
+      const meal = getMeal(currentPlan, dayName, m.key)
+      if (meal) {
+        plannedCount++
+        totalCalories += meal.calories || 0
+      }
+    })
+  })
+  const totalSlots = DAYS.length * MEALS.length
+  const pct = totalSlots ? plannedCount / totalSlots : 0
+
+  const openAdd = (dayName: string, mealType: string) => {
+    setSelectedDay(dayName)
+    setSelectedMealType(mealType)
+    setShowRecipeSelector(true)
+  }
 
   if (isLoading) {
     return (
-      <div className="screen">
-        <header style={{ padding: '16px', background: '#fff', borderBottom: '1px solid rgba(15, 23, 42, 0.08)' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
+      <div className="screen" style={{ background: '#f7f8f5' }}>
+        <header style={{ padding: '16px', background: '#fff' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
         </header>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
           <p>Loading meal plans...</p>
@@ -106,14 +139,18 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
   if (mealPlans.length === 0) {
     return (
-      <div className="screen">
-        <header style={{ padding: '16px', background: '#fff', borderBottom: '1px solid rgba(15, 23, 42, 0.08)' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
+      <div className="screen" style={{ background: '#f7f8f5' }}>
+        <header style={{ padding: '16px', background: '#fff' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
         </header>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', gap: '16px' }}>
-          <p>No meal plans yet</p>
-          <button onClick={createNewMealPlan} className="btn" style={{ background: '#6ba356', color: '#fff', padding: '12px 24px', fontSize: '16px', fontWeight: '600', borderRadius: '8px' }}>
-            Create Your First Meal Plan
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '18px', padding: '24px' }}>
+          <div style={{ fontSize: '64px' }}>🗓️</div>
+          <div style={{ textAlign: 'center' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: '0 0 6px' }}>No meal plan yet</h3>
+            <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>Plan your week and cook with less guesswork.</p>
+          </div>
+          <button onClick={createNewMealPlan} style={{ background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', padding: '14px 28px', fontSize: '15px', fontWeight: '700', borderRadius: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(107,163,86,0.3)' }}>
+            Create a meal plan
           </button>
         </div>
         <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
@@ -121,289 +158,173 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     )
   }
 
+  const R = 24
+  const CIRC = 2 * Math.PI * R
+
   return (
-    <div className="screen" style={{ background: '#f8fafc' }}>
-      <header style={{ padding: '16px', background: '#fff', borderBottom: '1px solid rgba(15, 23, 42, 0.08)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
-          <button
-            onClick={createNewMealPlan}
-            className="btn btn-icon"
-            style={{
-              background: 'transparent',
-              color: '#6ba356',
-              padding: '8px',
-              cursor: 'pointer',
-              fontSize: '20px',
-              transition: 'transform 0.2s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-          >
-            +
+    <div className="screen" style={{ background: '#f7f8f5' }}>
+      <header style={{ padding: '14px 16px 12px', background: '#fff' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
+          <button onClick={createNewMealPlan} aria-label="New week" style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#f0f7ed', color: '#6ba356', border: '1.5px solid #c8e0bc', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Plus size={18} />
           </button>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-          <button
-            className="btn btn-icon"
-            style={{ background: 'transparent', color: '#1e293b', padding: '4px' }}
-          >
-            <ChevronLeft size={20} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button style={{ width: '30px', height: '30px', borderRadius: '9px', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+            <ChevronLeft size={18} />
           </button>
-          <div style={{ flex: 1, textAlign: 'center' }}>
-            <select
-              value={currentPlanId || mealPlans[0]?.id || ''}
-              onChange={(e) => setCurrentPlanId(e.target.value)}
-              className="input"
-              style={{ fontSize: '12px', textAlign: 'center', background: 'transparent', border: 'none', color: '#94a3b8' }}
-            >
-              {mealPlans.length === 0 ? (
-                <option value="">No meal plans</option>
-              ) : (
-                mealPlans.map(plan => (
-                  <option key={plan.id} value={plan.id}>
-                    Jul 14-20, 2025
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-          <button
-            className="btn btn-icon"
-            style={{ background: 'transparent', color: '#1e293b', padding: '4px' }}
-          >
-            <ChevronRight size={20} />
+          <span style={{ fontSize: '14px', fontWeight: '700', color: '#334155' }}>{weekLabel(weekStart)}</span>
+          <button style={{ width: '30px', height: '30px', borderRadius: '9px', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+            <ChevronRight size={18} />
           </button>
         </div>
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Day Selector Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '6px', background: '#fff', padding: '14px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          {DAYS.map((day, idx) => (
-            <div
-              key={day}
-              style={{
-                textAlign: 'center',
-                padding: '12px 10px',
-                borderRadius: '12px',
-                background: idx === 1 ? '#d4a574' : 'transparent',
-                color: idx === 1 ? '#fff' : '#64748b',
-                fontSize: '11px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (idx !== 1) {
-                  e.currentTarget.style.background = '#f0f7ed'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (idx !== 1) {
-                  e.currentTarget.style.background = 'transparent'
-                }
-              }}
-            >
-              <div>{day}</div>
-              <div style={{ fontSize: '14px', fontWeight: '800', marginTop: '6px', color: idx === 1 ? '#fff' : '#1e293b' }}>{getDayNumber(idx, new Date(currentPlan?.weekStart || new Date()))}</div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        {/* Summary card */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#fff', borderRadius: '18px', padding: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+          <div style={{ position: 'relative', width: '58px', height: '58px', flexShrink: 0 }}>
+            <svg width="58" height="58" viewBox="0 0 58 58">
+              <circle cx="29" cy="29" r={R} fill="none" stroke="#eef2ee" strokeWidth="7" />
+              <circle cx="29" cy="29" r={R} fill="none" stroke="url(#ringGrad)" strokeWidth="7" strokeLinecap="round" strokeDasharray={CIRC} strokeDashoffset={CIRC * (1 - pct)} transform="rotate(-90 29 29)" style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
+              <defs>
+                <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stopColor="#6ba356" />
+                  <stop offset="1" stopColor="#f4b860" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '800', color: '#1e293b' }}>
+              {plannedCount}
             </div>
-          ))}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+              {plannedCount === 0 ? 'Nothing planned yet' : `${plannedCount} meal${plannedCount === 1 ? '' : 's'} planned`}
+            </p>
+            <p style={{ fontSize: '13px', color: '#94a3b8', margin: '2px 0 0' }}>
+              of {totalSlots} this week{totalCalories > 0 ? ` · ~${totalCalories.toLocaleString()} kcal` : ''}
+            </p>
+          </div>
         </div>
 
-        {/* Meals Grid */}
-        {['breakfast', 'lunch', 'dinner'].map(mealType => (
-          <div key={mealType}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <div style={{ width: '4px', height: '20px', background: MEAL_COLORS[mealType], borderRadius: '2px' }}></div>
-              <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', textTransform: 'capitalize', margin: 0 }}>
-                {mealType}
-              </h3>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', animation: 'fadeIn 0.3s ease' }}>
-              {DAYS.map((day, dayIdx) => {
-                const dayName = DAY_NAMES[dayIdx]
-                const meal = currentPlan?.meals?.[dayName]?.[mealType as keyof typeof currentPlan.meals[typeof dayName]]
-                const mealColor = MEAL_COLORS[mealType]
+        {/* Meal matrix */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {/* Fixed meal-type labels */}
+          <div style={{ flexShrink: 0, width: `${LABEL_W}px` }}>
+            <div style={{ height: `${HEADER_H}px` }} />
+            {MEALS.map(m => (
+              <div key={m.key} style={{ height: `${CELL_H}px`, marginTop: `${ROW_GAP}px`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '12px', background: m.tint, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <m.Icon size={17} color={m.color} />
+                </div>
+                <span style={{ fontSize: '9px', fontWeight: '700', color: '#64748b', letterSpacing: '0.02em' }}>{m.label}</span>
+              </div>
+            ))}
+          </div>
 
+          {/* Scrollable day columns */}
+          <div style={{ flex: 1, overflowX: 'auto', paddingBottom: '4px' }}>
+            <div style={{ display: 'flex', gap: '8px', minWidth: 'max-content' }}>
+              {DAYS.map((day, dayIdx) => {
+                const dayNum = getDayNumber(dayIdx, weekStart)
+                const isToday = new Date().getDate() === dayNum && new Date().getMonth() === new Date(weekStart).getMonth()
                 return (
-                  <div
-                    key={`${dayName}-${mealType}`}
-                    onClick={() => {
-                      if (!meal) {
-                        setSelectedDay(dayName)
-                        setSelectedMealType(mealType)
-                        setShowRecipeSelector(true)
-                      }
-                    }}
-                    style={{
-                      padding: '14px',
-                      background: meal ? mealColor : '#fff',
-                      color: meal ? '#fff' : '#94a3b8',
-                      borderRadius: '14px',
-                      cursor: 'pointer',
-                      minHeight: '76px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      border: meal ? 'none' : '2px solid #e2e8f0',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                      transform: 'scale(1) translateY(0)',
-                      boxShadow: meal ? `0 4px 12px ${mealColor}40` : '0 2px 6px rgba(0,0,0,0.06)',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!meal) {
-                        e.currentTarget.style.background = '#f0f7ed'
-                        e.currentTarget.style.borderColor = '#d4a574'
-                        e.currentTarget.style.color = '#c67139'
-                        e.currentTarget.style.transform = 'scale(1.02) translateY(-4px)'
-                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(198, 113, 57, 0.15)'
-                      } else {
-                        e.currentTarget.style.transform = 'scale(1.05) translateY(-6px)'
-                        e.currentTarget.style.boxShadow = `0 12px 24px ${mealColor}50`
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!meal) {
-                        e.currentTarget.style.background = '#fff'
-                        e.currentTarget.style.borderColor = '#e2e8f0'
-                        e.currentTarget.style.color = '#94a3b8'
-                      }
-                      e.currentTarget.style.transform = 'scale(1) translateY(0)'
-                      e.currentTarget.style.boxShadow = meal ? `0 4px 12px ${mealColor}40` : '0 2px 6px rgba(0,0,0,0.06)'
-                    }}
-                  >
-                    {meal ? (
-                      <div>
-                        <div style={{ fontWeight: '600', fontSize: '13px' }}>
-                          {Array.isArray(meal) ? meal[0]?.name : (meal as Recipe)?.name || 'Meal'}
+                  <div key={day} style={{ width: `${DAY_COL_W}px` }}>
+                    <div style={{ height: `${HEADER_H}px`, borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: isToday ? '#6ba356' : 'transparent' }}>
+                      <span style={{ fontSize: '10px', fontWeight: '700', color: isToday ? 'rgba(255,255,255,0.85)' : '#94a3b8' }}>{day}</span>
+                      <span style={{ fontSize: '16px', fontWeight: '800', color: isToday ? '#fff' : '#1e293b' }}>{dayNum}</span>
+                    </div>
+                    {MEALS.map(m => {
+                      const meal = getMeal(currentPlan, DAY_NAMES[dayIdx], m.key)
+                      return (
+                        <div
+                          key={m.key}
+                          onClick={() => { if (!meal) openAdd(DAY_NAMES[dayIdx], m.key) }}
+                          title={meal?.name || `Add ${m.label.toLowerCase()}`}
+                          style={{
+                            height: `${CELL_H}px`, marginTop: `${ROW_GAP}px`, borderRadius: '14px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: 'pointer', overflow: 'hidden',
+                            background: meal ? m.tint : '#fff',
+                            border: meal ? `1.5px solid ${m.color}30` : '1.5px dashed #dbe2d6',
+                            transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.08)' }}
+                          onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
+                        >
+                          {meal ? (
+                            <span style={{ fontSize: '28px', lineHeight: 1 }}>{(meal as any).emoji || m.emoji}</span>
+                          ) : (
+                            <Plus size={20} color="#c3cdba" />
+                          )}
                         </div>
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: '24px' }}>+</div>
-                    )}
+                      )
+                    })}
                   </div>
                 )
               })}
             </div>
           </div>
-        ))}
+        </div>
 
-        {/* Generate Button */}
+        {/* CTA */}
         <button
-          onClick={createNewMealPlan}
-          style={{
-            width: '100%',
-            padding: '16px',
-            background: 'linear-gradient(135deg, #c67139 0%, #d4a574 100%)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '14px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 14px rgba(198, 113, 57, 0.25)',
-            marginTop: '8px',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(198, 113, 57, 0.35)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 4px 14px rgba(198, 113, 57, 0.25)'
-          }}
+          onClick={() => onNavigate('grocery')}
+          style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)', marginTop: '4px' }}
         >
-          <Sparkles size={18} />
-          Generate Meal Plan
+          <ShoppingCart size={17} />
+          Go to grocery list
         </button>
       </div>
 
       {/* Recipe Selector Modal */}
       {showRecipeSelector && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'flex-end',
-          zIndex: 999,
-          animation: 'fadeIn 0.2s ease',
-        }}>
-          <div style={{
-            background: '#fff',
-            width: '100%',
-            borderTopLeftRadius: '20px',
-            borderTopRightRadius: '20px',
-            maxHeight: '60vh',
-            overflowY: 'auto',
-            padding: '16px',
-            animation: 'slideUp 0.3s ease',
-          }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 999, animation: 'fadeIn 0.2s ease' }}>
+          <div style={{ background: '#fff', width: '100%', borderTopLeftRadius: '22px', borderTopRightRadius: '22px', maxHeight: '66vh', overflowY: 'auto', padding: '16px', animation: 'slideUp 0.3s ease' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', margin: 0 }}>
-                Select {selectedMealType} for {selectedDay}
-              </h3>
-              <button
-                onClick={() => setShowRecipeSelector(false)}
-                className="btn btn-icon"
-                style={{ background: 'transparent', color: '#1e293b', fontSize: '24px', padding: '0' }}
-              >
-                ×
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1e293b', textTransform: 'capitalize' }}>Add {selectedMealType}</h3>
+                <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>{selectedDay}</p>
+              </div>
+              <button onClick={() => setShowRecipeSelector(false)} aria-label="Close" style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                <X size={18} />
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {recipes.map(recipe => (
-                <button
-                  key={recipe.id}
-                  onClick={() => addMealToPlan(recipe.id)}
-                  style={{
-                    padding: '12px',
-                    background: '#f8fafc',
-                    border: '1px solid rgba(15, 23, 42, 0.08)',
-                    borderRadius: '8px',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#e8ede5'
-                    e.currentTarget.style.transform = 'translateX(4px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#f8fafc'
-                    e.currentTarget.style.transform = 'translateX(0)'
-                  }}
-                >
-                  <div style={{ fontWeight: '600' }}>{recipe.name}</div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                    {recipe.cuisine} · {recipe.prepTime + recipe.cookTime} min
-                  </div>
-                </button>
-              ))}
-            </div>
+            {recipes.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8' }}>
+                <div style={{ fontSize: '36px', marginBottom: '8px' }}>🍽️</div>
+                <p style={{ fontSize: '14px', margin: 0 }}>No recipes yet — add some first.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {recipes.map(recipe => (
+                  <button
+                    key={recipe.id}
+                    onClick={() => addMealToPlan(recipe.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', border: '1px solid #eef2f6', borderRadius: '12px', textAlign: 'left', cursor: 'pointer' }}
+                  >
+                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
+                      {(recipe as any).emoji || '🍽️'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: '600', fontSize: '14px', color: '#1e293b' }}>{recipe.name}</div>
+                      <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                        {recipe.cuisine} · {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
 
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
       `}</style>
 
       <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
