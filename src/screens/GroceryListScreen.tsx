@@ -1,11 +1,48 @@
-import { useState, useEffect } from 'react'
-import { Trash2, Plus, Check } from 'lucide-react'
-import type { Screen, GroceryList, GroceryItem } from '../types'
+import { useState, useEffect, useRef } from 'react'
+import { Trash2, Plus, Check, Camera, Loader2, X } from 'lucide-react'
+import type { Screen, GroceryList } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI } from '../utils/api'
+import { Toast, useToast } from '../components/Toast'
 
 interface Props {
   onNavigate: (screen: Screen) => void
+}
+
+const UNITS = [
+  'lb', 'lbs', 'oz', 'kg', 'g', 'gram', 'grams', 'cup', 'cups', 'tbsp', 'tsp',
+  'ml', 'l', 'liter', 'litre', 'dozen', 'doz', 'pack', 'packs', 'bunch', 'bunches',
+  'can', 'cans', 'box', 'boxes', 'bag', 'bags', 'bottle', 'bottles', 'jar', 'jars',
+]
+
+// Strip bullets, checkboxes and list numbering that show up on handwritten/printed notes.
+function cleanLine(l: string): string {
+  return l
+    .replace(/^\s*[-*•·◦+□☐☑✓]+\s*/, '')
+    .replace(/^\s*\d+[.)]\s+/, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function parseGroceryLines(text: string): string[] {
+  return text
+    .split('\n')
+    .map(cleanLine)
+    .filter(l => l.length >= 2 && /[a-zA-Z]/.test(l))
+    .slice(0, 50)
+}
+
+// Pull a leading quantity + unit out of a line, e.g. "2 lb apples" -> {apples, 2, lb}.
+function parseItemParts(raw: string): { name: string; quantity: number; unit: string } {
+  const m = raw.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)?\s+(.+)$/)
+  if (m) {
+    const qty = parseFloat(m[1]) || 1
+    const unit = (m[2] || '').toLowerCase()
+    if (unit && UNITS.includes(unit)) return { name: m[3].trim(), quantity: qty, unit }
+    // number but no recognized unit -> keep the word as part of the name ("3 apples")
+    return { name: (m[2] ? m[2] + ' ' : '') + m[3].trim(), quantity: qty, unit: 'piece' }
+  }
+  return { name: raw.trim(), quantity: 1, unit: 'piece' }
 }
 
 export default function GroceryListScreen({ onNavigate }: Props) {
@@ -16,6 +53,14 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const [newItemName, setNewItemName] = useState('')
   const [newItemQuantity, setNewItemQuantity] = useState('1')
   const [newItemUnit, setNewItemUnit] = useState('piece')
+
+  // Photo-scan state
+  const [scanning, setScanning] = useState(false)
+  const [scanProgress, setScanProgress] = useState(0)
+  const [scanned, setScanned] = useState<string[] | null>(null)
+  const [savingScan, setSavingScan] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { toast, show } = useToast()
 
   useEffect(() => {
     loadLists()
@@ -100,9 +145,78 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     }
   }
 
+  // ─── Photo scan ────────────────────────────────────────────────────────────
+  const openCamera = () => fileInputRef.current?.click()
+
+  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+    setScanning(true)
+    setScanProgress(0)
+    try {
+      const Tesseract = (await import('tesseract.js')).default
+      const { data } = await Tesseract.recognize(file, 'eng', {
+        logger: (m: { progress?: number }) => {
+          if (typeof m.progress === 'number') setScanProgress(m.progress)
+        },
+      })
+      const lines = parseGroceryLines(data.text || '')
+      if (lines.length === 0) {
+        show('No items found — try a clearer photo', 'error')
+      } else {
+        setScanned(lines)
+      }
+    } catch (err) {
+      console.error('OCR failed:', err)
+      show('Could not read the photo', 'error')
+    } finally {
+      setScanning(false)
+    }
+  }
+
+  const updateScanned = (i: number, v: string) =>
+    setScanned(prev => (prev ? prev.map((x, idx) => (idx === i ? v : x)) : prev))
+  const removeScanned = (i: number) =>
+    setScanned(prev => (prev ? prev.filter((_, idx) => idx !== i) : prev))
+
+  async function addScannedItems() {
+    const items = (scanned || []).map(s => s.trim()).filter(Boolean)
+    if (items.length === 0) { setScanned(null); return }
+    setSavingScan(true)
+    try {
+      let listId = selectedListId
+      if (!listId) {
+        const list = await groceryAPI.create(newListName.trim() || 'Scanned List')
+        setLists(prev => [...prev, list])
+        setSelectedListId(list.id)
+        setNewListName('')
+        listId = list.id
+      }
+      const added: any[] = []
+      for (const raw of items) {
+        const { name, quantity, unit } = parseItemParts(raw)
+        const item = await groceryAPI.addItem(listId, { name, quantity, unit, category: 'general' })
+        added.push(item)
+      }
+      setLists(prev => prev.map(l => (l.id === listId ? { ...l, items: [...(l.items || []), ...added] } : l)))
+      setScanned(null)
+      show(`Added ${added.length} item${added.length === 1 ? '' : 's'}`)
+    } catch (err) {
+      console.error('Failed to add scanned items:', err)
+      show('Could not save items', 'error')
+    } finally {
+      setSavingScan(false)
+    }
+  }
+
   const selectedList = lists.find(l => l.id === selectedListId)
   const checkedCount = selectedList?.items?.filter(i => i.checked).length || 0
   const totalCount = selectedList?.items?.length || 0
+
+  const hiddenFileInput = (
+    <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhoto} style={{ display: 'none' }} />
+  )
 
   if (isLoading) {
     return (
@@ -119,10 +233,19 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen">
+    <div className="screen" style={{ position: 'relative' }}>
+      {hiddenFileInput}
+
       <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedList ? '12px' : 0 }}>
           <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
+          <button
+            onClick={openCamera}
+            aria-label="Scan a grocery note"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f0f7ed', color: '#6ba356', border: '1.5px solid #c8e0bc', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+          >
+            <Camera size={16} /> Scan
+          </button>
         </div>
         {selectedList && (
           <div style={{ fontSize: '13px', color: '#94a3b8' }}>
@@ -147,6 +270,13 @@ export default function GroceryListScreen({ onNavigate }: Props) {
               />
               <button onClick={createNewList} className="btn" style={{ width: '100%', background: '#6ba356', color: '#fff' }}>
                 Create List
+              </button>
+              <button
+                onClick={openCamera}
+                className="btn"
+                style={{ width: '100%', background: '#fff', color: '#6ba356', border: '1.5px solid #c8e0bc', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <Camera size={16} /> Scan a note
               </button>
             </div>
           </div>
@@ -283,6 +413,66 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         )}
       </div>
 
+      {/* Scanning overlay */}
+      {scanning && (
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.96)', zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
+          <Loader2 size={40} color="#6ba356" style={{ animation: 'spin 1s linear infinite' }} />
+          <p style={{ fontSize: '15px', color: '#1e293b', fontWeight: '600', margin: 0 }}>Reading your note…</p>
+          <div style={{ width: '200px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+            <div style={{ height: '100%', background: '#6ba356', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
+          </div>
+          <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+        </div>
+      )}
+
+      {/* Review overlay */}
+      {scanned && (
+        <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 20, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button onClick={() => setScanned(null)} aria-label="Cancel scan" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
+              <X size={22} color="#1e293b" />
+            </button>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Review items</h3>
+              <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Edit or remove any misreads, then add.</p>
+            </div>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {scanned.map((item, i) => (
+              <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  value={item}
+                  onChange={e => updateScanned(i, e.target.value)}
+                  style={{ flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #e2e8f0', fontSize: '14px', color: '#1e293b', background: '#fff', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                />
+                <button onClick={() => removeScanned(i)} aria-label="Remove item" style={{ flexShrink: 0, width: '36px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '10px', color: '#94a3b8', cursor: 'pointer' }}>
+                  <X size={15} />
+                </button>
+              </div>
+            ))}
+            {scanned.length === 0 && (
+              <p style={{ textAlign: 'center', color: '#94a3b8', marginTop: '24px' }}>No items — cancel and try again.</p>
+            )}
+          </div>
+
+          <div style={{ padding: '12px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '10px' }}>
+            <button onClick={() => setScanned(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: '#f1f5f9', color: '#64748b', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+              Cancel
+            </button>
+            <button
+              onClick={addScannedItems}
+              disabled={savingScan || scanned.length === 0}
+              style={{ flex: 2, padding: '13px', borderRadius: '12px', background: '#6ba356', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1 }}
+            >
+              {savingScan ? 'Adding…' : `Add ${scanned.length} item${scanned.length === 1 ? '' : 's'}`}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
       <BottomNavigation active="grocery" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
