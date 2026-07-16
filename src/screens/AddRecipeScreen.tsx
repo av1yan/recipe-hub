@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { ArrowLeft, Check, Plus, X } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { ArrowLeft, Check, Plus, X, Camera } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
 import { DIET_OPTIONS } from './DietPreferencesScreen'
 import { Toast, useToast } from '../components/Toast'
+import { fileToCompressedDataUrl } from '../utils/image'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -53,7 +54,25 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
   const [instructions, setInstructions] = useState<InstructionRow[]>([{ text: '', duration: '' }])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [photoBusy, setPhotoBusy] = useState(false)
+  const [photoError, setPhotoError] = useState('')
+  const photoInputRef = useRef<HTMLInputElement>(null)
   const { toast, show } = useToast()
+
+  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // let the same file be picked again after a removal
+    if (!file) return
+    setPhotoError('')
+    setPhotoBusy(true)
+    try {
+      setImageUrl(await fileToCompressedDataUrl(file))
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : 'Could not read that photo')
+    } finally {
+      setPhotoBusy(false)
+    }
+  }
 
   const toggleTag = (id: string) => {
     setTags(prev => (prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]))
@@ -188,26 +207,47 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
           </div>
 
           <div className="field">
-            <label>Photo URL <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-            <input
-              type="url"
-              className="input"
-              placeholder="https://…/photo.jpg"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              autoCapitalize="none"
-              autoCorrect="off"
-            />
-            {imageUrl.trim() && (
-              <div style={{ marginTop: '8px', height: '140px', borderRadius: '12px', overflow: 'hidden', background: '#f1f5f9', border: '1px solid #eef2f6' }}>
-                <img
-                  src={imageUrl.trim()}
-                  alt=""
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  onError={e => { (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:13px">Couldn\'t load that image</div>' }}
-                />
+            <label>Photo <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+            <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: 'none' }} />
+
+            {imageUrl ? (
+              <div style={{ marginTop: '6px' }}>
+                <div style={{ position: 'relative', height: '160px', borderRadius: '12px', overflow: 'hidden', background: '#f1f5f9', border: '1px solid #eef2f6' }}>
+                  <img src={imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  <button
+                    type="button"
+                    onClick={() => setImageUrl('')}
+                    aria-label="Remove photo"
+                    style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '9px', background: 'rgba(255,255,255,0.94)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1e293b' }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => photoInputRef.current?.click()}
+                  style={{ marginTop: '8px', background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '700', cursor: 'pointer', padding: 0 }}
+                >
+                  Choose a different photo
+                </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={photoBusy}
+                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
+              >
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Camera size={18} color="#6ba356" />
+                </div>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#94a3b8' }}>
+                  {photoBusy ? 'Processing photo…' : 'Add a photo'}
+                </span>
+              </button>
             )}
+
+            {photoError && <p style={{ fontSize: '13px', color: '#ef4444', margin: '8px 0 0' }}>{photoError}</p>}
           </div>
 
           {/* Ingredients */}
