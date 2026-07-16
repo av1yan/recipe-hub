@@ -4,6 +4,7 @@ import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
 import { DIET_OPTIONS } from './DietPreferencesScreen'
+import { Toast, useToast } from '../components/Toast'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -51,6 +52,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
   const [instructions, setInstructions] = useState<InstructionRow[]>([{ text: '', duration: '' }])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { toast, show } = useToast()
 
   const toggleTag = (id: string) => {
     setTags(prev => (prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]))
@@ -99,8 +101,8 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
         instructions: cleanInstructions,
       })
 
-      alert('Recipe created successfully!')
-      onNavigate('home')
+      show('Recipe created!')
+      setTimeout(() => onNavigate('home'), 1100)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create recipe')
     } finally {
@@ -109,7 +111,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen">
+    <div className="screen" style={{ position: 'relative' }}>
       <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button onClick={() => onNavigate('home')} className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
@@ -262,6 +264,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
         </form>
       </div>
 
+      {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
       <BottomNavigation active="add" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )

@@ -5,6 +5,7 @@ import {
   Monitor, UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf,
 } from 'lucide-react'
 import type { Screen } from '../types'
+import { Toast, useToast } from '../components/Toast'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
@@ -40,37 +41,6 @@ function selectElementText(el: HTMLElement | null) {
   const sel = window.getSelection()
   sel?.removeAllRanges()
   sel?.addRange(range)
-}
-
-// Floating confirmation pill, anchored to the bottom of the phone frame.
-function Toast({ message, tone }: { message: string; tone: 'success' | 'error' }) {
-  return (
-    <div style={{ position: 'absolute', bottom: '28px', left: '16px', right: '16px', display: 'flex', justifyContent: 'center', zIndex: 100, pointerEvents: 'none' }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '9px',
-        background: tone === 'error' ? '#334155' : '#1e293b', color: '#fff',
-        padding: '12px 18px', borderRadius: '999px', fontSize: '14px', fontWeight: '600',
-        boxShadow: '0 10px 28px rgba(0,0,0,0.3)', maxWidth: '100%',
-        animation: 'toastPop 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-      }}>
-        {tone === 'success' ? <Check size={16} color="#7ee08a" /> : <span style={{ fontSize: '14px' }}>⚠️</span>}
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{message}</span>
-      </div>
-      <style>{`@keyframes toastPop { from { opacity: 0; transform: translateY(14px) scale(0.96) } to { opacity: 1; transform: translateY(0) scale(1) } }`}</style>
-    </div>
-  )
-}
-
-// Shows a Toast for a few seconds, replacing any toast already on screen.
-function useToast() {
-  const [toast, setToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null)
-  const timer = useRef<ReturnType<typeof setTimeout>>()
-  const show = (message: string, tone: 'success' | 'error' = 'success') => {
-    setToast({ message, tone })
-    if (timer.current) clearTimeout(timer.current)
-    timer.current = setTimeout(() => setToast(null), 2600)
-  }
-  return { toast, show }
 }
 
 type SubPage =
