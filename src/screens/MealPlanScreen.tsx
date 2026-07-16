@@ -152,16 +152,20 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </button>
           <div style={{ flex: 1, textAlign: 'center' }}>
             <select
-              value={currentPlanId || ''}
+              value={currentPlanId || mealPlans[0]?.id || ''}
               onChange={(e) => setCurrentPlanId(e.target.value)}
               className="input"
               style={{ fontSize: '12px', textAlign: 'center', background: 'transparent', border: 'none', color: '#94a3b8' }}
             >
-              {mealPlans.map(plan => (
-                <option key={plan.id} value={plan.id}>
-                  Jul 14-20, 2025
-                </option>
-              ))}
+              {mealPlans.length === 0 ? (
+                <option value="">No meal plans</option>
+              ) : (
+                mealPlans.map(plan => (
+                  <option key={plan.id} value={plan.id}>
+                    Jul 14-20, 2025
+                  </option>
+                ))
+              )}
             </select>
           </div>
           <button
