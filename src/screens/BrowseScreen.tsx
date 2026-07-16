@@ -12,9 +12,13 @@ const DIET_LABELS: Record<string, string> = {
 }
 
 // A recipe matches when its tags satisfy every selected diet/allergy preference.
+// The API returns tags either as strings or as { tag: string } objects, so normalize both.
 function matchesDiet(recipe: Recipe, prefs: string[]): boolean {
   if (prefs.length === 0) return true
-  const tags = (recipe.tags || []).map(t => t.toLowerCase().replace(/\s+/g, '-'))
+  const tags = (recipe.tags || []).map((t: any) => {
+    const raw = typeof t === 'string' ? t : (t?.tag ?? '')
+    return raw.toLowerCase().replace(/\s+/g, '-')
+  })
   return prefs.every(pref => tags.includes(pref))
 }
 
@@ -39,7 +43,24 @@ export default function BrowseScreen({ onNavigate }: Props) {
   async function loadRecipes() {
     try {
       setIsLoading(true)
-      const data = await recipeAPI.list()
+      let data: Recipe[] = await recipeAPI.list()
+      // The list endpoint omits tags, so when diet filters are active we hydrate
+      // each recipe's tags from its detail endpoint to filter against.
+      if (getDietPrefs().length > 0) {
+        data = await Promise.all(
+          data.map(async (r: any) => {
+            try {
+              const detail = await recipeAPI.get(r.id)
+              const tags = (detail.tags || [])
+                .map((t: any) => (typeof t === 'string' ? t : t?.tag))
+                .filter(Boolean)
+              return { ...r, tags }
+            } catch {
+              return r
+            }
+          })
+        )
+      }
       setRecipes(data)
       setFilteredRecipes(data)
     } catch (error) {
