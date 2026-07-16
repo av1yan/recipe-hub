@@ -2,8 +2,8 @@ const API_BASE_URL = (() => {
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'http://localhost:5001/api'
   }
-  // Production backend on Railway
-  return import.meta.env.VITE_API_URL || 'https://recipe-hub-backend-production.up.railway.app/api'
+  const base = import.meta.env.VITE_API_URL || 'https://recipe-hub-backend-production.up.railway.app'
+  return base.endsWith('/api') ? base : `${base}/api`
 })()
 
 let authToken: string | null = null
