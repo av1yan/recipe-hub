@@ -142,7 +142,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             onClick={() => onNavigate('grocery')}
             style={{
               flex: 1, padding: '11px 8px',
-              background: '#fff', color: '#475569',
+              background: '#fff', color: '#64748b',
               border: '1.5px solid #e2e8f0', borderRadius: '10px',
               fontSize: '12px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',

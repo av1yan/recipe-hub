@@ -145,7 +145,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                 className="input"
                 style={{ marginBottom: '8px' }}
               />
-              <button onClick={createNewList} className="btn" style={{ width: '100%', background: '#c67139', color: '#fff' }}>
+              <button onClick={createNewList} className="btn" style={{ width: '100%', background: '#6ba356', color: '#fff' }}>
                 Create List
               </button>
             </div>
@@ -161,7 +161,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     padding: '8px 12px',
                     borderRadius: '8px',
                     border: 'none',
-                    background: list.id === selectedListId ? '#c67139' : '#f1f5f9',
+                    background: list.id === selectedListId ? '#6ba356' : '#f1f5f9',
                     color: list.id === selectedListId ? '#fff' : '#1e293b',
                     fontSize: '13px',
                     fontWeight: '600',
@@ -176,7 +176,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
             {selectedList && (
               <>
-                <div style={{ marginBottom: '16px', padding: '12px', background: '#f8f9fa', borderRadius: '8px' }}>
+                <div style={{ marginBottom: '16px', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                     <input
                       type="text"
@@ -215,7 +215,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     <button
                       onClick={addItemToList}
                       className="btn btn-icon"
-                      style={{ background: '#c67139', color: '#fff', width: '40px', height: '40px', padding: '8px' }}
+                      style={{ background: '#6ba356', color: '#fff', width: '40px', height: '40px', padding: '8px' }}
                     >
                       <Plus size={18} />
                     </button>
@@ -247,8 +247,8 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                             width: '20px',
                             height: '20px',
                             borderRadius: '4px',
-                            border: `2px solid ${item.checked ? '#7a8a5e' : '#cbd5e1'}`,
-                            background: item.checked ? '#7a8a5e' : 'transparent',
+                            border: `2px solid ${item.checked ? '#6ba356' : '#cbd5e1'}`,
+                            background: item.checked ? '#6ba356' : 'transparent',
                             color: '#fff',
                             cursor: 'pointer',
                             padding: 0,

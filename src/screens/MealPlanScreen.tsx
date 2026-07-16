@@ -112,7 +112,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         </header>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', gap: '16px' }}>
           <p>No meal plans yet</p>
-          <button onClick={createNewMealPlan} className="btn" style={{ background: '#4f46e5', color: '#fff', padding: '12px 24px', fontSize: '16px', fontWeight: '600', borderRadius: '8px' }}>
+          <button onClick={createNewMealPlan} className="btn" style={{ background: '#6ba356', color: '#fff', padding: '12px 24px', fontSize: '16px', fontWeight: '600', borderRadius: '8px' }}>
             Create Your First Meal Plan
           </button>
         </div>
@@ -122,7 +122,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen" style={{ background: '#fafaf9' }}>
+    <div className="screen" style={{ background: '#f8fafc' }}>
       <header style={{ padding: '16px', background: '#fff', borderBottom: '1px solid rgba(15, 23, 42, 0.08)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
@@ -131,7 +131,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             className="btn btn-icon"
             style={{
               background: 'transparent',
-              color: '#4f46e5',
+              color: '#6ba356',
               padding: '8px',
               cursor: 'pointer',
               fontSize: '20px',
@@ -196,7 +196,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               }}
               onMouseEnter={(e) => {
                 if (idx !== 1) {
-                  e.currentTarget.style.background = '#f5f1ed'
+                  e.currentTarget.style.background = '#f0f7ed'
                 }
               }}
               onMouseLeave={(e) => {
@@ -256,7 +256,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                     }}
                     onMouseEnter={(e) => {
                       if (!meal) {
-                        e.currentTarget.style.background = '#f5f1ed'
+                        e.currentTarget.style.background = '#f0f7ed'
                         e.currentTarget.style.borderColor = '#d4a574'
                         e.currentTarget.style.color = '#c67139'
                         e.currentTarget.style.transform = 'scale(1.02) translateY(-4px)'
@@ -367,7 +367,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   onClick={() => addMealToPlan(recipe.id)}
                   style={{
                     padding: '12px',
-                    background: '#f8f9fa',
+                    background: '#f8fafc',
                     border: '1px solid rgba(15, 23, 42, 0.08)',
                     borderRadius: '8px',
                     textAlign: 'left',
@@ -380,7 +380,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                     e.currentTarget.style.transform = 'translateX(4px)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#f8f9fa'
+                    e.currentTarget.style.background = '#f8fafc'
                     e.currentTarget.style.transform = 'translateX(0)'
                   }}
                 >

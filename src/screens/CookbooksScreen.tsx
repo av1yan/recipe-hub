@@ -44,7 +44,7 @@ export default function CookbooksScreen({ onNavigate }: Props) {
   }
 
   const getColorForCookbook = (index: number): string => {
-    const colors = ['#c67139', '#7a8a5e', '#d4a574', '#b8956a', '#a48a6e']
+    const colors = ['#c67139', '#6ba356', '#d4a574', '#b8956a', '#a48a6e']
     return colors[index % colors.length]
   }
 
@@ -82,7 +82,7 @@ export default function CookbooksScreen({ onNavigate }: Props) {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {showCreateForm && (
-          <div style={{ background: '#f8f9fa', borderRadius: '12px', padding: '16px', gap: '12px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px', gap: '12px', display: 'flex', flexDirection: 'column' }}>
             <input
               type="text"
               value={newCookbookName}

@@ -59,7 +59,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
         {error && (
-          <div style={{ background: '#fee', border: '1px solid #fcc', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#c33', fontSize: '14px' }}>
+          <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#ef4444', fontSize: '14px' }}>
             {error}
           </div>
         )}
@@ -72,7 +72,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
 
           <div className="field">
             <label>Cuisine</label>
-            <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: '#fff', color: '#0f172a', cursor: 'pointer' }}>
+            <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
               <option>Italian</option>
               <option>Asian</option>
               <option>Mexican</option>
@@ -84,7 +84,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
 
           <div className="field">
             <label>Meal Type</label>
-            <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: '#fff', color: '#0f172a', cursor: 'pointer' }}>
+            <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
               <option value="breakfast">Breakfast</option>
               <option value="lunch">Lunch</option>
               <option value="dinner">Dinner</option>
@@ -94,7 +94,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
 
           <div className="field">
             <label>Difficulty</label>
-            <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{ background: '#fff', color: '#0f172a', cursor: 'pointer' }}>
+            <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>

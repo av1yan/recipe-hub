@@ -97,7 +97,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 onClick={() => handleSearch('')}
                 style={{
                   padding: '8px 16px',
-                  background: '#c67139',
+                  background: '#6ba356',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',

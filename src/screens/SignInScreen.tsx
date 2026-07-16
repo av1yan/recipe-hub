@@ -93,7 +93,7 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px', width: '100%', boxSizing: 'border-box' }}>
         {isSignUp && (
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Name</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>Name</label>
             <input
               type="text"
               placeholder="John Doe"
@@ -115,7 +115,7 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
         )}
 
         <div>
-          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Email</label>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>Email</label>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Mail size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
             <input
@@ -139,7 +139,7 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Password</label>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>Password</label>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Lock size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
             <input

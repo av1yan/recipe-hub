@@ -11,13 +11,13 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
 
   const dietOptions = [
     { id: 'vegan', label: 'Vegan', color: '#6ba356' },
-    { id: 'vegetarian', label: 'Vegetarian', color: '#7a8a5e' },
+    { id: 'vegetarian', label: 'Vegetarian', color: '#6ba356' },
     { id: 'gluten-free', label: 'Gluten-Free', color: '#6ba356' },
     { id: 'keto', label: 'Keto', color: '#a48a6e' },
     { id: 'paleo', label: 'Paleo', color: '#d4a574' },
     { id: 'dairy-free', label: 'Dairy-Free', color: '#c67139' },
-    { id: 'nut-free', label: 'Nut-Free', color: '#8a7d7d' },
-    { id: 'low-carb', label: 'Low-Carb', color: '#9d8b7e' },
+    { id: 'nut-free', label: 'Nut-Free', color: '#64748b' },
+    { id: 'low-carb', label: 'Low-Carb', color: '#64748b' },
   ]
 
   const toggleDiet = (id: string) => {
@@ -27,7 +27,7 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: '#e8f5f0', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: '#f0f7ed', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ padding: '40px 24px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '60px', marginBottom: '16px' }}>🥗</div>
@@ -48,9 +48,9 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
               onClick={() => toggleDiet(diet.id)}
               style={{
                 padding: '10px 16px',
-                background: selectedDiet.includes(diet.id) ? diet.color : '#f0fffe',
+                background: selectedDiet.includes(diet.id) ? diet.color : '#f0f7ed',
                 color: selectedDiet.includes(diet.id) ? '#fff' : '#1e293b',
-                border: selectedDiet.includes(diet.id) ? 'none' : '2px solid #d4f0ed',
+                border: selectedDiet.includes(diet.id) ? 'none' : '2px solid #c8e0bc',
                 borderRadius: '999px',
                 fontSize: '14px',
                 fontWeight: '600',
