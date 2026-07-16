@@ -115,7 +115,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
             {filteredRecipes.map((recipe, index) => (
               <div
                 key={recipe.id}
-                onClick={() => onNavigate('recipe')}
+                onClick={() => onNavigate('recipe', { recipe })}
                 style={{
                   display: 'flex',
                   gap: '12px',

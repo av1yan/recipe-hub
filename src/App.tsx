@@ -10,6 +10,7 @@ import AddRecipeScreen from './screens/AddRecipeScreen'
 import MealPlanScreen from './screens/MealPlanScreen'
 import GroceryListScreen from './screens/GroceryListScreen'
 import CookbooksScreen from './screens/CookbooksScreen'
+import RecipeDetailScreen from './screens/RecipeDetailScreen'
 import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import { setAuthToken, clearAuthToken, getAuthToken, authAPI } from './utils/api'
@@ -113,7 +114,7 @@ export default function App() {
       case 'browse':
         return <BrowseScreen onNavigate={handleNavigation} />
       case 'recipe':
-        return <BrowseScreen onNavigate={handleNavigation} />
+        return <RecipeDetailScreen recipe={currentRecipe} onNavigate={handleNavigation} />
       case 'add-recipe':
         return <AddRecipeScreen onNavigate={handleNavigation} />
       case 'meal-plan':

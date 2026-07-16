@@ -212,7 +212,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             {displayRecipes.map((recipe: any, i: number) => (
               <div
                 key={recipe.id}
-                onClick={() => onNavigate('browse')}
+                onClick={() => onNavigate('recipe', { recipe })}
                 style={{ minWidth: '110px', cursor: 'pointer' }}
               >
                 <div style={{
