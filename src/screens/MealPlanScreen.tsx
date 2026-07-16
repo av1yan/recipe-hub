@@ -33,8 +33,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [currentPlanId, setCurrentPlanId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<string>(() => DAY_NAMES[(new Date().getDay() + 6) % 7])
-  const [selectedMealType, setSelectedMealType] = useState<string | null>(null)
-  const [showRecipeSelector, setShowRecipeSelector] = useState(false)
+  const [pickerFor, setPickerFor] = useState<string | null>(null) // meal-type key whose inline picker is open
 
   useEffect(() => {
     loadData()
@@ -66,13 +65,12 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
-  async function addMealToPlan(recipeId: string) {
-    if (!currentPlanId || !selectedDay || !selectedMealType) return
+  async function addMealToPlan(recipeId: string, mealType: string) {
+    if (!currentPlanId || !selectedDay) return
     try {
-      await mealPlanAPI.addMeal(currentPlanId, recipeId, selectedDay, selectedMealType)
+      await mealPlanAPI.addMeal(currentPlanId, recipeId, selectedDay, mealType)
       await loadData()
-      setShowRecipeSelector(false)
-      setSelectedMealType(null)
+      setPickerFor(null)
     } catch (error) {
       console.error('Failed to add meal to plan:', error)
     }
@@ -86,11 +84,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
   const currentPlan = mealPlans.find(p => p.id === currentPlanId)
   const weekStart = new Date(currentPlan?.weekStart || new Date())
-
-  const openAdd = (mealType: string) => {
-    setSelectedMealType(mealType)
-    setShowRecipeSelector(true)
-  }
 
   if (isLoading) {
     return (
@@ -146,7 +139,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             return (
               <button
                 key={dayName}
-                onClick={() => setSelectedDay(dayName)}
+                onClick={() => { setSelectedDay(dayName); setPickerFor(null) }}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
               >
                 <span style={{ fontSize: '12px', fontWeight: '600', color: active ? '#f26d5b' : '#94a3b8' }}>{short}</span>
@@ -162,17 +155,22 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px', background: '#f7f8f5' }}>
         {MEALS.map(m => {
           const meals = getMeals(currentPlan, selectedDay, m.key)
+          const pickerOpen = pickerFor === m.key
           return (
             <div key={m.key} style={{ marginBottom: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', margin: 0 }}>{m.label}</h3>
-                <button onClick={() => openAdd(m.key)} style={{ background: 'none', border: 'none', color: '#f26d5b', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  <Plus size={15} /> Add
+                <button
+                  onClick={() => setPickerFor(pickerOpen ? null : m.key)}
+                  style={{ background: 'none', border: 'none', color: '#f26d5b', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                >
+                  {pickerOpen ? <><X size={15} /> Close</> : <><Plus size={15} /> Add</>}
                 </button>
               </div>
 
-              {meals.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {/* Planned meal cards */}
+              {meals.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: pickerOpen ? '10px' : 0 }}>
                   {meals.map((meal, i) => (
                     <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#fff', border: '1px solid #f1f5f9', borderRadius: '16px', padding: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                       <div style={{ width: '62px', height: '62px', borderRadius: '13px', background: m.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', flexShrink: 0 }}>
@@ -187,8 +185,44 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                     </div>
                   ))}
                 </div>
-              ) : (
-                <button onClick={() => openAdd(m.key)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#fff', border: '1.5px dashed #f0d8d2', borderRadius: '16px', cursor: 'pointer', textAlign: 'left' }}>
+              )}
+
+              {/* Inline recipe picker */}
+              {pickerOpen && (
+                <div style={{ border: '1.5px solid #f7d2ca', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
+                  <div style={{ padding: '9px 14px', fontSize: '11px', fontWeight: '800', color: '#f26d5b', letterSpacing: '0.05em', background: '#fdeeeb' }}>
+                    CHOOSE A RECIPE
+                  </div>
+                  <div style={{ maxHeight: '256px', overflowY: 'auto' }}>
+                    {recipes.length === 0 ? (
+                      <p style={{ padding: '18px', textAlign: 'center', color: '#94a3b8', fontSize: '14px', margin: 0 }}>No recipes yet — add some first.</p>
+                    ) : (
+                      recipes.map((r, i) => (
+                        <button
+                          key={r.id}
+                          onClick={() => addMealToPlan(r.id, m.key)}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', background: 'none', border: 'none', borderTop: i === 0 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left' }}
+                        >
+                          <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: m.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
+                            {(r as any).emoji || m.emoji}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{r.name}</div>
+                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                              {r.cuisine} · {(r.prepTime || 0) + (r.cookTime || 0)} min
+                            </div>
+                          </div>
+                          <Plus size={16} color="#f26d5b" />
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty state (no meals, picker closed) */}
+              {meals.length === 0 && !pickerOpen && (
+                <button onClick={() => setPickerFor(m.key)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#fff', border: '1.5px dashed #f0d8d2', borderRadius: '16px', cursor: 'pointer', textAlign: 'left' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Plus size={18} color="#f26d5b" />
                   </div>
@@ -199,54 +233,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           )
         })}
       </div>
-
-      {/* Recipe Selector Modal */}
-      {showRecipeSelector && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 999, animation: 'fadeIn 0.2s ease' }}>
-          <div style={{ background: '#fff', width: '100%', borderTopLeftRadius: '22px', borderTopRightRadius: '22px', maxHeight: '66vh', overflowY: 'auto', padding: '16px', animation: 'slideUp 0.3s ease' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1e293b', textTransform: 'capitalize' }}>Add {selectedMealType}</h3>
-                <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>{selectedDay}</p>
-              </div>
-              <button onClick={() => setShowRecipeSelector(false)} aria-label="Close" style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
-                <X size={18} />
-              </button>
-            </div>
-            {recipes.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8' }}>
-                <div style={{ fontSize: '36px', marginBottom: '8px' }}>🍽️</div>
-                <p style={{ fontSize: '14px', margin: 0 }}>No recipes yet — add some first.</p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {recipes.map(recipe => (
-                  <button
-                    key={recipe.id}
-                    onClick={() => addMealToPlan(recipe.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', border: '1px solid #eef2f6', borderRadius: '12px', textAlign: 'left', cursor: 'pointer' }}
-                  >
-                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
-                      {(recipe as any).emoji || '🍽️'}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: '600', fontSize: '14px', color: '#1e293b' }}>{recipe.name}</div>
-                      <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                        {recipe.cuisine} · {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-        @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
-      `}</style>
 
       <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
