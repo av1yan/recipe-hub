@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import {
-  ChevronRight, ChevronLeft, User, Settings as SettingsIcon, Crown,
+  ChevronRight, ChevronLeft, User, Crown,
   Globe, SlidersHorizontal, Smartphone, HelpCircle, Zap, BookOpen,
   Monitor, UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf,
 } from 'lucide-react'
@@ -44,7 +44,7 @@ function selectElementText(el: HTMLElement | null) {
 }
 
 type SubPage =
-  | 'edit-profile' | 'account' | 'subscription' | 'language'
+  | 'account' | 'subscription' | 'language'
   | 'preferences' | 'app-icon' | 'help' | 'shortcut'
   | 'import-guides' | 'desktop' | 'invite' | null
 
@@ -119,26 +119,41 @@ function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean })
 
 // ─── Sub-pages ────────────────────────────────────────────────────────────────
 
-function EditProfile({ onBack }: { onBack: () => void }) {
+function AccountPage({ onBack }: { onBack: () => void }) {
+  // Profile
   const [name, setName] = useState('Alex Johnson')
   const [email, setEmail] = useState('alex@example.com')
-  const [saved, setSaved] = useState(false)
+  const [profileSaved, setProfileSaved] = useState(false)
+  // Password
+  const [current, setCurrent] = useState('')
+  const [newPw, setNewPw] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [pwSaved, setPwSaved] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
 
-  const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2500) }
+  const saveProfile = () => { setProfileSaved(true); setTimeout(() => setProfileSaved(false), 2500) }
+  const savePassword = () => {
+    if (!current || !newPw || newPw !== confirm) return
+    setPwSaved(true); setCurrent(''); setNewPw(''); setConfirm('')
+    setTimeout(() => setPwSaved(false), 2500)
+  }
 
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #e2e8f0', fontSize: '15px', color: '#1e293b', background: '#fff', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
+  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #e2e8f0', fontSize: '15px', color: '#1e293b', background: '#f8fafc', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   const labelStyle: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: '#64748b', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
+  const cardStyle: React.CSSProperties = { background: '#fff', borderRadius: '14px', padding: '16px', border: '1px solid #f1f5f9', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
-      <SubHeader title="Edit Profile" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
+      <SubHeader title="Account" onBack={onBack} />
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '22px' }}>
           <div style={{ width: '80px', height: '80px', borderRadius: '40px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: '700', color: '#fff' }}>
             {name.charAt(0).toUpperCase()}
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
+
+        <SectionHeader label="PROFILE" />
+        <div style={cardStyle}>
           <div>
             <label style={labelStyle}>NAME</label>
             <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
@@ -147,35 +162,11 @@ function EditProfile({ onBack }: { onBack: () => void }) {
             <label style={labelStyle}>EMAIL</label>
             <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle} />
           </div>
+          <SaveButton onClick={saveProfile} saved={profileSaved} />
         </div>
-        <SaveButton onClick={save} saved={saved} />
-      </div>
-    </div>
-  )
-}
 
-function AccountSettings({ onBack }: { onBack: () => void }) {
-  const [current, setCurrent] = useState('')
-  const [newPw, setNewPw] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [saved, setSaved] = useState(false)
-  const [showDelete, setShowDelete] = useState(false)
-
-  const save = () => {
-    if (!current || !newPw || newPw !== confirm) return
-    setSaved(true); setCurrent(''); setNewPw(''); setConfirm('')
-    setTimeout(() => setSaved(false), 2500)
-  }
-
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #e2e8f0', fontSize: '15px', color: '#1e293b', background: '#f8fafc', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
-  const labelStyle: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: '#64748b', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
-
-  return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
-      <SubHeader title="Account Settings" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
         <SectionHeader label="CHANGE PASSWORD" />
-        <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', border: '1px solid #f1f5f9', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={cardStyle}>
           {[
             { label: 'CURRENT PASSWORD', val: current, set: setCurrent },
             { label: 'NEW PASSWORD', val: newPw, set: setNewPw },
@@ -186,7 +177,7 @@ function AccountSettings({ onBack }: { onBack: () => void }) {
               <input value={val} onChange={e => set(e.target.value)} type="password" placeholder="••••••••" style={inputStyle} />
             </div>
           ))}
-          <SaveButton onClick={save} saved={saved} />
+          <SaveButton onClick={savePassword} saved={pwSaved} />
         </div>
 
         <SectionHeader label="DANGER ZONE" />
@@ -552,8 +543,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   const [language, setLanguage] = useState(() => localStorage.getItem('reciphub_language') || 'en')
   const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0]
 
-  if (subPage === 'edit-profile') return <EditProfile onBack={() => setSubPage(null)} />
-  if (subPage === 'account') return <AccountSettings onBack={() => setSubPage(null)} />
+  if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} />
   if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
   if (subPage === 'language') return <LanguagePage selected={language} onSelect={(code) => { setLanguage(code); localStorage.setItem('reciphub_language', code) }} onBack={() => setSubPage(null)} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} onNavigate={onNavigate} />
@@ -577,9 +567,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
         <div style={{ marginTop: '20px', marginBottom: '24px' }}>
           <div style={{ borderRadius: '14px', overflow: 'hidden', margin: '0 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9' }}>
-            <Row icon={<User size={18} color="#64748b" />} label="Edit profile" onPress={() => setSubPage('edit-profile')} />
-            <Divider />
-            <Row icon={<SettingsIcon size={18} color="#64748b" />} label="Account settings" onPress={() => setSubPage('account')} />
+            <Row icon={<User size={18} color="#64748b" />} label="Account" onPress={() => setSubPage('account')} />
             <Divider />
             <Row icon={<Crown size={18} color="#f4b860" />} label="My subscription" value="Free" onPress={() => setSubPage('subscription')} />
             <Divider />
