@@ -41,7 +41,7 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
             {isSignUp ? 'Create Account' : 'Welcome back'}
           </h1>
           <p style={{ color: 'rgba(32, 30, 29, 0.6)', marginBottom: 0 }}>
-            {isSignUp ? 'Join RECIPhub' : 'Sign in to RECIPhub'}
+            {isSignUp ? 'Join recipHub' : 'Sign in to recipHub'}
           </p>
         </div>
 

@@ -87,7 +87,7 @@ export default function App() {
       <div className="screen" style={{ background: 'linear-gradient(135deg, #f4a261, #e9c46a)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', color: '#fff' }}>
           <h1 style={{ fontSize: '48px', marginBottom: '16px', fontFamily: 'var(--font-heading)' }}>
-            🍳 RECIPhub
+            🍳 recipHub
           </h1>
           <p style={{ fontSize: '18px', opacity: 0.9 }}>Loading...</p>
         </div>
