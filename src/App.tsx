@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { AppProvider } from './context/AppContext'
 import SplashScreen from './screens/SplashScreen'
 import SignInScreen from './screens/SignInScreen'
+import OnboardingScreen from './screens/OnboardingScreen'
 import HomeScreen from './screens/HomeScreen'
 import BrowseScreen from './screens/BrowseScreen'
 import AddRecipeScreen from './screens/AddRecipeScreen'
@@ -68,7 +69,7 @@ export default function App() {
       const response = await authAPI.register(email, name, password)
       setAuthToken(response.token)
       setUser(response.user)
-      setScreen('home')
+      setScreen('onboarding')
     } catch (error) {
       alert(`Registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
@@ -101,6 +102,8 @@ export default function App() {
         return <SplashScreen onNavigate={handleNavigation} />
       case 'signin':
         return <SignInScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onNavigate={handleNavigation} />
+      case 'onboarding':
+        return <OnboardingScreen onNavigate={handleNavigation} />
       case 'home':
         return <HomeScreen onNavigate={handleNavigation} />
       case 'browse':
