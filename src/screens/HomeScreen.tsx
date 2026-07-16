@@ -57,7 +57,7 @@ export default function HomeScreen({ onNavigate }: Props) {
     : SAMPLE_SUGGESTION
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafafa' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafc' }}>
     <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
       {/* Header */}
       <div style={{ background: '#fff', padding: '16px 16px 0', borderBottom: '1px solid #f1f5f9' }}>
