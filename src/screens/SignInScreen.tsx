@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Mail, Lock } from 'lucide-react'
 import type { Screen } from '../types'
 
 interface Props {
@@ -34,33 +35,32 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
   }
 
   return (
-    <div className="screen" style={{ background: '#fff', padding: '28px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-      {/* Compact Header */}
-      <div style={{ marginBottom: '28px' }}>
-        <div style={{ fontSize: '32px', marginBottom: '12px' }}>🍳</div>
-        <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1e293b', margin: 0, marginBottom: '4px' }}>
+    <div className="screen" style={{ background: '#fff', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div style={{ fontSize: '44px', marginBottom: '16px' }}>📖</div>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b', margin: 0, marginBottom: '8px' }}>
           {isSignUp ? 'Create Account' : 'Welcome back'}
         </h1>
-        <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>
-          {isSignUp ? 'Join recipHub to start cooking smarter' : 'Sign in to your account'}
+        <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
+          {isSignUp ? 'Join recipHub to start cooking smarter' : 'Sign in to your RECIPhub'}
         </p>
       </div>
 
-      {/* Tab Buttons */}
-      <div style={{ display: 'flex', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', gap: 0 }}>
+      {/* Pill Tab Buttons */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '28px', justifyContent: 'center' }}>
         <button
           onClick={() => setIsSignUp(false)}
           style={{
-            flex: 1,
-            padding: '10px 0',
-            background: 'none',
-            border: 'none',
-            fontSize: '13px',
+            padding: '10px 24px',
+            background: !isSignUp ? '#f1f5f9' : '#fff',
+            border: `1px solid ${!isSignUp ? '#e2e8f0' : '#e2e8f0'}`,
+            borderRadius: '20px',
+            fontSize: '14px',
             fontWeight: '600',
-            color: isSignUp ? '#cbd5e1' : '#6ba356',
-            borderBottom: isSignUp ? 'none' : '2px solid #6ba356',
+            color: !isSignUp ? '#1e293b' : '#94a3b8',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.3s ease'
           }}
         >
           Sign In
@@ -68,16 +68,15 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
         <button
           onClick={() => setIsSignUp(true)}
           style={{
-            flex: 1,
-            padding: '10px 0',
-            background: 'none',
-            border: 'none',
-            fontSize: '13px',
+            padding: '10px 24px',
+            background: isSignUp ? '#f1f5f9' : '#fff',
+            border: `1px solid ${isSignUp ? '#e2e8f0' : '#e2e8f0'}`,
+            borderRadius: '20px',
+            fontSize: '14px',
             fontWeight: '600',
-            color: !isSignUp ? '#cbd5e1' : '#6ba356',
-            borderBottom: !isSignUp ? 'none' : '2px solid #6ba356',
+            color: isSignUp ? '#1e293b' : '#94a3b8',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.3s ease'
           }}
         >
           Sign Up
@@ -85,90 +84,95 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
       </div>
 
       {error && (
-        <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', color: '#991b1b', fontSize: '12px' }}>
+        <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '20px', color: '#991b1b', fontSize: '13px' }}>
           {error}
         </div>
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px', flex: 1 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '24px' }}>
         {isSignUp && (
-          <input
-            type="text"
-            placeholder="Full name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '11px 12px',
-              fontSize: '14px',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              background: '#f8fafc',
-              boxSizing: 'border-box',
-              fontFamily: 'inherit',
-              transition: 'border-color 0.2s'
-            }}
-            onFocus={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
-            onBlur={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
-          />
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Name</label>
+            <input
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                fontSize: '14px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                background: '#f8fafc',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
         )}
 
-        <input
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{
-            width: '100%',
-            padding: '11px 12px',
-            fontSize: '14px',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            background: '#f8fafc',
-            boxSizing: 'border-box',
-            fontFamily: 'inherit',
-            transition: 'border-color 0.2s'
-          }}
-          onFocus={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
-          onBlur={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
-        />
+        <div>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Email</label>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Mail size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 14px 12px 40px',
+                fontSize: '14px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                background: '#f8fafc',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{
-            width: '100%',
-            padding: '11px 12px',
-            fontSize: '14px',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            background: '#f8fafc',
-            boxSizing: 'border-box',
-            fontFamily: 'inherit',
-            transition: 'border-color 0.2s'
-          }}
-          onFocus={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
-          onBlur={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
-        />
+        <div>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Password</label>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Lock size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 14px 12px 40px',
+                fontSize: '14px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                background: '#f8fafc',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+        </div>
 
         {!isSignUp && (
-          <div style={{ textAlign: 'right', marginTop: '-4px' }}>
+          <div style={{ textAlign: 'right' }}>
             <button
               type="button"
               style={{
                 background: 'none',
                 border: 'none',
                 color: '#6ba356',
-                fontSize: '12px',
+                fontSize: '13px',
                 fontWeight: '500',
-                cursor: 'pointer',
-                padding: 0
+                cursor: 'pointer'
               }}
             >
               Forgot password?
@@ -180,17 +184,17 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
           type="submit"
           disabled={loading}
           style={{
-            padding: '12px 16px',
+            padding: '14px 16px',
             background: '#6ba356',
             color: '#fff',
             border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
+            borderRadius: '12px',
+            fontSize: '15px',
             fontWeight: '600',
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
-            transition: 'all 0.2s ease',
-            marginTop: '4px'
+            transition: 'all 0.3s ease',
+            marginTop: '8px'
           }}
           onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#5a9549')}
           onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#6ba356')}
@@ -200,26 +204,26 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
       </form>
 
       {/* Divider */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
         <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-        <span style={{ color: '#cbd5e1', fontSize: '12px', fontWeight: '500' }}>or</span>
+        <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '500' }}>or</span>
         <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
       </div>
 
       {/* OAuth Buttons */}
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '12px' }}>
         <button
           style={{
             flex: 1,
-            padding: '11px 12px',
+            padding: '12px 16px',
             border: '1px solid #e2e8f0',
             background: '#fff',
-            borderRadius: '8px',
-            fontSize: '13px',
+            borderRadius: '10px',
+            fontSize: '14px',
             fontWeight: '600',
             color: '#1e293b',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.3s ease'
           }}
           onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
           onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
@@ -229,15 +233,15 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
         <button
           style={{
             flex: 1,
-            padding: '11px 12px',
+            padding: '12px 16px',
             border: '1px solid #e2e8f0',
             background: '#fff',
-            borderRadius: '8px',
-            fontSize: '13px',
+            borderRadius: '10px',
+            fontSize: '14px',
             fontWeight: '600',
             color: '#1e293b',
             cursor: 'pointer',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.3s ease'
           }}
           onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
           onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
