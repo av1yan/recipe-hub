@@ -42,7 +42,36 @@ function selectElementText(el: HTMLElement | null) {
   sel?.addRange(range)
 }
 
-type CopyStatus = 'idle' | 'copied' | 'failed'
+// Floating confirmation pill, anchored to the bottom of the phone frame.
+function Toast({ message, tone }: { message: string; tone: 'success' | 'error' }) {
+  return (
+    <div style={{ position: 'absolute', bottom: '28px', left: '16px', right: '16px', display: 'flex', justifyContent: 'center', zIndex: 100, pointerEvents: 'none' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '9px',
+        background: tone === 'error' ? '#334155' : '#1e293b', color: '#fff',
+        padding: '12px 18px', borderRadius: '999px', fontSize: '14px', fontWeight: '600',
+        boxShadow: '0 10px 28px rgba(0,0,0,0.3)', maxWidth: '100%',
+        animation: 'toastPop 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+      }}>
+        {tone === 'success' ? <Check size={16} color="#7ee08a" /> : <span style={{ fontSize: '14px' }}>⚠️</span>}
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{message}</span>
+      </div>
+      <style>{`@keyframes toastPop { from { opacity: 0; transform: translateY(14px) scale(0.96) } to { opacity: 1; transform: translateY(0) scale(1) } }`}</style>
+    </div>
+  )
+}
+
+// Shows a Toast for a few seconds, replacing any toast already on screen.
+function useToast() {
+  const [toast, setToast] = useState<{ message: string; tone: 'success' | 'error' } | null>(null)
+  const timer = useRef<ReturnType<typeof setTimeout>>()
+  const show = (message: string, tone: 'success' | 'error' = 'success') => {
+    setToast({ message, tone })
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = setTimeout(() => setToast(null), 2600)
+  }
+  return { toast, show }
+}
 
 type SubPage =
   | 'edit-profile' | 'account' | 'subscription' | 'language'
@@ -440,19 +469,22 @@ function ImportGuides({ onBack }: { onBack: () => void }) {
 }
 
 function DesktopPage({ onBack }: { onBack: () => void }) {
-  const [status, setStatus] = useState<CopyStatus>('idle')
   const urlRef = useRef<HTMLParagraphElement>(null)
+  const { toast, show } = useToast()
   const url = window.location.origin
 
   const copy = async () => {
     const ok = await copyText(url)
-    if (!ok) selectElementText(urlRef.current)
-    setStatus(ok ? 'copied' : 'failed')
-    setTimeout(() => setStatus('idle'), 3000)
+    if (ok) {
+      show('Link copied to clipboard')
+    } else {
+      selectElementText(urlRef.current)
+      show('Link selected — press copy to save it', 'error')
+    }
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc', position: 'relative' }}>
       <SubHeader title="Use on Desktop" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
@@ -464,17 +496,18 @@ function DesktopPage({ onBack }: { onBack: () => void }) {
           <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>URL</p>
           <p ref={urlRef} style={{ fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{url}</p>
         </div>
-        <button onClick={copy} style={{ width: '100%', padding: '14px', background: status === 'idle' ? 'linear-gradient(135deg, #7ec063, #5a9449)' : '#f0f7ed', color: status === 'idle' ? '#fff' : '#6ba356', border: status === 'idle' ? 'none' : '1.5px solid #c8e0bc', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          {status === 'copied' ? <><Check size={16} /> Copied!</> : status === 'failed' ? 'Select the link above to copy' : <><Copy size={16} /> Copy Link</>}
+        <button onClick={copy} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <Copy size={16} /> Copy Link
         </button>
       </div>
+      {toast && <Toast message={toast.message} tone={toast.tone} />}
     </div>
   )
 }
 
 function InvitePage({ onBack }: { onBack: () => void }) {
-  const [status, setStatus] = useState<CopyStatus>('idle')
   const linkRef = useRef<HTMLParagraphElement>(null)
+  const { toast, show } = useToast()
   const link = window.location.origin
 
   const share = async () => {
@@ -490,13 +523,16 @@ function InvitePage({ onBack }: { onBack: () => void }) {
       }
     }
     const ok = await copyText(link)
-    if (!ok) selectElementText(linkRef.current)
-    setStatus(ok ? 'copied' : 'failed')
-    setTimeout(() => setStatus('idle'), 3000)
+    if (ok) {
+      show('Link copied to clipboard')
+    } else {
+      selectElementText(linkRef.current)
+      show('Link selected — copy it manually', 'error')
+    }
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc', position: 'relative' }}>
       <SubHeader title="Invite Friends" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
@@ -508,10 +544,11 @@ function InvitePage({ onBack }: { onBack: () => void }) {
           <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>SHARE LINK</p>
           <p ref={linkRef} style={{ fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{link}</p>
         </div>
-        <button onClick={share} style={{ width: '100%', padding: '14px', background: status === 'idle' ? 'linear-gradient(135deg, #7ec063, #5a9449)' : '#f0f7ed', color: status === 'idle' ? '#fff' : '#6ba356', border: status === 'idle' ? 'none' : '1.5px solid #c8e0bc', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          {status === 'copied' ? <><Check size={16} /> Link Copied!</> : status === 'failed' ? 'Select the link above to copy' : <><Share2 size={16} /> Share recipHub</>}
+        <button onClick={share} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <Share2 size={16} /> Share recipHub
         </button>
       </div>
+      {toast && <Toast message={toast.message} tone={toast.tone} />}
     </div>
   )
 }
