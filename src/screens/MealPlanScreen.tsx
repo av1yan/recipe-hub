@@ -52,7 +52,9 @@ function getMeals(plan: MealPlan | undefined, dayName: string, mealType: string)
 export default function MealPlanScreen({ onNavigate }: Props) {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([])
   const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [currentPlanId, setCurrentPlanId] = useState<string | null>(null)
+  // The week being viewed. A plan is only created once you actually add a meal,
+  // so browsing weeks never litters empty plans.
+  const [viewWeek, setViewWeek] = useState<Date>(() => mondayOf(new Date()))
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<string>(() => DAY_NAMES[(new Date().getDay() + 6) % 7])
   const [pickerFor, setPickerFor] = useState<string | null>(null) // meal-type key whose inline picker is open
@@ -70,7 +72,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       const [plansData, recipesData] = await Promise.all([mealPlanAPI.list(), recipeAPI.list()])
       setMealPlans(plansData)
       setRecipes(recipesData)
-      if (plansData.length > 0) setCurrentPlanId(plansData[0].id)
     } catch (error) {
       console.error('Failed to load meal plan data:', error)
     } finally {
@@ -78,33 +79,21 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
-  // Opens the plan for a given week, creating it only if it doesn't exist yet.
-  async function openWeek(weekStart: Date) {
+  // Viewing a week is free — no plan is created just by looking.
+  function openWeek(weekStart: Date) {
+    setViewWeek(weekStart)
     setShowWeeks(false)
     setPickerFor(null)
     setConfirmDelete(false)
-    try {
-      const existing = mealPlans.find(p => sameWeek(p.weekStart, weekStart))
-      if (existing) {
-        setCurrentPlanId(existing.id)
-        return
-      }
-      const plan = await mealPlanAPI.create(weekStart)
-      setMealPlans(prev => [...prev, plan])
-      setCurrentPlanId(plan.id)
-    } catch (error) {
-      console.error('Failed to open meal plan week:', error)
-    }
   }
 
   async function deleteWeek() {
-    if (!currentPlanId) return
+    if (!currentPlan) return
     setDeleting(true)
     try {
-      await mealPlanAPI.delete(currentPlanId)
+      await mealPlanAPI.delete(currentPlan.id)
       setConfirmDelete(false)
       setPickerFor(null)
-      setCurrentPlanId(null)
       await loadData()
     } catch (error) {
       console.error('Failed to delete meal plan:', error)
@@ -114,9 +103,16 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   }
 
   async function addMealToPlan(recipeId: string, mealType: string) {
-    if (!currentPlanId || !selectedDay) return
+    if (!selectedDay) return
     try {
-      await mealPlanAPI.addMeal(currentPlanId, recipeId, selectedDay, mealType)
+      // Create the week's plan lazily, on the first meal added to it.
+      let planId = currentPlan?.id
+      if (!planId) {
+        const plan = await mealPlanAPI.create(viewWeek)
+        setMealPlans(prev => [...prev, plan])
+        planId = plan.id
+      }
+      await mealPlanAPI.addMeal(planId, recipeId, selectedDay, mealType)
       await loadData()
       setPickerFor(null)
     } catch (error) {
@@ -130,8 +126,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     return date.getDate()
   }
 
-  const currentPlan = mealPlans.find(p => p.id === currentPlanId)
-  const weekStart = new Date(currentPlan?.weekStart || new Date())
+  const currentPlan = mealPlans.find(p => sameWeek(p.weekStart, viewWeek))
+  const weekStart = viewWeek
 
   if (isLoading) {
     return (
@@ -147,36 +143,17 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     )
   }
 
-  if (mealPlans.length === 0) {
-    return (
-      <div className="screen">
-        <header style={{ padding: '16px', background: '#fff' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
-        </header>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '18px', padding: '24px' }}>
-          <div style={{ fontSize: '64px' }}>🗓️</div>
-          <div style={{ textAlign: 'center' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: '0 0 6px' }}>No meal plan yet</h3>
-            <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>Plan your week and cook with less guesswork.</p>
-          </div>
-          <button onClick={() => openWeek(mondayOf(new Date()))} style={{ background: 'linear-gradient(135deg, #fb8a72, #ef5a41)', color: '#fff', padding: '14px 28px', fontSize: '15px', fontWeight: '700', borderRadius: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(242,109,91,0.35)' }}>
-            Create a meal plan
-          </button>
-        </div>
-        <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
-      </div>
-    )
-  }
-
   return (
     <div className="screen" style={{ background: '#fff' }}>
       <header style={{ padding: '16px 16px 14px', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setConfirmDelete(v => !v)} aria-label="Delete week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fff', color: '#94a3b8', border: '1.5px solid #e9edf2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Trash2 size={16} />
-            </button>
+            {currentPlan && (
+              <button onClick={() => { setConfirmDelete(v => !v); setShowWeeks(false) }} aria-label="Delete week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fff', color: '#94a3b8', border: '1.5px solid #e9edf2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Trash2 size={16} />
+              </button>
+            )}
             <button onClick={() => { setShowWeeks(v => !v); setConfirmDelete(false) }} aria-label="Choose week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: showWeeks ? '#f26d5b' : '#fdeeeb', color: showWeeks ? '#fff' : '#f26d5b', border: '1.5px solid #f7d2ca', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <CalendarDays size={17} />
             </button>
@@ -231,10 +208,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                       {offset === 0 && <span style={{ fontSize: '11px', fontWeight: '700', color: '#f26d5b', marginLeft: '7px' }}>THIS WEEK</span>}
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
-                      {plan ? `${planned} meal${planned === 1 ? '' : 's'} planned` : 'No plan yet · tap to start one'}
+                      {plan ? `${planned} meal${planned === 1 ? '' : 's'} planned` : 'Nothing planned'}
                     </div>
                   </div>
-                  {isCurrent ? <Check size={16} color="#f26d5b" /> : <Plus size={16} color="#c3cdba" />}
+                  {isCurrent && <Check size={16} color="#f26d5b" />}
                 </button>
               )
             })}
