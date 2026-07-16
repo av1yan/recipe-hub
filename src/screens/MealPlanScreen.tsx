@@ -118,7 +118,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: '0 0 6px' }}>No meal plan yet</h3>
             <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>Plan your week and cook with less guesswork.</p>
           </div>
-          <button onClick={createNewMealPlan} style={{ background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', padding: '14px 28px', fontSize: '15px', fontWeight: '700', borderRadius: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(107,163,86,0.3)' }}>
+          <button onClick={createNewMealPlan} style={{ background: 'linear-gradient(135deg, #fb8a72, #ef5a41)', color: '#fff', padding: '14px 28px', fontSize: '15px', fontWeight: '700', borderRadius: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(242,109,91,0.35)' }}>
             Create a meal plan
           </button>
         </div>
@@ -132,7 +132,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       <header style={{ padding: '16px 16px 14px', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
-          <button onClick={createNewMealPlan} aria-label="New meal plan" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#f0f7ed', color: '#6ba356', border: '1.5px solid #c8e0bc', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={createNewMealPlan} aria-label="New meal plan" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fdeeeb', color: '#f26d5b', border: '1.5px solid #f7d2ca', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Plus size={17} />
           </button>
         </div>
@@ -149,8 +149,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 onClick={() => setSelectedDay(dayName)}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
               >
-                <span style={{ fontSize: '12px', fontWeight: '600', color: active ? '#6ba356' : '#94a3b8' }}>{short}</span>
-                <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? '#6ba356' : 'transparent', color: active ? '#fff' : '#1e293b', boxShadow: active ? '0 4px 10px rgba(107,163,86,0.3)' : 'none', transition: 'all 0.2s ease' }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: active ? '#f26d5b' : '#94a3b8' }}>{short}</span>
+                <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? '#f26d5b' : 'transparent', color: active ? '#fff' : '#1e293b', boxShadow: active ? '0 4px 10px rgba(242,109,91,0.35)' : 'none', transition: 'all 0.2s ease' }}>
                   {num}
                 </span>
               </button>
@@ -166,7 +166,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <div key={m.key} style={{ marginBottom: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', margin: 0 }}>{m.label}</h3>
-                <button onClick={() => openAdd(m.key)} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <button onClick={() => openAdd(m.key)} style={{ background: 'none', border: 'none', color: '#f26d5b', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}>
                   <Plus size={15} /> Add
                 </button>
               </div>
@@ -188,9 +188,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   ))}
                 </div>
               ) : (
-                <button onClick={() => openAdd(m.key)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '16px', cursor: 'pointer', textAlign: 'left' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Plus size={18} color="#6ba356" />
+                <button onClick={() => openAdd(m.key)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#fff', border: '1.5px dashed #f0d8d2', borderRadius: '16px', cursor: 'pointer', textAlign: 'left' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Plus size={18} color="#f26d5b" />
                   </div>
                   <span style={{ fontSize: '14px', fontWeight: '600', color: '#94a3b8' }}>Add a {m.label.toLowerCase()} recipe</span>
                 </button>
@@ -226,7 +226,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                     onClick={() => addMealToPlan(recipe.id)}
                     style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', border: '1px solid #eef2f6', borderRadius: '12px', textAlign: 'left', cursor: 'pointer' }}
                   >
-                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
                       {(recipe as any).emoji || '🍽️'}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
