@@ -53,7 +53,7 @@ export default function OnboardingScreen({ onNavigate }: Props) {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      onNavigate('home')
+      onNavigate('diet-preferences')
     }
   }
 

@@ -3,6 +3,7 @@ export type Screen =
   | 'signin'
   | 'signup'
   | 'onboarding'
+  | 'diet-preferences'
   | 'home'
   | 'browse'
   | 'recipe'

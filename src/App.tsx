@@ -3,6 +3,7 @@ import { AppProvider } from './context/AppContext'
 import SplashScreen from './screens/SplashScreen'
 import SignInScreen from './screens/SignInScreen'
 import OnboardingScreen from './screens/OnboardingScreen'
+import DietPreferencesScreen from './screens/DietPreferencesScreen'
 import HomeScreen from './screens/HomeScreen'
 import BrowseScreen from './screens/BrowseScreen'
 import AddRecipeScreen from './screens/AddRecipeScreen'
@@ -104,6 +105,8 @@ export default function App() {
         return <SignInScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onNavigate={handleNavigation} />
       case 'onboarding':
         return <OnboardingScreen onNavigate={handleNavigation} />
+      case 'diet-preferences':
+        return <DietPreferencesScreen onNavigate={handleNavigation} />
       case 'home':
         return <HomeScreen onNavigate={handleNavigation} />
       case 'browse':
