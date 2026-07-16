@@ -177,26 +177,26 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         </div>
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {/* Day Selector Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '6px', background: '#fff', padding: '12px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '6px', background: '#fff', padding: '14px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           {DAYS.map((day, idx) => (
             <div
               key={day}
               style={{
                 textAlign: 'center',
-                padding: '10px 8px',
-                borderRadius: '8px',
-                background: idx === 1 ? '#4f46e5' : 'transparent',
-                color: idx === 1 ? '#fff' : '#1e293b',
-                fontSize: '10px',
-                fontWeight: '600',
+                padding: '12px 10px',
+                borderRadius: '12px',
+                background: idx === 1 ? '#d4a574' : 'transparent',
+                color: idx === 1 ? '#fff' : '#64748b',
+                fontSize: '11px',
+                fontWeight: '700',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={(e) => {
                 if (idx !== 1) {
-                  e.currentTarget.style.background = '#f1f5f9'
+                  e.currentTarget.style.background = '#f5f1ed'
                 }
               }}
               onMouseLeave={(e) => {
@@ -206,7 +206,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               }}
             >
               <div>{day}</div>
-              <div style={{ fontSize: '14px', fontWeight: '700', marginTop: '4px' }}>{getDayNumber(idx, new Date(currentPlan?.weekStart || new Date()))}</div>
+              <div style={{ fontSize: '14px', fontWeight: '800', marginTop: '6px', color: idx === 1 ? '#fff' : '#1e293b' }}>{getDayNumber(idx, new Date(currentPlan?.weekStart || new Date()))}</div>
             </div>
           ))}
         </div>
@@ -214,9 +214,12 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         {/* Meals Grid */}
         {['breakfast', 'lunch', 'dinner'].map(mealType => (
           <div key={mealType}>
-            <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px', marginTop: 0 }}>
-              {mealType}
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <div style={{ width: '4px', height: '20px', background: MEAL_COLORS[mealType], borderRadius: '2px' }}></div>
+              <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', textTransform: 'capitalize', margin: 0 }}>
+                {mealType}
+              </h3>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', animation: 'fadeIn 0.3s ease' }}>
               {DAYS.map((day, dayIdx) => {
                 const dayName = DAY_NAMES[dayIdx]
@@ -234,29 +237,42 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                       }
                     }}
                     style={{
-                      padding: '12px',
+                      padding: '14px',
                       background: meal ? mealColor : '#fff',
-                      color: meal ? '#fff' : '#1e293b',
-                      borderRadius: '12px',
+                      color: meal ? '#fff' : '#94a3b8',
+                      borderRadius: '14px',
                       cursor: 'pointer',
-                      minHeight: '70px',
+                      minHeight: '76px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       textAlign: 'center',
-                      border: meal ? 'none' : '2px dashed #e2e8f0',
+                      border: meal ? 'none' : '2px solid #e2e8f0',
                       fontSize: '13px',
-                      fontWeight: '500',
+                      fontWeight: '600',
                       transition: 'all 0.3s ease',
                       transform: 'scale(1)',
+                      boxShadow: meal ? `0 4px 12px ${mealColor}40` : '0 2px 6px rgba(0,0,0,0.06)',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.05)'
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
+                      if (!meal) {
+                        e.currentTarget.style.background = '#f5f1ed'
+                        e.currentTarget.style.borderColor = '#d4a574'
+                        e.currentTarget.style.color = '#c67139'
+                      } else {
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                        e.currentTarget.style.boxShadow = `0 6px 16px ${mealColor}60`
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)'
-                      e.currentTarget.style.boxShadow = 'none'
+                      if (!meal) {
+                        e.currentTarget.style.background = '#fff'
+                        e.currentTarget.style.borderColor = '#e2e8f0'
+                        e.currentTarget.style.color = '#94a3b8'
+                      } else {
+                        e.currentTarget.style.transform = 'scale(1)'
+                        e.currentTarget.style.boxShadow = `0 4px 12px ${mealColor}40`
+                      }
                     }}
                   >
                     {meal ? (
@@ -281,10 +297,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           style={{
             width: '100%',
             padding: '16px',
-            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+            background: 'linear-gradient(135deg, #c67139 0%, #d4a574 100%)',
             color: '#fff',
             border: 'none',
-            borderRadius: '12px',
+            borderRadius: '14px',
             fontSize: '16px',
             fontWeight: '600',
             cursor: 'pointer',
@@ -293,15 +309,16 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             justifyContent: 'center',
             gap: '8px',
             transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)',
+            boxShadow: '0 4px 14px rgba(198, 113, 57, 0.25)',
+            marginTop: '8px',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 8px 20px rgba(79, 70, 229, 0.4)'
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(198, 113, 57, 0.35)'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(79, 70, 229, 0.3)'
+            e.currentTarget.style.boxShadow = '0 4px 14px rgba(198, 113, 57, 0.25)'
           }}
         >
           <Sparkles size={18} />
