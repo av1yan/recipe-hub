@@ -34,82 +34,214 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
   }
 
   return (
-    <div className="screen" style={{ background: '#fff', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h1 style={{ fontSize: '36px', marginBottom: '8px' }}>
-            {isSignUp ? 'Create Account' : 'Welcome back'}
-          </h1>
-          <p style={{ color: 'rgba(32, 30, 29, 0.6)', marginBottom: 0 }}>
-            {isSignUp ? 'Join recipHub' : 'Sign in to recipHub'}
-          </p>
-        </div>
+    <div className="screen" style={{ background: '#fff', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🍳</div>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b', margin: 0, marginBottom: '8px' }}>
+          {isSignUp ? 'Create Account' : 'Welcome back'}
+        </h1>
+        <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
+          {isSignUp ? 'Join recipHub to start cooking smarter' : 'Sign in to your RECIPhub'}
+        </p>
+      </div>
 
-        {error && (
-          <div style={{ background: '#fee', border: '1px solid #fcc', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#c33', fontSize: '14px' }}>
-            {error}
+      {/* Tab Buttons */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #e2e8f0' }}>
+        <button
+          onClick={() => setIsSignUp(false)}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            background: 'none',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: isSignUp ? '#94a3b8' : '#6ba356',
+            borderBottom: isSignUp ? 'none' : '3px solid #6ba356',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          Sign In
+        </button>
+        <button
+          onClick={() => setIsSignUp(true)}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            background: 'none',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: !isSignUp ? '#94a3b8' : '#6ba356',
+            borderBottom: !isSignUp ? 'none' : '3px solid #6ba356',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          Sign Up
+        </button>
+      </div>
+
+      {error && (
+        <div style={{ background: '#fee', border: '1px solid #fca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#b91c1c', fontSize: '13px' }}>
+          {error}
+        </div>
+      )}
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+        {isSignUp && (
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Name</label>
+            <input
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                fontSize: '14px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                background: '#f8fafc',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit'
+              }}
+            />
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {isSignUp && (
-            <div className="field">
-              <label htmlFor="name">Name</label>
-              <input
-                id="name"
-                type="text"
-                className="input"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-          )}
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Email</label>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              fontSize: '14px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              background: '#f8fafc',
+              boxSizing: 'border-box',
+              fontFamily: 'inherit'
+            }}
+          />
+        </div>
 
-          <div className="field">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              className="input"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+        <div>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Password</label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              fontSize: '14px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              background: '#f8fafc',
+              boxSizing: 'border-box',
+              fontFamily: 'inherit'
+            }}
+          />
+        </div>
+
+        {!isSignUp && (
+          <div style={{ textAlign: 'right' }}>
+            <button
+              type="button"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#6ba356',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Forgot password?
+            </button>
           </div>
+        )}
 
-          <div className="field">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className="input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            padding: '14px 16px',
+            background: '#6ba356',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '12px',
+            fontSize: '15px',
+            fontWeight: '600',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.7 : 1,
+            transition: 'all 0.3s ease',
+            marginTop: '8px'
+          }}
+          onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#5a9549')}
+          onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#6ba356')}
+        >
+          {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
+        </button>
+      </form>
 
-          <button 
-            type="submit" 
-            className="btn btn-primary" 
-            style={{ width: '100%', marginTop: '8px' }}
-            disabled={loading}
-          >
-            {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
-          </button>
-        </form>
+      {/* Divider */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+        <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '500' }}>or</span>
+        <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '24px' }}>
+      {/* OAuth Buttons */}
+      <div style={{ display: 'flex', gap: '12px' }}>
         <button
-          onClick={() => setIsSignUp(!isSignUp)}
-          style={{ background: 'none', border: 'none', color: '#c67139', fontSize: '14px', cursor: 'pointer', fontWeight: '600' }}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            border: '1px solid #e2e8f0',
+            background: '#fff',
+            borderRadius: '10px',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#1e293b',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
         >
-          {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+          Google
+        </button>
+        <button
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            border: '1px solid #e2e8f0',
+            background: '#fff',
+            borderRadius: '10px',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#1e293b',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+        >
+          Apple
         </button>
       </div>
     </div>

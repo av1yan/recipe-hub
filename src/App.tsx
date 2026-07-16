@@ -133,8 +133,29 @@ export default function App() {
 
   return (
     <AppProvider user={user}>
-      <div className="app-container">
-        {renderScreen()}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f5f5f5', padding: '20px' }}>
+        <div style={{
+          width: '375px',
+          height: '812px',
+          background: '#fff',
+          borderRadius: '40px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          border: '12px solid #000'
+        }}>
+          {/* Status bar */}
+          <div style={{ height: '44px', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', fontSize: '14px', fontWeight: '600' }}>
+            <span>9:41</span>
+            <span>📶 🔋</span>
+          </div>
+          {/* App content */}
+          <div className="app-container" style={{ flex: 1, overflowY: 'auto' }}>
+            {renderScreen()}
+          </div>
+        </div>
       </div>
     </AppProvider>
   )

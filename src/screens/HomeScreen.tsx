@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Menu, Search, Plus, Calendar, ShoppingCart, Book, Bookmark, Settings, LogOut } from 'lucide-react'
+import { Search, Plus, Calendar, ShoppingCart, Settings } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
@@ -8,15 +8,9 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
 }
 
-const RECIPE_GRADIENTS = [
-  'linear-gradient(135deg, #f4a261, #e9c46a)',
-  'linear-gradient(135deg, #e76f51, #c67139)',
-  'linear-gradient(135deg, #7a8a5e, #52b788)',
-  'linear-gradient(135deg, #2a9d8f, #52b788)',
-]
+const RECIPE_COLORS = ['#d4a574', '#6ba356', '#c67139', '#5b9acd']
 
 export default function HomeScreen({ onNavigate }: Props) {
-  const [hamburgerOpen, setHamburgerOpen] = useState(false)
   const [recipes, setRecipes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -39,305 +33,280 @@ export default function HomeScreen({ onNavigate }: Props) {
     onNavigate('recipe', { recipe })
   }
 
+  const getColorByIndex = (index: number) => RECIPE_COLORS[index % RECIPE_COLORS.length]
+
+  const todaysMeals = [
+    { type: 'Breakfast', name: 'Shakshuka', time: '30 min', cal: '320 cal', color: '#d4a574' },
+    { type: 'Lunch', name: 'Caesar Salad', time: '15 min', cal: '320 cal', color: '#6ba356' },
+    { type: 'Dinner', name: 'Thai Green Curry', time: '45 min', cal: '480 cal', color: '#c67139' }
+  ]
+
   return (
-    <div className="screen" style={{ background: '#f1f5f9' }}>
-      <header style={{
-        background: '#fff',
-        padding: '14px 16px 12px',
-        borderBottom: '1px solid rgba(15, 23, 42, 0.08)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        flexShrink: 0,
-      }}>
-        <div style={{ flex: 1 }}>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).toUpperCase()}
-          </p>
-          <h2 style={{ fontSize: '22px', color: '#0f172a', margin: '2px 0 0', letterSpacing: '-0.5px' }}>
-            Good morning! 👋
-          </h2>
-        </div>
-        <button
-          onClick={() => setHamburgerOpen(!hamburgerOpen)}
-          className="btn btn-icon"
-          style={{ background: 'none', border: 'none' }}
-        >
-          <Menu size={22} color="#0f172a" />
-        </button>
-      </header>
-
-      {hamburgerOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.4)',
-            zIndex: 100,
-          }}
-          onClick={() => setHamburgerOpen(false)}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: '264px',
-              background: '#fff',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.12)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ padding: '20px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                background: RECIPE_GRADIENTS[0],
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '12px',
-                fontSize: '22px',
-              }}>
-                👤
-              </div>
-              <div style={{ fontWeight: '700', fontSize: '16px' }}>My Account</div>
-              <div style={{ color: '#94a3b8', fontSize: '13px' }}>Logged in</div>
-            </div>
-
-            <div style={{ padding: '12px', flex: 1 }}>
-              {[
-                { label: 'My Cookbooks', icon: Book, screen: 'cookbooks' },
-                { label: 'Saved Recipes', icon: Bookmark, screen: 'browse' },
-                { label: 'Settings', icon: Settings, screen: 'settings' },
-              ].map((item) => (
-                <button
-                  key={item.screen}
-                  onClick={() => {
-                    setHamburgerOpen(false)
-                    onNavigate(item.screen as Screen)
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
-                    width: '100%',
-                    padding: '14px 12px',
-                    border: 'none',
-                    background: 'none',
-                    cursor: 'pointer',
-                    borderRadius: '12px',
-                    color: '#0f172a',
-                    fontSize: '15px',
-                    fontWeight: '600',
-                  }}
-                >
-                  <item.icon size={20} color="#c67139" />
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => {
-                setHamburgerOpen(false)
-                onNavigate('signin')
-              }}
-              style={{
-                margin: '16px',
-                padding: '12px',
-                border: '1px solid #f1f5f9',
-                borderRadius: '12px',
-                background: 'none',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#ef4444',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                justifyContent: 'center',
-              }}
-            >
-              <LogOut size={16} /> Log Out
-            </button>
+    <div className="screen" style={{ background: '#fff', paddingBottom: '60px' }}>
+      {/* Header */}
+      <div style={{ padding: '20px 16px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <p style={{ color: '#94a3b8', fontSize: '12px', fontWeight: '500', margin: '0 0 4px' }}>
+              TUESDAY, JUL 15
+            </p>
+            <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+              Good morning! 👋
+            </h1>
           </div>
-        </div>
-      )}
-
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        <div style={{ padding: '12px 16px', background: '#fff', flexShrink: 0 }}>
-          <div
-            onClick={() => onNavigate('browse')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              background: '#f1f5f9',
-              borderRadius: '999px',
-              padding: '10px 14px',
-              cursor: 'pointer',
-            }}
-          >
-            <Search size={16} color="#94a3b8" />
-            <span style={{ flex: 1, color: '#94a3b8', fontSize: '14px' }}>Search recipes...</span>
-          </div>
-        </div>
-
-        <div style={{ padding: '14px 16px 8px', display: 'flex', gap: '10px' }}>
           <button
-            onClick={() => onNavigate('add-recipe')}
-            className="btn btn-primary"
+            onClick={() => onNavigate('settings')}
             style={{
-              flex: 1,
+              background: '#f1f5f9',
+              border: 'none',
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '7px',
-              padding: '13px 10px',
+              cursor: 'pointer'
             }}
           >
-            <Plus size={17} /> Add Recipe
+            <Settings size={20} color="#475569" />
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{
+          background: '#f1f5f9',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          padding: '12px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '20px'
+        }}>
+          <Search size={18} color="#94a3b8" />
+          <input
+            type="text"
+            placeholder="Search recipes..."
+            style={{
+              flex: 1,
+              border: 'none',
+              background: 'transparent',
+              fontSize: '14px',
+              color: '#1e293b',
+              outline: 'none',
+              fontFamily: 'inherit'
+            }}
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '28px' }}>
+          <button
+            onClick={() => onNavigate('add-recipe')}
+            style={{
+              flex: 1,
+              padding: '12px',
+              background: '#6ba356',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            <Plus size={16} />
+            Add Recipe
           </button>
           <button
             onClick={() => onNavigate('meal-plan')}
             style={{
               flex: 1,
-              background: '#ecfdf5',
-              color: '#10b981',
-              border: '1px solid #a7f3d0',
-              borderRadius: '16px',
-              padding: '13px 10px',
-              fontSize: '14px',
-              fontWeight: '700',
-              cursor: 'pointer',
+              padding: '12px',
+              background: '#e8f5f0',
+              color: '#6ba356',
+              border: '1px solid #d0ebe4',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: '600',
               display: 'flex',
               alignItems: 'center',
-              gap: '7px',
               justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer'
             }}
           >
-            <Calendar size={17} color="#10b981" /> Meal Plan
+            <Calendar size={16} />
+            Meal Plan
           </button>
           <button
             onClick={() => onNavigate('grocery')}
             style={{
-              background: '#f1f5f9',
-              color: '#64748b',
+              flex: 1,
+              padding: '12px',
+              background: 'transparent',
+              color: '#1e293b',
               border: '1px solid #e2e8f0',
-              borderRadius: '16px',
-              padding: '13px 12px',
-              fontSize: '14px',
-              fontWeight: '700',
-              cursor: 'pointer',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: '600',
               display: 'flex',
               alignItems: 'center',
-              gap: '7px',
+              justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer'
             }}
           >
-            <ShoppingCart size={17} color="#64748b" /> List
+            <ShoppingCart size={16} />
+            List
           </button>
         </div>
-
-        {loading ? (
-          <div style={{ padding: '40px 16px', textAlign: 'center', color: '#94a3b8' }}>
-            Loading recipes...
-          </div>
-        ) : recipes.length === 0 ? (
-          <div style={{ padding: '40px 16px', textAlign: 'center', color: '#94a3b8' }}>
-            <p>No recipes yet. Create your first recipe!</p>
-            <button
-              onClick={() => onNavigate('add-recipe')}
-              className="btn btn-primary"
-              style={{ marginTop: '16px' }}
-            >
-              Add Recipe
-            </button>
-          </div>
-        ) : (
-          <>
-            <div style={{ padding: '4px 16px 12px' }}>
-              <h3 style={{ fontWeight: '700', fontSize: '16px', margin: '0 0 10px' }}>Your Recipes</h3>
-              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {recipes.slice(0, 5).map((recipe, idx) => (
-                  <div
-                    key={recipe.id}
-                    onClick={() => handleRecipeClick(recipe)}
-                    style={{
-                      flexShrink: 0,
-                      width: '136px',
-                      borderRadius: '16px',
-                      overflow: 'hidden',
-                      background: '#fff',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.07)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div style={{ height: '88px', background: RECIPE_GRADIENTS[idx % 4] }} />
-                    <div style={{ padding: '9px 10px 11px' }}>
-                      <div style={{ fontWeight: '700', fontSize: '13px', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {recipe.name}
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                        {recipe.prepTime + recipe.cookTime} min
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ padding: '0 16px 24px' }}>
-              <h3 style={{ fontWeight: '700', fontSize: '16px', margin: '0 0 10px' }}>All Recipes</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {recipes.map((recipe, idx) => (
-                  <div
-                    key={recipe.id}
-                    onClick={() => handleRecipeClick(recipe)}
-                    style={{
-                      background: '#fff',
-                      borderRadius: '14px',
-                      padding: '12px 14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      boxShadow: '0 1px 4px rgba(0, 0, 0, 0.06)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '50px',
-                        height: '50px',
-                        borderRadius: '12px',
-                        background: RECIPE_GRADIENTS[idx % 4],
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '2px' }}>
-                        {recipe.name}
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>
-                        {recipe.cuisine} • {recipe.prepTime + recipe.cookTime} min {recipe.calories ? `• ${recipe.calories} cal` : ''}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
       </div>
 
-      <BottomNavigation active="home" onNavigate={(s) => onNavigate(s as Screen)} />
+      {/* Today's Meals */}
+      <div style={{ paddingLeft: '16px', paddingRight: '16px', marginBottom: '28px' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: '0 0 12px' }}>
+          Today's Meals
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {todaysMeals.map((meal, index) => (
+            <div key={index} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px',
+              background: '#f8fafc',
+              borderRadius: '12px',
+              cursor: 'pointer'
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '10px',
+                background: meal.color
+              }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500', margin: 0, textTransform: 'uppercase' }}>
+                  {meal.type}
+                </p>
+                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '4px 0 0' }}>
+                  {meal.name}
+                </h3>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
+                  {meal.time}
+                </p>
+                <p style={{ fontSize: '12px', color: '#94a3b8', margin: '4px 0 0' }}>
+                  {meal.cal}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Recipes */}
+      <div style={{ marginBottom: '28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '16px', paddingRight: '16px', marginBottom: '12px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+            Recent Recipes
+          </h2>
+          <button
+            onClick={() => onNavigate('browse')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#6ba356',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            See all →
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingLeft: '16px', paddingRight: '16px', paddingBottom: '8px' }}>
+          {recipes.slice(0, 3).map((recipe, index) => (
+            <div
+              key={recipe.id}
+              onClick={() => handleRecipeClick(recipe)}
+              style={{
+                minWidth: '90px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              <div style={{
+                width: '90px',
+                height: '90px',
+                borderRadius: '12px',
+                background: getColorByIndex(index),
+                flexShrink: 0
+              }} />
+              <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: 0, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {recipe.name}
+              </h4>
+              <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                {recipe.prepTime} min
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Suggested For You */}
+      <div style={{ paddingLeft: '16px', paddingRight: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+            Suggested For You
+          </h2>
+          <span style={{ background: '#d1fae5', color: '#059669', fontSize: '11px', fontWeight: '600', padding: '4px 8px', borderRadius: '6px' }}>
+            FREE
+          </span>
+        </div>
+        {recipes.slice(0, 1).map((recipe, index) => (
+          <div
+            key={recipe.id}
+            onClick={() => handleRecipeClick(recipe)}
+            style={{
+              display: 'flex',
+              gap: '12px',
+              padding: '12px',
+              background: '#f8fafc',
+              borderRadius: '12px',
+              cursor: 'pointer'
+            }}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '10px',
+              background: getColorByIndex(index),
+              flexShrink: 0
+            }} />
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500', margin: 0, textTransform: 'uppercase' }}>
+                Dinner
+              </p>
+              <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '4px 0 4px' }}>
+                {recipe.name}
+              </h3>
+              <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
+                {recipe.cuisine} • {recipe.prepTime} min
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <BottomNavigation currentScreen="home" onNavigate={onNavigate} />
     </div>
   )
 }
