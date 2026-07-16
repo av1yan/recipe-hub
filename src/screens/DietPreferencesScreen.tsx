@@ -1,37 +1,57 @@
 import { useState } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Check } from 'lucide-react'
 import type { Screen } from '../types'
 
 interface Props {
   onNavigate: (screen: Screen) => void
 }
 
-export default function DietPreferencesScreen({ onNavigate }: Props) {
-  const [selectedDiet, setSelectedDiet] = useState<string[]>([])
+// Shared key so other screens (e.g. Browse) can tailor recipes to these choices.
+export const DIET_PREFS_KEY = 'reciphub_diet_prefs'
 
-  const dietOptions = [
-    { id: 'vegan', label: 'Vegan', color: '#6ba356' },
-    { id: 'vegetarian', label: 'Vegetarian', color: '#6ba356' },
-    { id: 'gluten-free', label: 'Gluten-Free', color: '#6ba356' },
-    { id: 'keto', label: 'Keto', color: '#a48a6e' },
-    { id: 'paleo', label: 'Paleo', color: '#d4a574' },
-    { id: 'dairy-free', label: 'Dairy-Free', color: '#c67139' },
-    { id: 'nut-free', label: 'Nut-Free', color: '#64748b' },
-    { id: 'low-carb', label: 'Low-Carb', color: '#64748b' },
-  ]
+export function getDietPrefs(): string[] {
+  try {
+    const raw = localStorage.getItem(DIET_PREFS_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+const DIET_OPTIONS = [
+  { id: 'vegan', label: 'Vegan' },
+  { id: 'vegetarian', label: 'Vegetarian' },
+  { id: 'gluten-free', label: 'Gluten-Free' },
+  { id: 'keto', label: 'Keto' },
+  { id: 'paleo', label: 'Paleo' },
+  { id: 'dairy-free', label: 'Dairy-Free' },
+  { id: 'nut-free', label: 'Nut-Free' },
+  { id: 'low-carb', label: 'Low-Carb' },
+]
+
+export default function DietPreferencesScreen({ onNavigate }: Props) {
+  const [selectedDiet, setSelectedDiet] = useState<string[]>(() => getDietPrefs())
 
   const toggleDiet = (id: string) => {
-    setSelectedDiet(prev =>
-      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-    )
+    setSelectedDiet(prev => {
+      const next = prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+      localStorage.setItem(DIET_PREFS_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
+  const handleContinue = () => {
+    localStorage.setItem(DIET_PREFS_KEY, JSON.stringify(selectedDiet))
+    localStorage.setItem('onboardingCompleted', 'true')
+    onNavigate('home')
   }
 
   return (
-    <div style={{ background: '#f0f7ed', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: '#f0f7ed', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ padding: '40px 24px 24px', textAlign: 'center' }}>
-        <div style={{ fontSize: '60px', marginBottom: '16px' }}>🥗</div>
-        <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1e293b', margin: 0, marginBottom: '8px' }}>
+      <div style={{ padding: '32px 24px 16px', textAlign: 'center', flexShrink: 0 }}>
+        <div style={{ fontSize: '52px', marginBottom: '12px' }}>🥗</div>
+        <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px' }}>
           Your Diet
         </h1>
         <p style={{ fontSize: '15px', color: '#64748b', margin: 0 }}>
@@ -40,44 +60,46 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
       </div>
 
       {/* Diet Options - Wrapping Pills */}
-      <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-          {dietOptions.map(diet => (
-            <button
-              key={diet.id}
-              onClick={() => toggleDiet(diet.id)}
-              style={{
-                padding: '10px 16px',
-                background: selectedDiet.includes(diet.id) ? diet.color : '#f0f7ed',
-                color: selectedDiet.includes(diet.id) ? '#fff' : '#1e293b',
-                border: selectedDiet.includes(diet.id) ? 'none' : '2px solid #c8e0bc',
-                borderRadius: '999px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                transform: 'scale(1)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)'
-              }}
-            >
-              {diet.label}
-            </button>
-          ))}
+      <div style={{ flex: 1, padding: '16px 24px', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
+          {DIET_OPTIONS.map(diet => {
+            const active = selectedDiet.includes(diet.id)
+            return (
+              <button
+                key={diet.id}
+                onClick={() => toggleDiet(diet.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '11px 18px',
+                  background: active ? '#6ba356' : '#fff',
+                  color: active ? '#fff' : '#334155',
+                  border: active ? '2px solid #6ba356' : '2px solid #d7e8cd',
+                  borderRadius: '999px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: active ? '0 2px 8px rgba(107,163,86,0.3)' : '0 1px 2px rgba(0,0,0,0.04)',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {active && <Check size={15} />}
+                {diet.label}
+              </button>
+            )
+          })}
         </div>
+
+        <p style={{ textAlign: 'center', fontSize: '13px', color: '#94a3b8', marginTop: '20px' }}>
+          {selectedDiet.length === 0
+            ? 'Tap any that apply — or skip for now.'
+            : `${selectedDiet.length} selected`}
+        </p>
       </div>
 
       {/* Continue Button */}
-      <div style={{ padding: '24px' }}>
+      <div style={{ padding: '16px 24px 24px', flexShrink: 0 }}>
         <button
-          onClick={() => {
-            localStorage.setItem('onboardingCompleted', 'true')
-            onNavigate('home')
-          }}
+          onClick={handleContinue}
           style={{
             width: '100%',
             padding: '16px',
@@ -86,25 +108,16 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
             border: 'none',
             borderRadius: '14px',
             fontSize: '16px',
-            fontWeight: '600',
+            fontWeight: '700',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            transition: 'all 0.3s ease',
             boxShadow: '0 4px 12px rgba(107, 163, 86, 0.3)',
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 8px 20px rgba(107, 163, 86, 0.4)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(107, 163, 86, 0.3)'
-          }}
         >
-          Continue
+          {selectedDiet.length > 0 ? 'Continue' : 'Skip for now'}
           <ChevronRight size={18} />
         </button>
       </div>

@@ -1,8 +1,22 @@
 import { useState, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search, SlidersHorizontal, X } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
+import { getDietPrefs } from './DietPreferencesScreen'
+
+const DIET_LABELS: Record<string, string> = {
+  vegan: 'Vegan', vegetarian: 'Vegetarian', 'gluten-free': 'Gluten-Free',
+  keto: 'Keto', paleo: 'Paleo', 'dairy-free': 'Dairy-Free',
+  'nut-free': 'Nut-Free', 'low-carb': 'Low-Carb',
+}
+
+// A recipe matches when its tags satisfy every selected diet/allergy preference.
+function matchesDiet(recipe: Recipe, prefs: string[]): boolean {
+  if (prefs.length === 0) return true
+  const tags = (recipe.tags || []).map(t => t.toLowerCase().replace(/\s+/g, '-'))
+  return prefs.every(pref => tags.includes(pref))
+}
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -13,6 +27,10 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [dietPrefs, setDietPrefs] = useState<string[]>(() => getDietPrefs())
+
+  // Recipes matching both the search box and the saved diet preferences.
+  const displayedRecipes = filteredRecipes.filter(r => matchesDiet(r, dietPrefs))
 
   useEffect(() => {
     loadRecipes()
@@ -88,31 +106,55 @@ export default function BrowseScreen({ onNavigate }: Props) {
         </div>
       </header>
 
+      {dietPrefs.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#f0f7ed', borderBottom: '1px solid #e2e8f0', overflowX: 'auto' }}>
+          <SlidersHorizontal size={15} color="#6ba356" style={{ flexShrink: 0 }} />
+          <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
+            {dietPrefs.map(pref => (
+              <span key={pref} style={{ flexShrink: 0, background: '#6ba356', color: '#fff', fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '999px' }}>
+                {DIET_LABELS[pref] || pref}
+              </span>
+            ))}
+          </div>
+          <button
+            onClick={() => setDietPrefs([])}
+            aria-label="Clear diet filters"
+            style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '3px', background: 'none', border: 'none', color: '#64748b', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+          >
+            <X size={13} /> Clear
+          </button>
+        </div>
+      )}
+
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-        {filteredRecipes.length === 0 ? (
+        {displayedRecipes.length === 0 ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8', textAlign: 'center', flexDirection: 'column', gap: '16px' }}>
-            <p>{searchTerm ? 'No recipes found matching your search' : 'No recipes available'}</p>
-            {searchTerm && (
+            <p>
+              {searchTerm
+                ? 'No recipes found matching your search'
+                : dietPrefs.length > 0
+                ? 'No recipes match your diet preferences yet'
+                : 'No recipes available'}
+            </p>
+            {searchTerm ? (
               <button
                 onClick={() => handleSearch('')}
-                style={{
-                  padding: '8px 16px',
-                  background: '#6ba356',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                }}
+                style={{ padding: '8px 16px', background: '#6ba356', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}
               >
                 Clear Search
               </button>
-            )}
+            ) : dietPrefs.length > 0 ? (
+              <button
+                onClick={() => setDietPrefs([])}
+                style={{ padding: '8px 16px', background: '#6ba356', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}
+              >
+                Clear diet filters
+              </button>
+            ) : null}
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filteredRecipes.map((recipe, index) => (
+            {displayedRecipes.map((recipe, index) => (
               <div
                 key={recipe.id}
                 onClick={() => onNavigate('recipe', { recipe })}
