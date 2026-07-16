@@ -250,8 +250,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                       border: meal ? 'none' : '2px solid #e2e8f0',
                       fontSize: '13px',
                       fontWeight: '600',
-                      transition: 'all 0.3s ease',
-                      transform: 'scale(1)',
+                      transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      transform: 'scale(1) translateY(0)',
                       boxShadow: meal ? `0 4px 12px ${mealColor}40` : '0 2px 6px rgba(0,0,0,0.06)',
                     }}
                     onMouseEnter={(e) => {
@@ -259,9 +259,11 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                         e.currentTarget.style.background = '#f5f1ed'
                         e.currentTarget.style.borderColor = '#d4a574'
                         e.currentTarget.style.color = '#c67139'
+                        e.currentTarget.style.transform = 'scale(1.02) translateY(-4px)'
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(198, 113, 57, 0.15)'
                       } else {
-                        e.currentTarget.style.transform = 'translateY(-2px)'
-                        e.currentTarget.style.boxShadow = `0 6px 16px ${mealColor}60`
+                        e.currentTarget.style.transform = 'scale(1.05) translateY(-6px)'
+                        e.currentTarget.style.boxShadow = `0 12px 24px ${mealColor}50`
                       }
                     }}
                     onMouseLeave={(e) => {
@@ -269,10 +271,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                         e.currentTarget.style.background = '#fff'
                         e.currentTarget.style.borderColor = '#e2e8f0'
                         e.currentTarget.style.color = '#94a3b8'
-                      } else {
-                        e.currentTarget.style.transform = 'scale(1)'
-                        e.currentTarget.style.boxShadow = `0 4px 12px ${mealColor}40`
                       }
+                      e.currentTarget.style.transform = 'scale(1) translateY(0)'
+                      e.currentTarget.style.boxShadow = meal ? `0 4px 12px ${mealColor}40` : '0 2px 6px rgba(0,0,0,0.06)'
                     }}
                   >
                     {meal ? (
