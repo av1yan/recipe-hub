@@ -102,7 +102,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
       })
 
       show('Recipe created!')
-      setTimeout(() => onNavigate('home'), 1100)
+      setTimeout(() => onNavigate('home'), 1800)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create recipe')
     } finally {
