@@ -32,13 +32,25 @@ function parseGroceryLines(text: string): string[] {
     .slice(0, 50)
 }
 
+// Common OCR misreads of unit abbreviations (l↔I↔1, o↔0).
+const UNIT_ALIASES: Record<string, string> = {
+  ib: 'lb', '1b': 'lb', lbs: 'lb', ozs: 'oz', '0z': 'oz', gr: 'g', kgs: 'kg', ltr: 'l',
+}
+
+function normalizeUnit(u: string): string | null {
+  const low = u.toLowerCase()
+  if (UNIT_ALIASES[low]) return UNIT_ALIASES[low]
+  if (UNITS.includes(low)) return low
+  return null
+}
+
 // Pull a leading quantity + unit out of a line, e.g. "2 lb apples" -> {apples, 2, lb}.
 function parseItemParts(raw: string): { name: string; quantity: number; unit: string } {
   const m = raw.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)?\s+(.+)$/)
   if (m) {
     const qty = parseFloat(m[1]) || 1
-    const unit = (m[2] || '').toLowerCase()
-    if (unit && UNITS.includes(unit)) return { name: m[3].trim(), quantity: qty, unit }
+    const unit = m[2] ? normalizeUnit(m[2]) : null
+    if (unit) return { name: m[3].trim(), quantity: qty, unit }
     // number but no recognized unit -> keep the word as part of the name ("3 apples")
     return { name: (m[2] ? m[2] + ' ' : '') + m[3].trim(), quantity: qty, unit: 'piece' }
   }
