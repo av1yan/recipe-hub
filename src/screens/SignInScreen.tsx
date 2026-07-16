@@ -35,20 +35,20 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
   }
 
   return (
-    <div className="screen" style={{ background: '#fff', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
+    <div className="screen" style={{ background: '#fff', padding: '24px 16px', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ fontSize: '44px', marginBottom: '16px' }}>📖</div>
-        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b', margin: 0, marginBottom: '8px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <div style={{ fontSize: '36px', marginBottom: '12px' }}>📖</div>
+        <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: 0, marginBottom: '6px', wordBreak: 'break-word' }}>
           {isSignUp ? 'Create Account' : 'Welcome back'}
         </h1>
-        <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
+        <p style={{ fontSize: '13px', color: '#64748b', margin: 0, wordBreak: 'break-word' }}>
           {isSignUp ? 'Join recipHub to start cooking smarter' : 'Sign in to your RECIPhub'}
         </p>
       </div>
 
       {/* Pill Tab Buttons */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '28px', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
         <button
           onClick={() => setIsSignUp(false)}
           style={{
@@ -90,7 +90,7 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '24px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px', width: '100%', boxSizing: 'border-box' }}>
         {isSignUp && (
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Name</label>
