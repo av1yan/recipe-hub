@@ -59,6 +59,19 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     try {
       const weekStart = new Date()
       weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1)
+      weekStart.setHours(0, 0, 0, 0)
+
+      // Don't pile up duplicate weeks — if this week already has a plan, just open it.
+      const existing = mealPlans.find(p => {
+        const d = new Date(p.weekStart)
+        d.setHours(0, 0, 0, 0)
+        return d.getTime() === weekStart.getTime()
+      })
+      if (existing) {
+        setCurrentPlanId(existing.id)
+        return
+      }
+
       const plan = await mealPlanAPI.create(weekStart)
       setMealPlans(prev => [...prev, plan])
       setCurrentPlanId(plan.id)
