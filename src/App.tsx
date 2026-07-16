@@ -25,11 +25,12 @@ export default function App() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = getAuthToken()
+      const onboardingCompleted = localStorage.getItem('onboardingCompleted')
       if (token) {
         try {
           const profile = await authAPI.getProfile()
           setUser(profile)
-          setScreen('home')
+          setScreen(onboardingCompleted ? 'home' : 'onboarding')
         } catch (error) {
           clearAuthToken()
           setScreen('signin')

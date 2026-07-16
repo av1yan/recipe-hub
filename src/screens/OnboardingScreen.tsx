@@ -142,7 +142,10 @@ export default function OnboardingScreen({ onNavigate }: Props) {
 
         {currentStep < steps.length - 1 && (
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => {
+              localStorage.setItem('onboardingCompleted', 'true')
+              onNavigate('home')
+            }}
             style={{
               width: '100%',
               padding: '12px',

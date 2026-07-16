@@ -74,7 +74,10 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
       {/* Continue Button */}
       <div style={{ padding: '24px' }}>
         <button
-          onClick={() => onNavigate('home')}
+          onClick={() => {
+            localStorage.setItem('onboardingCompleted', 'true')
+            onNavigate('home')
+          }}
           style={{
             width: '100%',
             padding: '16px',
