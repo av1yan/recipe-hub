@@ -87,6 +87,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
               border: 'none', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               backdropFilter: 'blur(8px)',
+              zIndex: 2,
             }}
           >
             <ArrowLeft size={18} color="#1e293b" />
@@ -100,13 +101,23 @@ export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
               border: 'none', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               backdropFilter: 'blur(8px)',
+              zIndex: 2,
             }}
           >
             <Heart size={18} color={isFavorited ? '#ef4444' : '#94a3b8'} fill={isFavorited ? '#ef4444' : 'none'} />
           </button>
-          <div style={{ fontSize: '72px', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.12))' }}>
-            {emoji}
-          </div>
+          {recipe.imageUrl ? (
+            <img
+              src={recipe.imageUrl}
+              alt={recipe.name}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={e => { e.currentTarget.style.display = 'none' }}
+            />
+          ) : (
+            <div style={{ fontSize: '72px', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.12))' }}>
+              {emoji}
+            </div>
+          )}
         </div>
 
         {/* Title + stats */}

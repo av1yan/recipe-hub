@@ -232,8 +232,12 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 {rotd.description && (
                   <p style={{ fontSize: '14px', color: '#475569', margin: '0 0 14px', lineHeight: 1.5 }}>{rotd.description}</p>
                 )}
-                <div style={{ height: '170px', borderRadius: '14px', background: `linear-gradient(135deg, ${TILE_COLORS[0]}, ${TILE_COLORS[3]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '58px' }}>
-                  🍽️
+                <div style={{ height: '170px', borderRadius: '14px', overflow: 'hidden', background: `linear-gradient(135deg, ${TILE_COLORS[0]}, ${TILE_COLORS[3]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '58px' }}>
+                  {rotd.imageUrl ? (
+                    <img src={rotd.imageUrl} alt={rotd.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                  ) : (
+                    '🍽️'
+                  )}
                 </div>
               </div>
             )}
@@ -329,7 +333,11 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
           onClick={() => onNavigate('recipe', { recipe })}
           style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', cursor: 'pointer' }}
         >
-          <div style={{ width: '62px', height: '62px', borderRadius: '12px', background: TILE_COLORS[index % TILE_COLORS.length], flexShrink: 0 }} />
+          <div style={{ width: '62px', height: '62px', borderRadius: '12px', background: TILE_COLORS[index % TILE_COLORS.length], flexShrink: 0, overflow: 'hidden' }}>
+            {recipe.imageUrl && (
+              <img src={recipe.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+            )}
+          </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '4px' }}>{recipe.name}</div>
             <div style={{ fontSize: '13px', color: '#94a3b8' }}>

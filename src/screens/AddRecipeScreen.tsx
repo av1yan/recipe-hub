@@ -47,6 +47,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
   const [cookTime, setCookTime] = useState('')
   const [servings, setServings] = useState('2')
   const [calories, setCalories] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [ingredients, setIngredients] = useState<IngredientRow[]>([{ name: '', quantity: '', unit: '' }])
   const [instructions, setInstructions] = useState<InstructionRow[]>([{ text: '', duration: '' }])
@@ -96,6 +97,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
         cookTime: parseInt(cookTime),
         servings: parseInt(servings),
         calories: calories ? parseInt(calories) : null,
+        imageUrl: imageUrl.trim() || null,
         tags,
         ingredients: cleanIngredients,
         instructions: cleanInstructions,
@@ -183,6 +185,29 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
               <label>Calories (optional)</label>
               <input type="number" className="input" placeholder="500" value={calories} onChange={(e) => setCalories(e.target.value)} />
             </div>
+          </div>
+
+          <div className="field">
+            <label>Photo URL <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+            <input
+              type="url"
+              className="input"
+              placeholder="https://…/photo.jpg"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              autoCapitalize="none"
+              autoCorrect="off"
+            />
+            {imageUrl.trim() && (
+              <div style={{ marginTop: '8px', height: '140px', borderRadius: '12px', overflow: 'hidden', background: '#f1f5f9', border: '1px solid #eef2f6' }}>
+                <img
+                  src={imageUrl.trim()}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  onError={e => { (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:13px">Couldn\'t load that image</div>' }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Ingredients */}
