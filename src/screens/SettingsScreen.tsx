@@ -1,10 +1,48 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   ChevronRight, ChevronLeft, User, Settings as SettingsIcon, Crown,
   Globe, SlidersHorizontal, Smartphone, HelpCircle, Zap, BookOpen,
   Monitor, UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf,
 } from 'lucide-react'
 import type { Screen } from '../types'
+
+// Copy text using the Clipboard API, falling back to legacy execCommand.
+// Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+  } catch { /* fall through to legacy path */ }
+  try {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.position = 'fixed'
+    ta.style.top = '0'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.focus()
+    ta.select()
+    const ok = document.execCommand('copy')
+    document.body.removeChild(ta)
+    return ok
+  } catch {
+    return false
+  }
+}
+
+// When copying isn't allowed, highlight the link so the user can copy it by hand.
+function selectElementText(el: HTMLElement | null) {
+  if (!el) return
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  const sel = window.getSelection()
+  sel?.removeAllRanges()
+  sel?.addRange(range)
+}
+
+type CopyStatus = 'idle' | 'copied' | 'failed'
 
 type SubPage =
   | 'edit-profile' | 'account' | 'subscription' | 'language'
@@ -402,11 +440,15 @@ function ImportGuides({ onBack }: { onBack: () => void }) {
 }
 
 function DesktopPage({ onBack }: { onBack: () => void }) {
-  const [copied, setCopied] = useState(false)
+  const [status, setStatus] = useState<CopyStatus>('idle')
+  const urlRef = useRef<HTMLParagraphElement>(null)
   const url = window.location.origin
 
-  const copy = () => {
-    navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500) })
+  const copy = async () => {
+    const ok = await copyText(url)
+    if (!ok) selectElementText(urlRef.current)
+    setStatus(ok ? 'copied' : 'failed')
+    setTimeout(() => setStatus('idle'), 3000)
   }
 
   return (
@@ -420,10 +462,10 @@ function DesktopPage({ onBack }: { onBack: () => void }) {
         </div>
         <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', border: '1px solid #f1f5f9', marginBottom: '12px' }}>
           <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>URL</p>
-          <p style={{ fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all' }}>{url}</p>
+          <p ref={urlRef} style={{ fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{url}</p>
         </div>
-        <button onClick={copy} style={{ width: '100%', padding: '14px', background: copied ? '#f0f7ed' : 'linear-gradient(135deg, #7ec063, #5a9449)', color: copied ? '#6ba356' : '#fff', border: copied ? '1.5px solid #c8e0bc' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          {copied ? <><Check size={16} /> Copied!</> : <><Copy size={16} /> Copy Link</>}
+        <button onClick={copy} style={{ width: '100%', padding: '14px', background: status === 'idle' ? 'linear-gradient(135deg, #7ec063, #5a9449)' : '#f0f7ed', color: status === 'idle' ? '#fff' : '#6ba356', border: status === 'idle' ? 'none' : '1.5px solid #c8e0bc', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          {status === 'copied' ? <><Check size={16} /> Copied!</> : status === 'failed' ? 'Select the link above to copy' : <><Copy size={16} /> Copy Link</>}
         </button>
       </div>
     </div>
@@ -431,15 +473,26 @@ function DesktopPage({ onBack }: { onBack: () => void }) {
 }
 
 function InvitePage({ onBack }: { onBack: () => void }) {
-  const [copied, setCopied] = useState(false)
+  const [status, setStatus] = useState<CopyStatus>('idle')
+  const linkRef = useRef<HTMLParagraphElement>(null)
   const link = window.location.origin
 
   const share = async () => {
+    // Prefer the native share sheet on devices that support it (mobile).
     if (navigator.share) {
-      try { await navigator.share({ title: 'recipHub — Save. Plan. Cook Better.', text: 'Check out recipHub, the recipe & meal planning app I use!', url: link }) } catch {}
-    } else {
-      navigator.clipboard.writeText(link).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500) })
+      try {
+        await navigator.share({ title: 'recipHub — Save. Plan. Cook Better.', text: 'Check out recipHub, the recipe & meal planning app I use!', url: link })
+        return
+      } catch (e) {
+        // User dismissed the sheet — leave things as they are.
+        if (e instanceof Error && e.name === 'AbortError') return
+        // Any other failure: fall through to copying the link.
+      }
     }
+    const ok = await copyText(link)
+    if (!ok) selectElementText(linkRef.current)
+    setStatus(ok ? 'copied' : 'failed')
+    setTimeout(() => setStatus('idle'), 3000)
   }
 
   return (
@@ -453,10 +506,10 @@ function InvitePage({ onBack }: { onBack: () => void }) {
         </div>
         <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', border: '1px solid #f1f5f9', marginBottom: '12px' }}>
           <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>SHARE LINK</p>
-          <p style={{ fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all' }}>{link}</p>
+          <p ref={linkRef} style={{ fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{link}</p>
         </div>
-        <button onClick={share} style={{ width: '100%', padding: '14px', background: copied ? '#f0f7ed' : 'linear-gradient(135deg, #7ec063, #5a9449)', color: copied ? '#6ba356' : '#fff', border: copied ? '1.5px solid #c8e0bc' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          {copied ? <><Check size={16} /> Link Copied!</> : <><Share2 size={16} /> Share recipHub</>}
+        <button onClick={share} style={{ width: '100%', padding: '14px', background: status === 'idle' ? 'linear-gradient(135deg, #7ec063, #5a9449)' : '#f0f7ed', color: status === 'idle' ? '#fff' : '#6ba356', border: status === 'idle' ? 'none' : '1.5px solid #c8e0bc', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          {status === 'copied' ? <><Check size={16} /> Link Copied!</> : status === 'failed' ? 'Select the link above to copy' : <><Share2 size={16} /> Share recipHub</>}
         </button>
       </div>
     </div>
