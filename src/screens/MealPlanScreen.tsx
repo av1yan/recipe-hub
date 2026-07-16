@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, X, Trash2 } from 'lucide-react'
+import { Plus, X, Trash2, CalendarDays, Check } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { mealPlanAPI, recipeAPI } from '../utils/api'
@@ -17,6 +17,28 @@ const MEALS = [
   { key: 'dinner', label: 'Dinner', tint: '#e5e9ff', emoji: '🍽️' },
   { key: 'snack', label: 'Snack', tint: '#fce7f3', emoji: '🍎' },
 ]
+
+// Monday (local midnight) of whatever week a date falls in.
+function mondayOf(date: Date | string): Date {
+  const d = new Date(date)
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function sameWeek(a: Date | string, b: Date | string): boolean {
+  return mondayOf(a).getTime() === mondayOf(b).getTime()
+}
+
+// "Jul 13 – 19" / "Jul 27 – Aug 2"
+function weekLabel(weekStart: Date): string {
+  const end = new Date(weekStart)
+  end.setDate(end.getDate() + 6)
+  const mo = (d: Date) => d.toLocaleDateString('en-US', { month: 'short' })
+  return mo(end) !== mo(weekStart)
+    ? `${mo(weekStart)} ${weekStart.getDate()} – ${mo(end)} ${end.getDate()}`
+    : `${mo(weekStart)} ${weekStart.getDate()} – ${end.getDate()}`
+}
 
 // Returns the recipe(s) planned for a given day + meal type as an array.
 function getMeals(plan: MealPlan | undefined, dayName: string, mealType: string): any[] {
@@ -36,6 +58,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [pickerFor, setPickerFor] = useState<string | null>(null) // meal-type key whose inline picker is open
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showWeeks, setShowWeeks] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -55,28 +78,22 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
-  async function createNewMealPlan() {
+  // Opens the plan for a given week, creating it only if it doesn't exist yet.
+  async function openWeek(weekStart: Date) {
+    setShowWeeks(false)
+    setPickerFor(null)
+    setConfirmDelete(false)
     try {
-      const weekStart = new Date()
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1)
-      weekStart.setHours(0, 0, 0, 0)
-
-      // Don't pile up duplicate weeks — if this week already has a plan, just open it.
-      const existing = mealPlans.find(p => {
-        const d = new Date(p.weekStart)
-        d.setHours(0, 0, 0, 0)
-        return d.getTime() === weekStart.getTime()
-      })
+      const existing = mealPlans.find(p => sameWeek(p.weekStart, weekStart))
       if (existing) {
         setCurrentPlanId(existing.id)
         return
       }
-
       const plan = await mealPlanAPI.create(weekStart)
       setMealPlans(prev => [...prev, plan])
       setCurrentPlanId(plan.id)
     } catch (error) {
-      console.error('Failed to create meal plan:', error)
+      console.error('Failed to open meal plan week:', error)
     }
   }
 
@@ -142,7 +159,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', margin: '0 0 6px' }}>No meal plan yet</h3>
             <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>Plan your week and cook with less guesswork.</p>
           </div>
-          <button onClick={createNewMealPlan} style={{ background: 'linear-gradient(135deg, #fb8a72, #ef5a41)', color: '#fff', padding: '14px 28px', fontSize: '15px', fontWeight: '700', borderRadius: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(242,109,91,0.35)' }}>
+          <button onClick={() => openWeek(mondayOf(new Date()))} style={{ background: 'linear-gradient(135deg, #fb8a72, #ef5a41)', color: '#fff', padding: '14px 28px', fontSize: '15px', fontWeight: '700', borderRadius: '14px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(242,109,91,0.35)' }}>
             Create a meal plan
           </button>
         </div>
@@ -160,8 +177,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <button onClick={() => setConfirmDelete(v => !v)} aria-label="Delete week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fff', color: '#94a3b8', border: '1.5px solid #e9edf2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Trash2 size={16} />
             </button>
-            <button onClick={createNewMealPlan} aria-label="New meal plan" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fdeeeb', color: '#f26d5b', border: '1.5px solid #f7d2ca', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Plus size={17} />
+            <button onClick={() => { setShowWeeks(v => !v); setConfirmDelete(false) }} aria-label="Choose week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: showWeeks ? '#f26d5b' : '#fdeeeb', color: showWeeks ? '#fff' : '#f26d5b', border: '1.5px solid #f7d2ca', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CalendarDays size={17} />
             </button>
           </div>
         </div>
@@ -189,6 +206,41 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       </header>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px', background: '#f7f8f5' }}>
+        {showWeeks && (
+          <div style={{ marginBottom: '18px', border: '1.5px solid #f7d2ca', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
+            <div style={{ padding: '9px 14px', fontSize: '11px', fontWeight: '800', color: '#f26d5b', letterSpacing: '0.05em', background: '#fdeeeb' }}>
+              JUMP TO A WEEK
+            </div>
+            {[-1, 0, 1, 2, 3].map(offset => {
+              const ws = mondayOf(new Date())
+              ws.setDate(ws.getDate() + offset * 7)
+              const plan = mealPlans.find(p => sameWeek(p.weekStart, ws))
+              const isCurrent = currentPlan ? sameWeek(currentPlan.weekStart, ws) : false
+              const planned = plan
+                ? DAY_NAMES.reduce((n, d) => n + MEALS.reduce((m, mt) => m + getMeals(plan, d, mt.key).length, 0), 0)
+                : 0
+              return (
+                <button
+                  key={offset}
+                  onClick={() => openWeek(ws)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', background: isCurrent ? '#fff7f5' : 'none', border: 'none', borderTop: offset === -1 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left' }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+                      {weekLabel(ws)}
+                      {offset === 0 && <span style={{ fontSize: '11px', fontWeight: '700', color: '#f26d5b', marginLeft: '7px' }}>THIS WEEK</span>}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                      {plan ? `${planned} meal${planned === 1 ? '' : 's'} planned` : 'No plan yet · tap to start one'}
+                    </div>
+                  </div>
+                  {isCurrent ? <Check size={16} color="#f26d5b" /> : <Plus size={16} color="#c3cdba" />}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
         {confirmDelete && (
           <div style={{ marginBottom: '18px', background: '#fff', border: '1.5px solid #fecdca', borderRadius: '14px', padding: '14px' }}>
             <p style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: '0 0 4px' }}>Delete this week's plan?</p>
