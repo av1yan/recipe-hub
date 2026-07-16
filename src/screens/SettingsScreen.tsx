@@ -275,16 +275,23 @@ function Subscription({ onBack }: { onBack: () => void }) {
   )
 }
 
-function LanguagePage({ onBack }: { onBack: () => void }) {
-  const [selected, setSelected] = useState('en')
+function LanguagePage({ selected, onSelect, onBack }: { selected: string; onSelect: (code: string) => void; onBack: () => void }) {
+  const { toast, show } = useToast()
+
+  const pick = (lang: typeof LANGUAGES[number]) => {
+    if (lang.code === selected) return
+    onSelect(lang.code)
+    show(`Language set to ${lang.label}`)
+  }
+
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc', position: 'relative' }}>
       <SubHeader title="Language" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
         <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
           {LANGUAGES.map((lang, i) => (
             <div key={lang.code}>
-              <button onClick={() => setSelected(lang.code)} style={{ width: '100%', display: 'flex', alignItems: 'center', padding: '14px 16px', background: '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+              <button onClick={() => pick(lang)} style={{ width: '100%', display: 'flex', alignItems: 'center', padding: '14px 16px', background: selected === lang.code ? '#f0f7ed' : '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
                 <span style={{ flex: 1, fontSize: '15px', color: '#1e293b', fontWeight: selected === lang.code ? '600' : '400' }}>
                   {lang.native}
                   <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '400', marginLeft: '8px' }}>{lang.label}</span>
@@ -296,6 +303,7 @@ function LanguagePage({ onBack }: { onBack: () => void }) {
           ))}
         </div>
       </div>
+      {toast && <Toast message={toast.message} tone={toast.tone} />}
     </div>
   )
 }
@@ -571,11 +579,13 @@ function InvitePage({ onBack }: { onBack: () => void }) {
 
 export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   const [subPage, setSubPage] = useState<SubPage>(null)
+  const [language, setLanguage] = useState(() => localStorage.getItem('reciphub_language') || 'en')
+  const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0]
 
   if (subPage === 'edit-profile') return <EditProfile onBack={() => setSubPage(null)} />
   if (subPage === 'account') return <AccountSettings onBack={() => setSubPage(null)} />
   if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
-  if (subPage === 'language') return <LanguagePage onBack={() => setSubPage(null)} />
+  if (subPage === 'language') return <LanguagePage selected={language} onSelect={(code) => { setLanguage(code); localStorage.setItem('reciphub_language', code) }} onBack={() => setSubPage(null)} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} onNavigate={onNavigate} />
   if (subPage === 'app-icon' || subPage === 'shortcut') return <AppIconPage onBack={() => setSubPage(null)} />
   if (subPage === 'help') return <HelpPage onBack={() => setSubPage(null)} />
@@ -603,7 +613,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             <Divider />
             <Row icon={<Crown size={18} color="#f4b860" />} label="My subscription" value="Free" onPress={() => setSubPage('subscription')} />
             <Divider />
-            <Row icon={<Globe size={18} color="#64748b" />} label="Language" value="English" onPress={() => setSubPage('language')} />
+            <Row icon={<Globe size={18} color="#64748b" />} label="Language" value={currentLang.label} onPress={() => setSubPage('language')} />
             <Divider />
             <Row icon={<SlidersHorizontal size={18} color="#64748b" />} label="Preferences" onPress={() => setSubPage('preferences')} />
             <Divider />
@@ -611,13 +621,6 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             <Divider />
             <Row icon={<HelpCircle size={18} color="#64748b" />} label="Help" onPress={() => setSubPage('help')} />
           </div>
-        </div>
-
-        <div style={{ margin: '0 16px 28px' }}>
-          <button onClick={onSignOut} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)' }}>
-            <LogOut size={17} />
-            Log out
-          </button>
         </div>
 
         <div style={{ marginBottom: '20px' }}>
@@ -635,13 +638,19 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
           <SectionHeader label="CONNECT" />
           <div style={{ borderRadius: '14px', overflow: 'hidden', margin: '0 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9' }}>
             <Row icon={<UserPlus size={18} color="#6ba356" />} label="Invite friends" onPress={() => setSubPage('invite')} />
-            <Divider />
-            <Row icon={<HelpCircle size={18} color="#64748b" />} label="Help" onPress={() => setSubPage('help')} />
           </div>
         </div>
 
         <p style={{ textAlign: 'center', fontSize: '13px', color: '#cbd5e1', marginBottom: '24px' }}>Version 1.0.0</p>
 
+      </div>
+
+      {/* Pinned footer */}
+      <div style={{ flexShrink: 0, padding: '12px 16px 16px', background: '#f8fafc', borderTop: '1px solid #eef2f6' }}>
+        <button onClick={onSignOut} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)' }}>
+          <LogOut size={17} />
+          Log out
+        </button>
       </div>
     </div>
   )
