@@ -57,7 +57,8 @@ export default function HomeScreen({ onNavigate }: Props) {
     : SAMPLE_SUGGESTION
 
   return (
-    <div className="screen" style={{ background: '#fafafa', paddingBottom: '72px' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafafa' }}>
+    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
       {/* Header */}
       <div style={{ background: '#fff', padding: '16px 16px 0', borderBottom: '1px solid #f1f5f9' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
@@ -280,7 +281,8 @@ export default function HomeScreen({ onNavigate }: Props) {
         </div>
       </div>
 
-      <BottomNavigation currentScreen="home" onNavigate={onNavigate} />
+      </div>
+      <BottomNavigation active="home" onNavigate={onNavigate} />
     </div>
   )
 }
