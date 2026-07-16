@@ -135,6 +135,11 @@ export const mealPlanAPI = {
 
   get: (id: string) => apiRequest(`/meal-plans/${id}`),
 
+  delete: (id: string) =>
+    apiRequest(`/meal-plans/${id}`, {
+      method: 'DELETE',
+    }),
+
   addMeal: (id: string, recipeId: string, day: string, mealType: string) =>
     apiRequest(`/meal-plans/${id}/meals`, {
       method: 'POST',
