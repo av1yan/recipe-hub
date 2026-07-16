@@ -510,6 +510,16 @@ function InvitePage({ onBack }: { onBack: () => void }) {
   const { toast, show } = useToast()
   const link = window.location.origin
 
+  const copyLink = async () => {
+    const ok = await copyText(link)
+    if (ok) {
+      show('Link copied to clipboard')
+    } else {
+      selectElementText(linkRef.current)
+      show('Link selected — copy it manually', 'error')
+    }
+  }
+
   const share = async () => {
     // Prefer the native share sheet on devices that support it (mobile).
     if (navigator.share) {
@@ -522,13 +532,7 @@ function InvitePage({ onBack }: { onBack: () => void }) {
         // Any other failure: fall through to copying the link.
       }
     }
-    const ok = await copyText(link)
-    if (ok) {
-      show('Link copied to clipboard')
-    } else {
-      selectElementText(linkRef.current)
-      show('Link selected — copy it manually', 'error')
-    }
+    copyLink()
   }
 
   return (
@@ -542,7 +546,12 @@ function InvitePage({ onBack }: { onBack: () => void }) {
         </div>
         <div style={{ background: '#fff', borderRadius: '14px', padding: '16px', border: '1px solid #f1f5f9', marginBottom: '12px' }}>
           <p style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>SHARE LINK</p>
-          <p ref={linkRef} style={{ fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{link}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <p ref={linkRef} style={{ flex: 1, fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{link}</p>
+            <button onClick={copyLink} aria-label="Copy link" title="Copy link" style={{ flexShrink: 0, width: '36px', height: '36px', borderRadius: '10px', background: '#f0f7ed', border: '1px solid #c8e0bc', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Copy size={16} color="#6ba356" />
+            </button>
+          </div>
         </div>
         <button onClick={share} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <Share2 size={16} /> Share recipHub
