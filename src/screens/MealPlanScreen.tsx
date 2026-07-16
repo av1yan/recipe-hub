@@ -28,7 +28,8 @@ const LABEL_W = 58
 function getMeal(plan: MealPlan | undefined, dayName: string, mealType: string): any {
   const dayMeals: any = plan?.meals?.[dayName]
   if (!dayMeals) return null
-  const value = mealType === 'snack' ? dayMeals.snacks : dayMeals[mealType]
+  // The API keys every meal type (including snack) singularly under the day.
+  const value = dayMeals[mealType] ?? dayMeals.snacks
   return Array.isArray(value) ? value[0] || null : value || null
 }
 
