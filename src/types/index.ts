@@ -17,6 +17,7 @@ export type Screen =
 export interface User {
   id: string
   name: string
+  username?: string | null
   email: string
   avatar?: string
   preferences?: UserPreferences

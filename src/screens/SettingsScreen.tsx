@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   ChevronRight, ChevronLeft, User, Crown,
   Globe, SlidersHorizontal, Smartphone, HelpCircle, Zap, BookOpen,
@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
+import { authAPI } from '../utils/api'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
@@ -120,10 +121,12 @@ function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean })
 // ─── Sub-pages ────────────────────────────────────────────────────────────────
 
 function AccountPage({ onBack }: { onBack: () => void }) {
-  // Profile
-  const [name, setName] = useState('Alex Johnson')
-  const [email, setEmail] = useState('alex@example.com')
+  // Profile — loaded from the real account
+  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [profileSaved, setProfileSaved] = useState(false)
+  const [profileError, setProfileError] = useState('')
   // Password
   const [current, setCurrent] = useState('')
   const [newPw, setNewPw] = useState('')
@@ -131,7 +134,28 @@ function AccountPage({ onBack }: { onBack: () => void }) {
   const [pwSaved, setPwSaved] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
 
-  const saveProfile = () => { setProfileSaved(true); setTimeout(() => setProfileSaved(false), 2500) }
+  useEffect(() => {
+    authAPI.getProfile()
+      .then((p: any) => {
+        setName(p?.name || '')
+        setUsername(p?.username || '')
+        setEmail(p?.email || '')
+      })
+      .catch(err => console.error('Failed to load profile:', err))
+  }, [])
+
+  const saveProfile = async () => {
+    setProfileError('')
+    try {
+      const updated: any = await authAPI.updateProfile({ name, username })
+      setName(updated?.name ?? name)
+      setUsername(updated?.username ?? '')
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2500)
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Could not save profile')
+    }
+  }
   const savePassword = () => {
     if (!current || !newPw || newPw !== confirm) return
     setPwSaved(true); setCurrent(''); setNewPw(''); setConfirm('')
@@ -159,9 +183,27 @@ function AccountPage({ onBack }: { onBack: () => void }) {
             <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>EMAIL</label>
-            <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle} />
+            <label style={labelStyle}>USERNAME</label>
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '15px' }}>@</span>
+              <input
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                placeholder="pick a username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                style={{ ...inputStyle, paddingLeft: '30px' }}
+              />
+            </div>
+            <p style={{ fontSize: '11px', color: '#94a3b8', margin: '5px 0 0' }}>3–20 characters · letters, numbers, _ or .</p>
           </div>
+          <div>
+            <label style={labelStyle}>EMAIL</label>
+            <input value={email} readOnly style={{ ...inputStyle, color: '#94a3b8', cursor: 'not-allowed' }} />
+          </div>
+          {profileError && (
+            <p style={{ fontSize: '13px', color: '#ef4444', margin: 0 }}>{profileError}</p>
+          )}
           <SaveButton onClick={saveProfile} saved={profileSaved} />
         </div>
 

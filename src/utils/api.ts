@@ -81,6 +81,12 @@ export const authAPI = {
     }),
 
   getProfile: () => apiRequest('/auth/profile'),
+
+  updateProfile: (data: { name?: string; username?: string }) =>
+    apiRequest('/auth/profile', {
+      method: 'PUT',
+      body: data,
+    }),
 }
 
 // Recipe endpoints

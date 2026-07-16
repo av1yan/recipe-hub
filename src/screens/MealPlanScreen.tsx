@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Trash2 } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { mealPlanAPI, recipeAPI } from '../utils/api'
@@ -34,6 +34,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<string>(() => DAY_NAMES[(new Date().getDay() + 6) % 7])
   const [pickerFor, setPickerFor] = useState<string | null>(null) // meal-type key whose inline picker is open
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -62,6 +64,22 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       setCurrentPlanId(plan.id)
     } catch (error) {
       console.error('Failed to create meal plan:', error)
+    }
+  }
+
+  async function deleteWeek() {
+    if (!currentPlanId) return
+    setDeleting(true)
+    try {
+      await mealPlanAPI.delete(currentPlanId)
+      setConfirmDelete(false)
+      setPickerFor(null)
+      setCurrentPlanId(null)
+      await loadData()
+    } catch (error) {
+      console.error('Failed to delete meal plan:', error)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -125,9 +143,14 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       <header style={{ padding: '16px 16px 14px', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
-          <button onClick={createNewMealPlan} aria-label="New meal plan" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fdeeeb', color: '#f26d5b', border: '1.5px solid #f7d2ca', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Plus size={17} />
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setConfirmDelete(v => !v)} aria-label="Delete week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fff', color: '#94a3b8', border: '1.5px solid #e9edf2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Trash2 size={16} />
+            </button>
+            <button onClick={createNewMealPlan} aria-label="New meal plan" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fdeeeb', color: '#f26d5b', border: '1.5px solid #f7d2ca', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Plus size={17} />
+            </button>
+          </div>
         </div>
 
         {/* Day selector */}
@@ -153,6 +176,21 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       </header>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px', background: '#f7f8f5' }}>
+        {confirmDelete && (
+          <div style={{ marginBottom: '18px', background: '#fff', border: '1.5px solid #fecdca', borderRadius: '14px', padding: '14px' }}>
+            <p style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: '0 0 4px' }}>Delete this week's plan?</p>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 12px', lineHeight: 1.5 }}>This removes the week and any meals planned in it. It can't be undone.</p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setConfirmDelete(false)} style={{ flex: 1, padding: '11px', borderRadius: '10px', background: '#f1f5f9', color: '#64748b', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={deleteWeek} disabled={deleting} style={{ flex: 1, padding: '11px', borderRadius: '10px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: deleting ? 0.6 : 1 }}>
+                {deleting ? 'Deleting…' : 'Delete week'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {MEALS.map(m => {
           const meals = getMeals(currentPlan, selectedDay, m.key)
           const pickerOpen = pickerFor === m.key
