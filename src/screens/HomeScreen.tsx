@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Plus, Calendar, ShoppingCart, Settings } from 'lucide-react'
+import { Search, Settings } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
@@ -106,52 +106,6 @@ export default function HomeScreen({ onNavigate }: Props) {
             placeholder="Search recipes..."
             style={{ flex: 1, border: 'none', background: 'transparent', fontSize: '14px', color: '#1e293b', outline: 'none', fontFamily: 'inherit' }}
           />
-        </div>
-
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-          <button
-            onClick={() => onNavigate('add-recipe')}
-            style={{
-              flex: 1, padding: '11px 8px',
-              background: '#6ba356', color: '#fff',
-              border: 'none', borderRadius: '10px',
-              fontSize: '12px', fontWeight: '700',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            <Plus size={14} />
-            Add Recipe
-          </button>
-          <button
-            onClick={() => onNavigate('meal-plan')}
-            style={{
-              flex: 1, padding: '11px 8px',
-              background: '#f0f7ed', color: '#6ba356',
-              border: '1.5px solid #c8e0bc', borderRadius: '10px',
-              fontSize: '12px', fontWeight: '700',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            <Calendar size={14} />
-            Meal Plan
-          </button>
-          <button
-            onClick={() => onNavigate('grocery')}
-            style={{
-              flex: 1, padding: '11px 8px',
-              background: '#fff', color: '#64748b',
-              border: '1.5px solid #e2e8f0', borderRadius: '10px',
-              fontSize: '12px', fontWeight: '700',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            <ShoppingCart size={14} />
-            List
-          </button>
         </div>
       </div>
 
