@@ -39,19 +39,19 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
         </p>
       </div>
 
-      {/* Diet Options Grid */}
+      {/* Diet Options - Wrapping Pills */}
       <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
           {dietOptions.map(diet => (
             <button
               key={diet.id}
               onClick={() => toggleDiet(diet.id)}
               style={{
-                padding: '16px 12px',
+                padding: '10px 16px',
                 background: selectedDiet.includes(diet.id) ? diet.color : '#f0fffe',
                 color: selectedDiet.includes(diet.id) ? '#fff' : '#1e293b',
                 border: selectedDiet.includes(diet.id) ? 'none' : '2px solid #d4f0ed',
-                borderRadius: '12px',
+                borderRadius: '999px',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
