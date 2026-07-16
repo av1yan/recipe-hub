@@ -18,7 +18,7 @@ export function getDietPrefs(): string[] {
   }
 }
 
-const DIET_OPTIONS = [
+export const DIET_OPTIONS = [
   { id: 'vegan', label: 'Vegan' },
   { id: 'vegetarian', label: 'Vegetarian' },
   { id: 'gluten-free', label: 'Gluten-Free' },

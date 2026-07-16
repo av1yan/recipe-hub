@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
+import { DIET_OPTIONS } from './DietPreferencesScreen'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -17,8 +18,13 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
   const [cookTime, setCookTime] = useState('')
   const [servings, setServings] = useState('2')
   const [calories, setCalories] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const toggleTag = (id: string) => {
+    setTags(prev => (prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,6 +41,7 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
         cookTime: parseInt(cookTime),
         servings: parseInt(servings),
         calories: calories ? parseInt(calories) : null,
+        tags,
         ingredients: [],
         instructions: [],
       })
@@ -121,6 +128,36 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
               <label>Calories (optional)</label>
               <input type="number" className="input" placeholder="500" value={calories} onChange={(e) => setCalories(e.target.value)} />
             </div>
+          </div>
+
+          <div className="field">
+            <label>Dietary Tags <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
+              {DIET_OPTIONS.map(opt => {
+                const active = tags.includes(opt.id)
+                return (
+                  <button
+                    type="button"
+                    key={opt.id}
+                    onClick={() => toggleTag(opt.id)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '5px',
+                      padding: '8px 14px',
+                      background: active ? '#6ba356' : '#fff',
+                      color: active ? '#fff' : '#334155',
+                      border: active ? '2px solid #6ba356' : '2px solid #e2e8f0',
+                      borderRadius: '999px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                    }}
+                  >
+                    {active && <Check size={13} />}
+                    {opt.label}
+                  </button>
+                )
+              })}
+            </div>
+            <p style={{ fontSize: '12px', color: '#94a3b8', margin: '8px 0 0' }}>
+              These let the recipe show up when filtering by diet in Browse.
+            </p>
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
