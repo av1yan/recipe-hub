@@ -634,23 +634,22 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
           </div>
         </div>
 
-        <div style={{ marginBottom: '28px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <SectionHeader label="CONNECT" />
           <div style={{ borderRadius: '14px', overflow: 'hidden', margin: '0 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9' }}>
             <Row icon={<UserPlus size={18} color="#6ba356" />} label="Invite friends" onPress={() => setSubPage('invite')} />
           </div>
         </div>
 
+        <div style={{ margin: '0 16px 24px' }}>
+          <button onClick={onSignOut} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)' }}>
+            <LogOut size={17} />
+            Log out
+          </button>
+        </div>
+
         <p style={{ textAlign: 'center', fontSize: '13px', color: '#cbd5e1', marginBottom: '24px' }}>Version 1.0.0</p>
 
-      </div>
-
-      {/* Pinned footer */}
-      <div style={{ flexShrink: 0, padding: '12px 16px 16px', background: '#f8fafc', borderTop: '1px solid #eef2f6' }}>
-        <button onClick={onSignOut} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)' }}>
-          <LogOut size={17} />
-          Log out
-        </button>
       </div>
     </div>
   )
