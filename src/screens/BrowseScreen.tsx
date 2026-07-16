@@ -5,7 +5,7 @@ import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
 
 interface Props {
-  onNavigate: (screen: Screen) => void
+  onNavigate: (screen: Screen, data?: any) => void
 }
 
 export default function BrowseScreen({ onNavigate }: Props) {
