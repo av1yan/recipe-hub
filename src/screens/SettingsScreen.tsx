@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   ChevronRight, ChevronLeft, User, Crown,
-  SlidersHorizontal, Smartphone, HelpCircle, Zap, BookOpen,
+  SlidersHorizontal, HelpCircle, Zap, BookOpen,
   Monitor, UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf,
 } from 'lucide-react'
 import type { Screen } from '../types'
@@ -46,7 +46,7 @@ function selectElementText(el: HTMLElement | null) {
 
 type SubPage =
   | 'account' | 'subscription'
-  | 'preferences' | 'app-icon' | 'help' | 'shortcut'
+  | 'preferences' | 'help' | 'shortcut'
   | 'import-guides' | 'desktop' | 'invite' | null
 
 interface Props {
@@ -541,7 +541,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} />
   if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} onNavigate={onNavigate} />
-  if (subPage === 'app-icon' || subPage === 'shortcut') return <AppIconPage onBack={() => setSubPage(null)} />
+  if (subPage === 'shortcut') return <AppIconPage onBack={() => setSubPage(null)} />
   if (subPage === 'help') return <HelpPage onBack={() => setSubPage(null)} />
   if (subPage === 'import-guides') return <ImportGuides onBack={() => setSubPage(null)} />
   if (subPage === 'desktop') return <DesktopPage onBack={() => setSubPage(null)} />
@@ -568,7 +568,6 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             <Divider />
             <Row icon={<SlidersHorizontal size={18} color="#64748b" />} label="Preferences" onPress={() => setSubPage('preferences')} />
             <Divider />
-            <Row icon={<Smartphone size={18} color="#64748b" />} label="App icon" onPress={() => setSubPage('app-icon')} />
             <Divider />
             <Row icon={<HelpCircle size={18} color="#64748b" />} label="Help" onPress={() => setSubPage('help')} />
           </div>
