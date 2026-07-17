@@ -32,6 +32,8 @@ export default function App() {
   // Where a recipe was opened from, so its back button returns there rather
   // than always dumping you on Browse.
   const [recipeOrigin, setRecipeOrigin] = useState<Screen>('browse')
+  // Where the Add Recipe form was opened from, so its back button returns there.
+  const [addRecipeOrigin, setAddRecipeOrigin] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
 
   // Check for existing auth token on load
@@ -95,6 +97,8 @@ export default function App() {
     // form any other way must start blank.
     if (nextScreen === 'add-recipe') {
       setDraft(data?.draft ?? null)
+      // Remember where we came from; 'add-recipe' -> 'add-recipe' would strand you.
+      if (screen !== 'add-recipe') setAddRecipeOrigin(screen)
     }
     if (nextScreen === 'cookbook' && data?.cookbookId) {
       setCookbookId(data.cookbookId)
@@ -161,7 +165,7 @@ export default function App() {
       case 'recipe':
         return <RecipeDetailScreen recipe={currentRecipe} backTo={recipeOrigin} onNavigate={handleNavigation} />
       case 'add-recipe':
-        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} />
+        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} />
       case 'import-web':
         return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} />
       case 'import-text':

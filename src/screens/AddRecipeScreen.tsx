@@ -11,6 +11,17 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
   /** A parsed import to review, or null when starting from scratch. */
   draft?: any
+  /** Where the back button goes — wherever this form was opened from. */
+  backTo?: Screen
+}
+
+/** A small section heading, so the long form reads as groups not one list. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.05em', textTransform: 'uppercase', margin: '8px 0 -4px' }}>
+      {children}
+    </p>
+  )
 }
 
 /** Draft numbers arrive as numbers or null; the form's inputs want strings. */
@@ -64,7 +75,7 @@ const stepBadge: React.CSSProperties = {
   fontSize: '13px', fontWeight: '700', marginTop: '5px',
 }
 
-export default function AddRecipeScreen({ onNavigate, draft }: Props) {
+export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home' }: Props) {
   // An import arrives here as a draft to be checked over. Seeding useState
   // rather than assigning in an effect means the fields are already filled on
   // first paint, and stay editable like any other.
@@ -203,10 +214,10 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
   return (
     <div className="screen" style={{ position: 'relative' }}>
       <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button onClick={() => onNavigate('home')} className="btn btn-icon" style={{ background: 'none' }}>
+        <button onClick={() => onNavigate(backTo)} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
         </button>
-        <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>Add Recipe</h2>
+        <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>{draft ? 'Review recipe' : 'Add Recipe'}</h2>
       </header>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
@@ -239,49 +250,28 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form id="addRecipeForm" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <SectionLabel>Basics</SectionLabel>
           <div className="field">
             <label>Recipe Name</label>
             <input type="text" className="input" placeholder="e.g., Pasta Carbonara" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
 
-          <div className="field">
-            <label>Cuisine</label>
-            <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
-              {CUISINES.map(c => <option key={c}>{c}</option>)}
-            </select>
-          </div>
-
-          <div className="field">
-            <label>Meal Type</label>
-            <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
-              {MEAL_TYPES.map(m => (
-                <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="field">
-            <label>Cookbook</label>
-            <select
-              className="input"
-              value={cookbookId}
-              onChange={(e) => setCookbookId(e.target.value)}
-              style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}
-            >
-              <option value="">Don't file it anywhere</option>
-              {cookbooks.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              <option value={NEW_COOKBOOK}>+ New cookbook…</option>
-            </select>
-            {cookbookId === NEW_COOKBOOK && (
-              <input
-                value={newCookbookName}
-                onChange={(e) => setNewCookbookName(e.target.value)}
-                placeholder="Name the cookbook, e.g. Weeknights"
-                className="input"
-                style={{ marginTop: '8px' }}
-              />
-            )}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="field">
+              <label>Cuisine</label>
+              <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
+                {CUISINES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>Meal Type</label>
+              <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
+                {MEAL_TYPES.map(m => (
+                  <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="field">
@@ -293,6 +283,7 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
             </select>
           </div>
 
+          <SectionLabel>Time &amp; servings</SectionLabel>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="field">
               <label>Prep Time (min)</label>
@@ -315,6 +306,7 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
             </div>
           </div>
 
+          <SectionLabel>Photo</SectionLabel>
           <div className="field">
             <label>Photo <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
             <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: 'none' }} />
@@ -360,6 +352,7 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
           </div>
 
           {/* Ingredients */}
+          <SectionLabel>Ingredients</SectionLabel>
           <div className="field">
             <label>Ingredients</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
@@ -380,6 +373,7 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
           </div>
 
           {/* Instructions */}
+          <SectionLabel>Instructions</SectionLabel>
           <div className="field">
             <label>Instructions</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '6px' }}>
@@ -402,6 +396,7 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
           </div>
 
           {/* Dietary Tags */}
+          <SectionLabel>Dietary tags</SectionLabel>
           <div className="field">
             <label>Dietary Tags <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
@@ -432,13 +427,45 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
             </p>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Creating...' : 'Create Recipe'}
-          </button>
+          <SectionLabel>Save to a cookbook <span style={{ textTransform: 'none', fontWeight: 400, color: '#cbd5e1' }}>(optional)</span></SectionLabel>
+          <div className="field">
+            <select
+              className="input"
+              value={cookbookId}
+              onChange={(e) => setCookbookId(e.target.value)}
+              style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}
+            >
+              <option value="">Don't file it anywhere</option>
+              {cookbooks.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <option value={NEW_COOKBOOK}>+ New cookbook…</option>
+            </select>
+            {cookbookId === NEW_COOKBOOK && (
+              <input
+                value={newCookbookName}
+                onChange={(e) => setNewCookbookName(e.target.value)}
+                placeholder="Name the cookbook, e.g. Weeknights"
+                className="input"
+                style={{ marginTop: '8px' }}
+              />
+            )}
+          </div>
         </form>
       </div>
 
-      {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
+      {/* Save is pinned above the nav so it's always in reach, not buried at the
+          bottom of a long scroll. */}
+      <div style={{ flexShrink: 0, padding: '10px 16px', borderTop: '1px solid #f1f5f9', background: '#fff' }}>
+        <button
+          type="submit"
+          form="addRecipeForm"
+          disabled={loading}
+          style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: loading ? '#a7c99a' : '#6ba356', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+        >
+          {loading ? 'Saving…' : draft ? 'Save recipe' : 'Create recipe'}
+        </button>
+      </div>
+
+      {toast && <Toast message={toast.message} tone={toast.tone} bottom="150px" />}
       <BottomNavigation active="add" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
