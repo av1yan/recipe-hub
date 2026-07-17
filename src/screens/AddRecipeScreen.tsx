@@ -180,6 +180,29 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
           </div>
         )}
 
+        {/* An import is a guess. Say which parts the parser was unsure of, so a
+            shaky read doesn't look as confident as a clean one. */}
+        {draft?.warnings?.length > 0 && (
+          <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
+            <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#92400e' }}>
+              Check this import before saving
+            </p>
+            <ul style={{ margin: '6px 0 0', paddingLeft: '18px' }}>
+              {draft.warnings.map((w: string) => (
+                <li key={w} style={{ fontSize: '12.5px', color: '#b45309', lineHeight: 1.5 }}>{w}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {draft && !draft.warnings?.length && (
+          <div style={{ background: '#f0f7ed', border: '1px solid #c8e0bc', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
+            <p style={{ margin: 0, fontSize: '12.5px', color: '#4d7a3c', lineHeight: 1.5 }}>
+              Imported — look it over and change anything that isn’t right.
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="field">
             <label>Recipe Name</label>
