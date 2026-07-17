@@ -83,9 +83,11 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
         </div>
 
         {/* The panel fills the screen, so bring the nav with it -- otherwise
-            the only way off was the X. The "+" dismisses rather than stacking
-            another copy of this panel. */}
-        <BottomNavigation active="" onNavigate={(s) => go(s as Screen)} onAdd={onClose} />
+            the only way off was the X. The "+" is inert here: it's the button
+            that opened this panel, so tapping it again should keep you put
+            rather than snap the panel shut (which read as a jolt). Close is
+            the header X, or tap another tab. */}
+        <BottomNavigation active="" onNavigate={(s) => go(s as Screen)} onAdd={() => {}} />
       </div>
 
       <style>{`
