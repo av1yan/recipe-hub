@@ -1,6 +1,38 @@
 // Photos are stored inline on the recipe (imageUrl) rather than in object
 // storage, so they must be downscaled and compressed hard before upload.
 
+/**
+ * Rewrites an Unsplash photo URL to the box it will actually be drawn into.
+ *
+ * Stored URLs are wide (`?w=800`), so a 64px tile was downloading a whole
+ * landscape and letting CSS shrink it. Unsplash serves through imgix, so we
+ * can ask for the target aspect directly and get a sharper, far smaller image.
+ *
+ * Cropping is left at imgix's centre default on purpose: `crop=entropy` was
+ * measured side by side and framed plated dishes worse, zooming out to include
+ * the table around them.
+ *
+ * Any other source — uploaded data URLs, arbitrary hosts — is passed through
+ * untouched, so callers can use this for every recipe image.
+ */
+export function recipeImageSrc(url: string, boxW: number, boxH: number): string {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    return url
+  }
+  if (parsed.hostname !== 'images.unsplash.com') return url
+
+  // Retina screens need the extra pixels; beyond 2x the bytes stop paying off.
+  const dpr = Math.min(2, Math.max(1, Math.round(globalThis.devicePixelRatio || 1)))
+  parsed.searchParams.set('w', String(Math.round(boxW * dpr)))
+  parsed.searchParams.set('h', String(Math.round(boxH * dpr)))
+  parsed.searchParams.set('fit', 'crop')
+  parsed.searchParams.set('q', '80')
+  return parsed.toString()
+}
+
 async function loadImage(file: File): Promise<ImageBitmap | HTMLImageElement> {
   if (typeof createImageBitmap === 'function') {
     try {

@@ -3,6 +3,7 @@ import { Search, Settings, Plus, CalendarDays } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI } from '../utils/api'
+import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
 import { DAY_NAMES, MEALS, sameWeek, getMeals } from './MealPlanScreen'
 
@@ -126,9 +127,9 @@ export default function HomeScreen({ onNavigate }: Props) {
                   onClick={() => onNavigate('recipe', { recipe: meal })}
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
                 >
-                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: cfg.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0, overflow: 'hidden' }}>
+                  <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: cfg.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0, overflow: 'hidden' }}>
                     {meal.imageUrl
-                      ? <img src={meal.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                      ? <img src={recipeImageSrc(meal.imageUrl, 64, 64)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                       : cfg.emoji}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -188,7 +189,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                       border: '1px solid ' + RECIPE_COLORS[i % RECIPE_COLORS.length] + '22',
                     }}>
                       {recipe.imageUrl
-                        ? <img src={recipe.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                        ? <img src={recipeImageSrc(recipe.imageUrl, 110, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                         : '🍽️'}
                     </div>
                     <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
