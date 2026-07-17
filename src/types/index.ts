@@ -17,6 +17,7 @@ export type Screen =
   | 'meal-plan'
   | 'grocery'
   | 'cookbooks'
+  | 'cookbook'
   | 'cooking-mode'
   | 'settings'
 

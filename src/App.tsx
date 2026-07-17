@@ -5,6 +5,7 @@ import SignInScreen from './screens/SignInScreen'
 import OnboardingScreen from './screens/OnboardingScreen'
 import ImportRecipeScreen from './screens/ImportRecipeScreen'
 import PasswordResetScreen from './screens/PasswordResetScreen'
+import CookbookDetailScreen from './screens/CookbookDetailScreen'
 import DietPreferencesScreen from './screens/DietPreferencesScreen'
 import HomeScreen from './screens/HomeScreen'
 import BrowseScreen from './screens/BrowseScreen'
@@ -26,6 +27,8 @@ export default function App() {
   const [draft, setDraft] = useState<any>(null)
   // The token from an emailed reset link.
   const [resetToken, setResetToken] = useState<string | null>(null)
+  // Which cookbook is open.
+  const [cookbookId, setCookbookId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Check for existing auth token on load
@@ -87,6 +90,9 @@ export default function App() {
     // form any other way must start blank.
     if (nextScreen === 'add-recipe') {
       setDraft(data?.draft ?? null)
+    }
+    if (nextScreen === 'cookbook' && data?.cookbookId) {
+      setCookbookId(data.cookbookId)
     }
     setScreen(nextScreen)
   }
@@ -163,6 +169,8 @@ export default function App() {
         return <MealPlanScreen onNavigate={handleNavigation} />
       case 'grocery':
         return <GroceryListScreen onNavigate={handleNavigation} />
+      case 'cookbook':
+        return <CookbookDetailScreen cookbookId={cookbookId} onNavigate={handleNavigation} />
       case 'cookbooks':
         return <CookbooksScreen onNavigate={handleNavigation} />
       case 'cooking-mode':

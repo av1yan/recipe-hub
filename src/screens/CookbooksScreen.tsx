@@ -4,7 +4,7 @@ import type { Screen, Cookbook } from '../types'
 import { cookbookAPI } from '../utils/api'
 
 interface Props {
-  onNavigate: (screen: Screen) => void
+  onNavigate: (screen: Screen, data?: any) => void
 }
 
 export default function CookbooksScreen({ onNavigate }: Props) {
@@ -198,7 +198,10 @@ export default function CookbooksScreen({ onNavigate }: Props) {
                     <Trash2 size={14} color="#64748b" />
                   </button>
                 </div>
-                <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div
+                  onClick={() => confirmId !== cookbook.id && onNavigate('cookbook', { cookbookId: cookbook.id })}
+                  style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+                >
                   <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>
                     {cookbook.name}
                   </div>
@@ -212,7 +215,7 @@ export default function CookbooksScreen({ onNavigate }: Props) {
                   </div>
 
                   {confirmId === cookbook.id && (
-                    <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                    <div onClick={e => e.stopPropagation()} style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
                       <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 8px', lineHeight: 1.45 }}>
                         Delete this cookbook? The recipes in it stay.
                       </p>

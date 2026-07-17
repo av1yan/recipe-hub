@@ -226,7 +226,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             {cookbooks.length > 0 ? (
               <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', marginLeft: '-2px', paddingLeft: '2px' }}>
                 {cookbooks.slice(0, 6).map((book: any, i: number) => (
-                  <div key={book.id} onClick={() => onNavigate('cookbooks')} style={{ minWidth: '110px', cursor: 'pointer' }}>
+                  <div key={book.id} onClick={() => onNavigate('cookbook', { cookbookId: book.id })} style={{ minWidth: '110px', cursor: 'pointer' }}>
                     <div style={{
                       width: '110px', height: '100px', borderRadius: '14px',
                       background: COOKBOOK_COLORS[i % COOKBOOK_COLORS.length],
