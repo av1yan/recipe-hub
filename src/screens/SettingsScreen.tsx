@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   ChevronRight, ChevronLeft, User, Crown,
-  Globe, SlidersHorizontal, Smartphone, HelpCircle, Zap, BookOpen,
+  SlidersHorizontal, Smartphone, HelpCircle, Zap, BookOpen,
   Monitor, UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf,
 } from 'lucide-react'
 import type { Screen } from '../types'
@@ -45,7 +45,7 @@ function selectElementText(el: HTMLElement | null) {
 }
 
 type SubPage =
-  | 'account' | 'subscription' | 'language'
+  | 'account' | 'subscription'
   | 'preferences' | 'app-icon' | 'help' | 'shortcut'
   | 'import-guides' | 'desktop' | 'invite' | null
 
@@ -53,19 +53,6 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
   onSignOut: () => void
 }
-
-const LANGUAGES = [
-  { code: 'en', label: 'English', native: 'English' },
-  { code: 'es', label: 'Spanish', native: 'Español' },
-  { code: 'fr', label: 'French', native: 'Français' },
-  { code: 'de', label: 'German', native: 'Deutsch' },
-  { code: 'it', label: 'Italian', native: 'Italiano' },
-  { code: 'pt', label: 'Portuguese', native: 'Português' },
-  { code: 'ja', label: 'Japanese', native: '日本語' },
-  { code: 'zh', label: 'Chinese', native: '中文' },
-  { code: 'ko', label: 'Korean', native: '한국어' },
-  { code: 'ar', label: 'Arabic', native: 'العربية' },
-]
 
 const FAQ = [
   { q: 'How do I add a recipe?', a: 'Tap "Add Recipe" on the home screen. Fill in the recipe details, ingredients, and step-by-step instructions.' },
@@ -278,38 +265,6 @@ function Subscription({ onBack }: { onBack: () => void }) {
   )
 }
 
-function LanguagePage({ selected, onSelect, onBack }: { selected: string; onSelect: (code: string) => void; onBack: () => void }) {
-  const { toast, show } = useToast()
-
-  const pick = (lang: typeof LANGUAGES[number]) => {
-    if (lang.code === selected) return
-    onSelect(lang.code)
-    show(`Language set to ${lang.label}`)
-  }
-
-  return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc', position: 'relative' }}>
-      <SubHeader title="Language" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-        <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
-          {LANGUAGES.map((lang, i) => (
-            <div key={lang.code}>
-              <button onClick={() => pick(lang)} style={{ width: '100%', display: 'flex', alignItems: 'center', padding: '14px 16px', background: selected === lang.code ? '#f0f7ed' : '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                <span style={{ flex: 1, fontSize: '15px', color: '#1e293b', fontWeight: selected === lang.code ? '600' : '400' }}>
-                  {lang.native}
-                  <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '400', marginLeft: '8px' }}>{lang.label}</span>
-                </span>
-                {selected === lang.code && <Check size={18} color="#6ba356" />}
-              </button>
-              {i < LANGUAGES.length - 1 && <Divider />}
-            </div>
-          ))}
-        </div>
-      </div>
-      {toast && <Toast message={toast.message} tone={toast.tone} />}
-    </div>
-  )
-}
 
 function Preferences({ onBack, onNavigate }: { onBack: () => void; onNavigate: (screen: Screen) => void }) {
   const [units, setUnits] = useState<'imperial' | 'metric'>('imperial')
@@ -582,12 +537,9 @@ function InvitePage({ onBack }: { onBack: () => void }) {
 
 export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   const [subPage, setSubPage] = useState<SubPage>(null)
-  const [language, setLanguage] = useState(() => localStorage.getItem('reciphub_language') || 'en')
-  const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0]
 
   if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} />
   if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
-  if (subPage === 'language') return <LanguagePage selected={language} onSelect={(code) => { setLanguage(code); localStorage.setItem('reciphub_language', code) }} onBack={() => setSubPage(null)} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} onNavigate={onNavigate} />
   if (subPage === 'app-icon' || subPage === 'shortcut') return <AppIconPage onBack={() => setSubPage(null)} />
   if (subPage === 'help') return <HelpPage onBack={() => setSubPage(null)} />
@@ -613,7 +565,6 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             <Divider />
             <Row icon={<Crown size={18} color="#f4b860" />} label="My subscription" value="Free" onPress={() => setSubPage('subscription')} />
             <Divider />
-            <Row icon={<Globe size={18} color="#64748b" />} label="Language" value={currentLang.label} onPress={() => setSubPage('language')} />
             <Divider />
             <Row icon={<SlidersHorizontal size={18} color="#64748b" />} label="Preferences" onPress={() => setSubPage('preferences')} />
             <Divider />
