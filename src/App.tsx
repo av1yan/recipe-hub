@@ -4,6 +4,7 @@ import SplashScreen from './screens/SplashScreen'
 import SignInScreen from './screens/SignInScreen'
 import OnboardingScreen from './screens/OnboardingScreen'
 import ImportRecipeScreen from './screens/ImportRecipeScreen'
+import PasswordResetScreen from './screens/PasswordResetScreen'
 import DietPreferencesScreen from './screens/DietPreferencesScreen'
 import HomeScreen from './screens/HomeScreen'
 import BrowseScreen from './screens/BrowseScreen'
@@ -23,6 +24,8 @@ export default function App() {
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null)
   // A parsed import waiting to be reviewed in the Add Recipe form.
   const [draft, setDraft] = useState<any>(null)
+  // The token from an emailed reset link.
+  const [resetToken, setResetToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Check for existing auth token on load
@@ -36,6 +39,24 @@ export default function App() {
       if (oauthToken) {
         setAuthToken(oauthToken)
         history.replaceState(null, '', window.location.pathname)
+      }
+
+      // A reset link lands here. It must win over any existing session --
+      // whoever opened it is proving the inbox, not the session.
+      //
+      // The token is parked in sessionStorage before the URL is cleaned,
+      // because stripping the hash destroys the only copy: anything that runs
+      // this again (StrictMode does, twice, in development) would find nothing
+      // and fall through to sign-in. The auth token above survives that only
+      // because setAuthToken persists it first.
+      const reset = hash.get('reset') || sessionStorage.getItem('pendingReset')
+      if (reset) {
+        sessionStorage.setItem('pendingReset', reset)
+        setResetToken(reset)
+        history.replaceState(null, '', window.location.pathname)
+        setScreen('reset-password')
+        setLoading(false)
+        return
       }
 
       const token = getAuthToken()
@@ -114,6 +135,10 @@ export default function App() {
         return <SplashScreen onNavigate={handleNavigation} />
       case 'signin':
         return <SignInScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onNavigate={handleNavigation} />
+      case 'forgot-password':
+        return <PasswordResetScreen mode="request" onNavigate={handleNavigation} />
+      case 'reset-password':
+        return <PasswordResetScreen mode="reset" token={resetToken ?? undefined} onNavigate={handleNavigation} />
       case 'onboarding':
         return <OnboardingScreen onNavigate={handleNavigation} />
       case 'diet-preferences':

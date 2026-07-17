@@ -9,7 +9,7 @@ interface Props {
   onNavigate: (screen: Screen) => void
 }
 
-export default function SignInScreen({ onSignIn, onSignUp }: Props) {
+export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
@@ -17,12 +17,17 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [providers, setProviders] = useState({ google: false, apple: false })
+  // No mail server means no reset link, so don't offer one.
+  const [resetAvailable, setResetAvailable] = useState(false)
 
   useEffect(() => {
     // Unreachable or unconfigured just means no buttons, which is the honest
     // default -- never block the password form on this.
     authAPI.oauthProviders()
       .then((p: any) => setProviders({ google: Boolean(p?.google), apple: Boolean(p?.apple) }))
+      .catch(() => {})
+    authAPI.passwordResetAvailable()
+      .then((r: any) => setResetAvailable(Boolean(r?.available)))
       .catch(() => {})
   }, [])
 
@@ -65,42 +70,6 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
         <p style={{ fontSize: '13px', color: '#64748b', margin: 0, wordBreak: 'break-word' }}>
           {isSignUp ? 'Join recipHub to start cooking smarter' : 'Sign in to your recipHub'}
         </p>
-      </div>
-
-      {/* Pill Tab Buttons */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
-        <button
-          onClick={() => setIsSignUp(false)}
-          style={{
-            padding: '10px 24px',
-            background: !isSignUp ? '#f1f5f9' : '#fff',
-            border: `1px solid ${!isSignUp ? '#e2e8f0' : '#e2e8f0'}`,
-            borderRadius: '20px',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: !isSignUp ? '#1e293b' : '#94a3b8',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          Sign In
-        </button>
-        <button
-          onClick={() => setIsSignUp(true)}
-          style={{
-            padding: '10px 24px',
-            background: isSignUp ? '#f1f5f9' : '#fff',
-            border: `1px solid ${isSignUp ? '#e2e8f0' : '#e2e8f0'}`,
-            borderRadius: '20px',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: isSignUp ? '#1e293b' : '#94a3b8',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          Sign Up
-        </button>
       </div>
 
       {error && (
@@ -190,10 +159,11 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
           </div>
         </div>
 
-        {!isSignUp && (
+        {!isSignUp && resetAvailable && (
           <div style={{ textAlign: 'right' }}>
             <button
               type="button"
+              onClick={() => onNavigate('forgot-password')}
               style={{
                 background: 'none',
                 border: 'none',
@@ -230,6 +200,15 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
           {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
         </button>
       </form>
+
+      <button
+        type="button"
+        onClick={() => { setIsSignUp(!isSignUp); setError('') }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#64748b', padding: '4px 0 18px', fontFamily: 'inherit', width: '100%' }}
+      >
+        {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+        <strong style={{ color: '#6ba356' }}>{isSignUp ? 'Sign in' : 'Sign up'}</strong>
+      </button>
 
       {/* A provider with no credentials configured would be a button that
           cannot work, so only offer the ones the API reports as ready. */}

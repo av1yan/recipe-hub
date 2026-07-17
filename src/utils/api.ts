@@ -99,6 +99,15 @@ export const authAPI = {
       requiresAuth: false,
     }),
 
+  forgotPassword: (email: string) =>
+    apiRequest('/auth/forgot-password', { method: 'POST', body: { email }, requiresAuth: false }),
+
+  resetPassword: (token: string, password: string) =>
+    apiRequest('/auth/reset-password', { method: 'POST', body: { token, password }, requiresAuth: false }),
+
+  /** Whether the server can actually send reset links. */
+  passwordResetAvailable: () => apiRequest('/auth/password-reset/available', { requiresAuth: false }),
+
   /** Which OAuth providers the API has credentials for, e.g. { google: true }. */
   oauthProviders: () => apiRequest('/auth/oauth/providers', { requiresAuth: false }),
 
