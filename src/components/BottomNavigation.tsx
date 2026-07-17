@@ -6,6 +6,9 @@ import type { Screen } from '../types'
 interface Props {
   active: string
   onNavigate: (tab: string) => void
+  /** Override the "+" — e.g. dismiss when the add panel is already open, so it
+      doesn't stack a second copy of itself. */
+  onAdd?: () => void
 }
 
 const tabs = [
@@ -16,13 +19,16 @@ const tabs = [
   { id: 'grocery', icon: ShoppingCart, label: 'Groceries', screen: 'grocery' },
 ]
 
-export function BottomNavigation({ active, onNavigate }: Props) {
+export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
   // The "+" now offers every way in, not just the blank form.
   const [sheetOpen, setSheetOpen] = useState(false)
+  const handleAdd = onAdd ?? (() => setSheetOpen(true))
 
   return (
     <>
-    <AddRecipeSheet open={sheetOpen} onClose={() => setSheetOpen(false)} onNavigate={onNavigate as (s: Screen, d?: any) => void} />
+    {/* When an onAdd override is given we're being rendered inside the sheet
+        already, so don't render another one. */}
+    {!onAdd && <AddRecipeSheet open={sheetOpen} onClose={() => setSheetOpen(false)} onNavigate={onNavigate as (s: Screen, d?: any) => void} />}
     <nav style={{
       display: 'flex',
       alignItems: 'center',
@@ -41,7 +47,7 @@ export function BottomNavigation({ active, onNavigate }: Props) {
           return (
             <button
               key={tab.id}
-              onClick={() => setSheetOpen(true)}
+              onClick={handleAdd}
               aria-label="Add a recipe"
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column',

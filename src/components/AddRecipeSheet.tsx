@@ -1,5 +1,6 @@
 import { Image, Type, Link2, PenLine, X } from 'lucide-react'
 import type { Screen } from '../types'
+import { BottomNavigation } from './BottomNavigation'
 
 interface Props {
   open: boolean
@@ -80,6 +81,11 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
             <Tile icon={<PenLine size={19} color={GREEN} />} label="Write from scratch" hint="A blank form" onClick={() => go('add-recipe')} />
           </div>
         </div>
+
+        {/* The panel fills the screen, so bring the nav with it -- otherwise
+            the only way off was the X. The "+" dismisses rather than stacking
+            another copy of this panel. */}
+        <BottomNavigation active="" onNavigate={(s) => go(s as Screen)} onAdd={onClose} />
       </div>
 
       <style>{`
