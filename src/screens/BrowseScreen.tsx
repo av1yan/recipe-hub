@@ -68,6 +68,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const [dietPrefs, setDietPrefs] = useState<string[]>(() => getDietPrefs())
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null)
   const [exploreCat, setExploreCat] = useState<FilterKind | null>(null)
+  const [filterOpen, setFilterOpen] = useState(false)
 
   useEffect(() => {
     loadRecipes()
@@ -140,26 +141,95 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const labelFor = (kind: FilterKind, value: string) =>
     kind === 'tag' ? DIET_LABELS[value] || value : value
 
+  // The popular filters, grouped so the dropdown reads as sections rather than
+  // one long list.
+  const FILTER_GROUPS: { label: string; kind: FilterKind }[] = [
+    { label: 'Dietary', kind: 'tag' },
+    { label: 'Meal', kind: 'mealType' },
+    { label: 'Cuisine', kind: 'cuisine' },
+  ]
+
   const header = (
-    <header style={{ padding: '14px 16px 12px', background: '#fff', flexShrink: 0 }}>
+    <header style={{ padding: '14px 16px 12px', background: '#fff', flexShrink: 0, position: 'relative', zIndex: 30 }}>
       <h1 style={{ fontFamily: SERIF, fontSize: '28px', fontWeight: '400', color: '#1e293b', margin: '0 0 12px' }}>
         Discover
       </h1>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '999px', padding: '11px 16px' }}>
-        <Search size={17} color="#94a3b8" />
-        <input
-          type="text"
-          placeholder="What would you like to cook?"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '15px', color: '#1e293b', fontFamily: 'inherit', minWidth: 0 }}
-        />
-        {q && (
-          <button onClick={() => setSearchTerm('')} aria-label="Clear search" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: '#94a3b8' }}>
-            <X size={16} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '999px', padding: '11px 16px', minWidth: 0 }}>
+          <Search size={17} color="#94a3b8" />
+          <input
+            type="text"
+            placeholder="What would you like to cook?"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '15px', color: '#1e293b', fontFamily: 'inherit', minWidth: 0 }}
+          />
+          {q && (
+            <button onClick={() => setSearchTerm('')} aria-label="Clear search" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: '#94a3b8' }}>
+              <X size={16} />
+            </button>
+          )}
+        </div>
+
+        {/* Filters, merged in here from the old "Popular searches" row. */}
+        {popularChips.length > 0 && (
+          <button
+            onClick={() => setFilterOpen(o => !o)}
+            aria-label="Filters"
+            style={{
+              position: 'relative', flexShrink: 0, width: '46px', height: '46px', borderRadius: '999px',
+              border: '1.5px solid ' + (activeFilter || filterOpen ? '#6ba356' : '#e2e8f0'),
+              background: activeFilter || filterOpen ? '#6ba356' : '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            }}
+          >
+            <SlidersHorizontal size={18} color={activeFilter || filterOpen ? '#fff' : '#64748b'} />
+            {activeFilter && !filterOpen && (
+              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: '#fff', border: '1.5px solid #6ba356' }} />
+            )}
           </button>
         )}
       </div>
+
+      {filterOpen && (
+        <>
+          {/* Tap-away backdrop. */}
+          <div onClick={() => setFilterOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 39 }} />
+          <div style={{ position: 'absolute', top: '100%', right: '16px', marginTop: '6px', width: '250px', maxHeight: '340px', overflowY: 'auto', background: '#fff', border: '1px solid #e8eef0', borderRadius: '14px', boxShadow: '0 8px 30px rgba(15,23,42,0.14)', zIndex: 40, padding: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>Filter by</span>
+              {activeFilter && (
+                <button onClick={() => { setActiveFilter(null); setFilterOpen(false) }} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12px', fontWeight: '700', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                  Clear
+                </button>
+              )}
+            </div>
+            {FILTER_GROUPS.map(group => {
+              const chips = popularChips.filter(c => c.kind === group.kind)
+              if (!chips.length) return null
+              return (
+                <div key={group.kind} style={{ marginBottom: '12px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.05em', margin: '0 0 7px' }}>{group.label.toUpperCase()}</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {chips.map(c => {
+                      const on = activeFilter?.kind === c.kind && activeFilter?.value === c.value
+                      return (
+                        <button
+                          key={c.value}
+                          onClick={() => { applyFilter({ kind: c.kind, value: c.value, label: c.label }); setFilterOpen(false) }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? '#6ba356' : '#e2e8f0'), background: on ? '#f0f7ed' : '#fff', color: on ? '#4d7a3c' : '#1e293b', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                        >
+                          <span>{c.emoji}</span> {c.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </header>
   )
 
@@ -198,25 +268,6 @@ export default function BrowseScreen({ onNavigate }: Props) {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {browsing ? (
           <>
-            {/* Popular searches — one scrolling row rather than four wrapped
-                ones, so it stops eating the top of the screen. */}
-            {popularChips.length > 0 && (
-              <div style={{ padding: '14px 0 0' }}>
-                <p style={{ fontSize: '14px', fontWeight: '600', color: '#475569', margin: '0 16px 10px' }}>Popular searches</p>
-                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '0 16px 2px', scrollbarWidth: 'none' }}>
-                  {popularChips.map(c => (
-                    <button
-                      key={c.kind + c.value}
-                      onClick={() => applyFilter({ kind: c.kind, value: c.value, label: c.label })}
-                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 13px', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '999px', fontSize: '13.5px', fontWeight: '500', color: '#1e293b', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
-                    >
-                      <span>{c.emoji}</span> {c.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Recipe of the day */}
             {rotd && (
               <div style={{ margin: '18px 16px 0', background: '#f6f1e4', borderRadius: '18px', padding: '18px', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
