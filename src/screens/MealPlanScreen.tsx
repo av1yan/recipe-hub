@@ -9,9 +9,9 @@ interface Props {
 }
 
 const DAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-const MEALS = [
+export const MEALS = [
   { key: 'breakfast', label: 'Breakfast', tint: '#fef3c7', emoji: '🍳' },
   { key: 'lunch', label: 'Lunch', tint: '#eaf6e0', emoji: '🥗' },
   { key: 'dinner', label: 'Dinner', tint: '#e5e9ff', emoji: '🍽️' },
@@ -19,14 +19,14 @@ const MEALS = [
 ]
 
 // Monday (local midnight) of whatever week a date falls in.
-function mondayOf(date: Date | string): Date {
+export function mondayOf(date: Date | string): Date {
   const d = new Date(date)
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
   d.setHours(0, 0, 0, 0)
   return d
 }
 
-function sameWeek(a: Date | string, b: Date | string): boolean {
+export function sameWeek(a: Date | string, b: Date | string): boolean {
   return mondayOf(a).getTime() === mondayOf(b).getTime()
 }
 
@@ -41,7 +41,7 @@ function weekLabel(weekStart: Date): string {
 }
 
 // Returns the recipe(s) planned for a given day + meal type as an array.
-function getMeals(plan: MealPlan | undefined, dayName: string, mealType: string): any[] {
+export function getMeals(plan: MealPlan | undefined, dayName: string, mealType: string): any[] {
   const dayMeals: any = plan?.meals?.[dayName]
   if (!dayMeals) return []
   const value = dayMeals[mealType] ?? dayMeals.snacks

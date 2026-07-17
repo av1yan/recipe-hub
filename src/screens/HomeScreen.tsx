@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Search, Settings } from 'lucide-react'
+import { Search, Settings, Plus, CalendarDays } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { recipeAPI } from '../utils/api'
+import { recipeAPI, mealPlanAPI } from '../utils/api'
+import { useApp } from '../context/AppContext'
+import { DAY_NAMES, MEALS, sameWeek, getMeals } from './MealPlanScreen'
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -10,31 +12,11 @@ interface Props {
 
 const RECIPE_COLORS = ['#d4a574', '#6ba356', '#c67139', '#5b9acd', '#9b7ec8']
 
-const SAMPLE_RECIPES = [
-  { id: 's1', name: 'Avocado Toast', prepTime: 10, color: '#6ba356', emoji: '🥑' },
-  { id: 's2', name: 'Pasta Carbonara', prepTime: 25, color: '#d4a574', emoji: '🍝' },
-  { id: 's3', name: 'Berry Smoothie', prepTime: 5, color: '#9b7ec8', emoji: '🫐' },
-]
-
-const SAMPLE_SUGGESTION = {
-  name: 'Lemon Herb Salmon',
-  category: 'Dinner',
-  detail: 'Mediterranean • 20 min',
-  color: '#5b9acd',
-  emoji: '🐟',
-}
-
-const TODAY_MEALS = [
-  { type: 'Breakfast', name: 'Shakshuka', time: '30 min', cal: '320 cal', color: '#d4a574', emoji: '🍳' },
-  { type: 'Lunch', name: 'Caesar Salad', time: '15 min', cal: '320 cal', color: '#6ba356', emoji: '🥗' },
-  { type: 'Dinner', name: 'Thai Green Curry', time: '45 min', cal: '480 cal', color: '#c67139', emoji: '🍛' },
-]
-
 function getGreeting() {
   const h = new Date().getHours()
-  if (h < 12) return 'Good morning!'
-  if (h < 18) return 'Good afternoon!'
-  return 'Good evening!'
+  if (h < 12) return 'Good morning'
+  if (h < 18) return 'Good afternoon'
+  return 'Good evening'
 }
 
 function getDateLabel() {
@@ -45,196 +27,195 @@ function getDateLabel() {
 }
 
 export default function HomeScreen({ onNavigate }: Props) {
+  const { user } = useApp()
   const [recipes, setRecipes] = useState<any[]>([])
+  const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>([])
+  const [plannedThisWeek, setPlannedThisWeek] = useState(0)
+
+  // Prefer the person's first name; fall back to their username.
+  const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
+  const initial = (displayName || user?.email || '?').charAt(0).toUpperCase()
 
   useEffect(() => {
     recipeAPI.list().then(setRecipes).catch(() => {})
+    loadToday()
   }, [])
 
-  const displayRecipes = recipes.length > 0 ? recipes.slice(0, 3) : SAMPLE_RECIPES
-  const suggestion = recipes.length > 0
-    ? { name: recipes[0].name, category: 'Dinner', detail: `${recipes[0].cuisine || 'World'} • ${recipes[0].prepTime} min`, color: RECIPE_COLORS[0], emoji: '🍽️' }
-    : SAMPLE_SUGGESTION
+  async function loadToday() {
+    try {
+      const plans = await mealPlanAPI.list()
+      const today = new Date()
+      const plan = plans.find((p: any) => sameWeek(p.weekStart, today))
+      if (!plan) return
+      const dayName = DAY_NAMES[(today.getDay() + 6) % 7]
+      const found: { meal: any; cfg: typeof MEALS[number] }[] = []
+      MEALS.forEach(cfg => getMeals(plan, dayName, cfg.key).forEach(meal => found.push({ meal, cfg })))
+      setTodayMeals(found)
+      setPlannedThisWeek(
+        DAY_NAMES.reduce((n, d) => n + MEALS.reduce((m, cfg) => m + getMeals(plan, d, cfg.key).length, 0), 0)
+      )
+    } catch {
+      /* home still works without a plan */
+    }
+  }
+
+  const recent = recipes.slice(0, 6)
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafc' }}>
-    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-      {/* Header */}
-      <div style={{ background: '#fff', padding: '16px 16px 0', borderBottom: '1px solid #f1f5f9' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
-          <div>
-            <p style={{ color: '#94a3b8', fontSize: '11px', fontWeight: '600', letterSpacing: '0.06em', margin: '0 0 2px' }}>
-              {getDateLabel()}
-            </p>
-            <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: 0, lineHeight: 1.2 }}>
-              {getGreeting()} 👋
-            </h1>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+        {/* Header */}
+        <div style={{ background: '#fff', padding: '16px 16px 0', borderBottom: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '12px' }}>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ color: '#94a3b8', fontSize: '11px', fontWeight: '600', letterSpacing: '0.06em', margin: '0 0 2px' }}>
+                {getDateLabel()}
+              </p>
+              <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: 0, lineHeight: 1.2 }}>
+                {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
+              </h1>
+              <p style={{ fontSize: '13px', color: '#94a3b8', margin: '6px 0 0' }}>
+                {recipes.length} recipe{recipes.length === 1 ? '' : 's'} · {plannedThisWeek} meal{plannedThisWeek === 1 ? '' : 's'} planned this week
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+              <button
+                onClick={() => onNavigate('settings')}
+                aria-label="Settings"
+                style={{ background: '#f1f5f9', border: 'none', width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              >
+                <Settings size={18} color="#64748b" />
+              </button>
+              <button
+                onClick={() => onNavigate('settings')}
+                aria-label="Your account"
+                title={user?.name || undefined}
+                style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', fontSize: '15px', fontWeight: '700' }}
+              >
+                {initial}
+              </button>
+            </div>
           </div>
+
+          {/* Search — hands off to Discover, which owns search */}
           <button
-            onClick={() => onNavigate('settings')}
-            style={{
-              background: '#f1f5f9',
-              border: 'none',
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              flexShrink: 0
-            }}
+            onClick={() => onNavigate('browse')}
+            style={{ width: '100%', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '11px 14px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer', textAlign: 'left' }}
           >
-            <Settings size={18} color="#64748b" />
+            <Search size={16} color="#94a3b8" />
+            <span style={{ flex: 1, fontSize: '14px', color: '#94a3b8' }}>What would you like to cook?</span>
           </button>
         </div>
 
-        {/* Search */}
-        <div style={{
-          background: '#f1f5f9',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '10px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginBottom: '16px'
-        }}>
-          <Search size={16} color="#94a3b8" />
-          <input
-            type="text"
-            placeholder="Search recipes..."
-            style={{ flex: 1, border: 'none', background: 'transparent', fontSize: '14px', color: '#1e293b', outline: 'none', fontFamily: 'inherit' }}
-          />
-        </div>
-      </div>
-
-      {/* Today's Meals */}
-      <div style={{ padding: '20px 16px 0' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: '0 0 12px', letterSpacing: '-0.01em' }}>
-          Today's Meals
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-          {TODAY_MEALS.map((meal, i) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'center', gap: '12px',
-              padding: '12px 14px',
-              background: '#fff',
-              borderRadius: '14px',
-              border: '1px solid #f1f5f9',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-              cursor: 'pointer'
-            }}>
-              <div style={{
-                width: '46px', height: '46px', borderRadius: '12px',
-                background: meal.color + '22',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '22px', flexShrink: 0
-              }}>
-                {meal.emoji}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', margin: 0, letterSpacing: '0.06em' }}>
-                  {meal.type.toUpperCase()}
-                </p>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {meal.name}
-                </h3>
-              </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <p style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', margin: 0 }}>{meal.time}</p>
-                <p style={{ fontSize: '11px', color: '#94a3b8', margin: '2px 0 0' }}>{meal.cal}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent Recipes */}
-        <div style={{ marginBottom: '24px' }}>
+        <div style={{ padding: '20px 16px 0' }}>
+          {/* Today's meals — real plan data */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
-              Recent Recipes
+              Today's Meals
             </h2>
-            <button
-              onClick={() => onNavigate('browse')}
-              style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
-            >
-              See all →
+            <button onClick={() => onNavigate('meal-plan')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+              Plan →
             </button>
           </div>
-          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', marginLeft: '-2px', paddingLeft: '2px' }}>
-            {displayRecipes.map((recipe: any, i: number) => (
-              <div
-                key={recipe.id}
-                onClick={() => onNavigate('recipe', { recipe })}
-                style={{ minWidth: '110px', cursor: 'pointer' }}
-              >
-                <div style={{
-                  width: '110px', height: '100px', borderRadius: '14px',
-                  background: (recipe.color || RECIPE_COLORS[i % RECIPE_COLORS.length]) + '33',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '32px', marginBottom: '8px',
-                  border: '1px solid ' + (recipe.color || RECIPE_COLORS[i % RECIPE_COLORS.length]) + '22'
-                }}>
-                  {recipe.emoji || '🍽️'}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+            {todayMeals.length > 0 ? (
+              todayMeals.map(({ meal, cfg }, i) => (
+                <div
+                  key={i}
+                  onClick={() => onNavigate('recipe', { recipe: meal })}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                >
+                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: cfg.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0, overflow: 'hidden' }}>
+                    {meal.imageUrl
+                      ? <img src={meal.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                      : cfg.emoji}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', margin: 0, letterSpacing: '0.06em' }}>
+                      {cfg.label.toUpperCase()}
+                    </p>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {meal.name}
+                    </h3>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <p style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', margin: 0 }}>
+                      {(meal.prepTime || 0) + (meal.cookTime || 0)} min
+                    </p>
+                    {meal.calories && <p style={{ fontSize: '11px', color: '#94a3b8', margin: '2px 0 0' }}>{meal.calories} cal</p>}
+                  </div>
                 </div>
-                <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
-                  {recipe.name}
-                </h4>
-                <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
-                  {recipe.prepTime} min
-                </p>
+              ))
+            ) : (
+              <button
+                onClick={() => onNavigate('meal-plan')}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+              >
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CalendarDays size={18} color="#6ba356" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>Nothing planned today</p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Tap to plan your day</p>
+                </div>
+              </button>
+            )}
+          </div>
+
+          {/* Your recipes */}
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
+                Your Recipes
+              </h2>
+              {recipes.length > 0 && (
+                <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                  See all →
+                </button>
+              )}
+            </div>
+
+            {recent.length > 0 ? (
+              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', marginLeft: '-2px', paddingLeft: '2px' }}>
+                {recent.map((recipe: any, i: number) => (
+                  <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ minWidth: '110px', cursor: 'pointer' }}>
+                    <div style={{
+                      width: '110px', height: '100px', borderRadius: '14px',
+                      background: RECIPE_COLORS[i % RECIPE_COLORS.length] + '33',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '32px', marginBottom: '8px', overflow: 'hidden',
+                      border: '1px solid ' + RECIPE_COLORS[i % RECIPE_COLORS.length] + '22',
+                    }}>
+                      {recipe.imageUrl
+                        ? <img src={recipe.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                        : '🍽️'}
+                    </div>
+                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
+                      {recipe.name}
+                    </h4>
+                    <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                      {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <button
+                onClick={() => onNavigate('add-recipe')}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+              >
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Plus size={18} color="#6ba356" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>No recipes yet</p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Add your first one</p>
+                </div>
+              </button>
+            )}
           </div>
         </div>
-
-        {/* Suggested For You */}
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
-              Suggested For You
-            </h2>
-            <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: '10px', fontWeight: '700', padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.04em' }}>
-              FREE
-            </span>
-          </div>
-          <div
-            onClick={() => onNavigate('browse')}
-            style={{
-              display: 'flex', gap: '14px',
-              padding: '14px',
-              background: '#fff',
-              borderRadius: '16px',
-              border: '1px solid #f1f5f9',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-              cursor: 'pointer'
-            }}
-          >
-            <div style={{
-              width: '64px', height: '64px', borderRadius: '14px',
-              background: suggestion.color + '22',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '28px', flexShrink: 0,
-              border: '1px solid ' + suggestion.color + '22'
-            }}>
-              {suggestion.emoji}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', margin: '0 0 4px', letterSpacing: '0.06em' }}>
-                {suggestion.category.toUpperCase()}
-              </p>
-              <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', margin: '0 0 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {suggestion.name}
-              </h3>
-              <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>
-                {suggestion.detail}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       </div>
       <BottomNavigation active="home" onNavigate={onNavigate} />
     </div>
