@@ -8,6 +8,9 @@ type Mode = 'web' | 'text' | 'photo' | 'social'
 interface Props {
   mode: Mode
   onNavigate: (screen: Screen, data?: any) => void
+  /** The screen the add panel was opened over; Back returns there and reopens
+      the panel rather than dropping you on Home. */
+  backTo?: Screen
 }
 
 const GREEN = '#6ba356'
@@ -39,7 +42,7 @@ const COPY: Record<Mode, { title: string; blurb: string; placeholder: string; ct
   },
 }
 
-export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
+export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }: Props) {
   const [value, setValue] = useState('')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -134,7 +137,7 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
   return (
     <div className="screen" style={{ background: '#f8fafc', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', background: '#fff', borderBottom: '1px solid #f1f5f9', flexShrink: 0 }}>
-        <button onClick={() => onNavigate('home')} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+        <button onClick={() => onNavigate(backTo, { openAddSheet: true })} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
           <ChevronLeft size={22} color="#1e293b" />
         </button>
         <h1 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', margin: 0 }}>{copy.title}</h1>

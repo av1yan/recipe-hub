@@ -1,13 +1,11 @@
-import { useState } from 'react'
 import { Home, Search, Plus, Calendar, ShoppingCart } from 'lucide-react'
-import { AddRecipeSheet } from './AddRecipeSheet'
-import type { Screen } from '../types'
+import { useApp } from '../context/AppContext'
 
 interface Props {
   active: string
   onNavigate: (tab: string) => void
-  /** Override the "+" — e.g. dismiss when the add panel is already open, so it
-      doesn't stack a second copy of itself. */
+  /** Override the "+" — e.g. make it inert inside the add panel, which is
+      already the "+" destination. Defaults to opening the panel. */
   onAdd?: () => void
 }
 
@@ -20,15 +18,13 @@ const tabs = [
 ]
 
 export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
-  // The "+" now offers every way in, not just the blank form.
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const handleAdd = onAdd ?? (() => setSheetOpen(true))
+  // The panel itself lives at the app level (App renders one AddRecipeSheet);
+  // the "+" just asks to open it. That's what lets Back on an import screen
+  // bring the panel back rather than only ever landing on Home.
+  const { openAddSheet } = useApp()
+  const handleAdd = onAdd ?? openAddSheet
 
   return (
-    <>
-    {/* When an onAdd override is given we're being rendered inside the sheet
-        already, so don't render another one. */}
-    {!onAdd && <AddRecipeSheet open={sheetOpen} onClose={() => setSheetOpen(false)} onNavigate={onNavigate as (s: Screen, d?: any) => void} />}
     <nav style={{
       display: 'flex',
       alignItems: 'center',
@@ -108,6 +104,5 @@ export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
         )
       })}
     </nav>
-    </>
   )
 }

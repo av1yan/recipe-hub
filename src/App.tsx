@@ -16,8 +16,11 @@ import CookbooksScreen from './screens/CookbooksScreen'
 import RecipeDetailScreen from './screens/RecipeDetailScreen'
 import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
+import { AddRecipeSheet } from './components/AddRecipeSheet'
 import { setAuthToken, clearAuthToken, getAuthToken, authAPI } from './utils/api'
 import type { Screen, User, Recipe } from './types'
+
+const IMPORT_SCREENS: Screen[] = ['import-web', 'import-text', 'import-photo', 'import-social']
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('splash')
@@ -34,6 +37,11 @@ export default function App() {
   const [recipeOrigin, setRecipeOrigin] = useState<Screen>('browse')
   // Where the Add Recipe form was opened from, so its back button returns there.
   const [addRecipeOrigin, setAddRecipeOrigin] = useState<Screen>('home')
+  // The "Add a recipe" panel, held here so it can be reopened from anywhere --
+  // Back on an import sub-screen brings it back instead of dumping you on Home.
+  const [addSheetOpen, setAddSheetOpen] = useState(false)
+  // The screen the panel was opened over, so an import Back returns there.
+  const [addSheetOrigin, setAddSheetOrigin] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
 
   // Check for existing auth token on load
@@ -103,7 +111,14 @@ export default function App() {
     if (nextScreen === 'cookbook' && data?.cookbookId) {
       setCookbookId(data.cookbookId)
     }
+    // Entering an import sub-screen: remember the screen the panel was open
+    // over so its Back button can reopen the panel there.
+    if (IMPORT_SCREENS.includes(nextScreen) && !IMPORT_SCREENS.includes(screen)) {
+      setAddSheetOrigin(screen)
+    }
     setScreen(nextScreen)
+    // Back from an import screen asks to bring the panel back up.
+    setAddSheetOpen(Boolean(data?.openAddSheet))
   }
 
   // `loading` gates the whole app behind a splash, so it must stay reserved for
@@ -167,13 +182,13 @@ export default function App() {
       case 'add-recipe':
         return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} />
       case 'import-web':
-        return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} />
+        return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} backTo={addSheetOrigin} />
       case 'import-text':
-        return <ImportRecipeScreen mode="text" onNavigate={handleNavigation} />
+        return <ImportRecipeScreen mode="text" onNavigate={handleNavigation} backTo={addSheetOrigin} />
       case 'import-photo':
-        return <ImportRecipeScreen mode="photo" onNavigate={handleNavigation} />
+        return <ImportRecipeScreen mode="photo" onNavigate={handleNavigation} backTo={addSheetOrigin} />
       case 'import-social':
-        return <ImportRecipeScreen mode="social" onNavigate={handleNavigation} />
+        return <ImportRecipeScreen mode="social" onNavigate={handleNavigation} backTo={addSheetOrigin} />
       case 'meal-plan':
         return <MealPlanScreen onNavigate={handleNavigation} />
       case 'grocery':
@@ -192,7 +207,7 @@ export default function App() {
   }
 
   return (
-    <AppProvider user={user}>
+    <AppProvider user={user} openAddSheet={() => setAddSheetOpen(true)}>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f5f5f5', padding: '20px' }}>
         <div style={{
           width: '375px',
@@ -215,6 +230,8 @@ export default function App() {
           <div className="app-container" style={{ flex: 1, overflowY: 'auto' }}>
             {renderScreen()}
           </div>
+          {/* One panel for the whole app, overlaying the current screen. */}
+          <AddRecipeSheet open={addSheetOpen} onClose={() => setAddSheetOpen(false)} onNavigate={handleNavigation} />
         </div>
       </div>
     </AppProvider>
