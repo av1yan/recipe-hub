@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Clock, Users, Flame, ChefHat, Heart } from 'lucide-react'
+import { ArrowLeft, Clock, Users, Flame, ChefHat, Heart, ExternalLink } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 
@@ -22,6 +22,15 @@ const MEAL_EMOJIS: Record<string, string> = {
 }
 
 const HERO_COLORS = ['#d4a574', '#6ba356', '#c67139', '#9b7ec8', '#f4b860', '#5b9acd']
+
+/** "View on bbcgoodfood.com" — the host is the useful part, not the full URL. */
+function sourceLabel(url: string): string {
+  try {
+    return `View on ${new URL(url).hostname.replace(/^www\./, '')}`
+  } catch {
+    return 'View the original'
+  }
+}
 
 export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set())
@@ -151,6 +160,24 @@ export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
             <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 14px', lineHeight: 1.5 }}>
               {recipe.description}
             </p>
+          )}
+
+          {/* Credit where an imported recipe came from, and let people go read
+              the original -- rel/noreferrer because it is a link we did not write. */}
+          {recipe.sourceUrl && (
+            <a
+              href={recipe.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                fontSize: '12.5px', color: '#6ba356', fontWeight: '600',
+                textDecoration: 'none', marginBottom: '14px',
+              }}
+            >
+              <ExternalLink size={13} />
+              {sourceLabel(recipe.sourceUrl)}
+            </a>
           )}
 
           {/* Stats row */}

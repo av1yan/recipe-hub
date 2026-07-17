@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Check, Plus, X, Camera } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { recipeAPI } from '../utils/api'
+import { recipeAPI, cookbookAPI } from '../utils/api'
 import { DIET_OPTIONS } from './DietPreferencesScreen'
 import { Toast, useToast } from '../components/Toast'
 import { fileToCompressedDataUrl } from '../utils/image'
@@ -27,6 +27,9 @@ const CUISINES = [
   'Indian', 'Middle Eastern', 'French', 'Other',
 ]
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert']
+
+/** Sentinel for the picker's "make a new one" option. */
+const NEW_COOKBOOK = '__new__'
 
 /** Keeps a draft's value only when the form can actually represent it. */
 function inList(value: unknown, list: string[], fallback: string): string {
@@ -74,6 +77,8 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
   const [servings, setServings] = useState(numField(draft?.servings) || '2')
   const [calories, setCalories] = useState(numField(draft?.calories))
   const [imageUrl, setImageUrl] = useState(draft?.imageUrl ?? '')
+  // Where an import came from. Kept so the recipe can credit its source.
+  const [sourceUrl] = useState<string | null>(draft?.sourceUrl ?? null)
   const [tags, setTags] = useState<string[]>(draft?.tags ?? [])
   const [ingredients, setIngredients] = useState<IngredientRow[]>(
     draft?.ingredients?.length
@@ -85,12 +90,24 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
       ? draft.instructions.map((i: any) => ({ text: i.text, duration: numField(i.duration) }))
       : [{ text: '', duration: '' }]
   )
+  // Cookbooks to file this under. '' means don't, NEW_COOKBOOK means make one.
+  const [cookbooks, setCookbooks] = useState<{ id: string; name: string }[]>([])
+  const [cookbookId, setCookbookId] = useState('')
+  const [newCookbookName, setNewCookbookName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [photoBusy, setPhotoBusy] = useState(false)
   const [photoError, setPhotoError] = useState('')
   const photoInputRef = useRef<HTMLInputElement>(null)
   const { toast, show } = useToast()
+
+  useEffect(() => {
+    // Not being able to list cookbooks just means the picker offers "none" and
+    // a new one -- never block saving a recipe on it.
+    cookbookAPI.list()
+      .then((list: any) => setCookbooks(Array.isArray(list) ? list.map((c: any) => ({ id: c.id, name: c.name })) : []))
+      .catch(() => {})
+  }, [])
 
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -140,7 +157,7 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
       })
 
     try {
-      await recipeAPI.create({
+      const created: any = await recipeAPI.create({
         name,
         cuisine,
         mealType,
@@ -150,12 +167,31 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
         servings: parseInt(servings),
         calories: calories ? parseInt(calories) : null,
         imageUrl: imageUrl.trim() || null,
+        sourceUrl,
         tags,
         ingredients: cleanIngredients,
         instructions: cleanInstructions,
       })
 
-      show('Recipe created!')
+      // Filing it is a second step, so a cookbook problem must not lose the
+      // recipe that already saved -- say so and carry on.
+      let filedInto = ''
+      try {
+        if (cookbookId === NEW_COOKBOOK && newCookbookName.trim()) {
+          const book: any = await cookbookAPI.create(newCookbookName.trim())
+          await cookbookAPI.addRecipe(book.id, created.id)
+          filedInto = book.name
+        } else if (cookbookId && cookbookId !== NEW_COOKBOOK) {
+          await cookbookAPI.addRecipe(cookbookId, created.id)
+          filedInto = cookbooks.find(c => c.id === cookbookId)?.name || ''
+        }
+      } catch {
+        show('Recipe saved, but adding it to the cookbook failed', 'error')
+        setTimeout(() => onNavigate('home'), 2600)
+        return
+      }
+
+      show(filedInto ? `Saved to ${filedInto}` : 'Recipe created!')
       setTimeout(() => onNavigate('home'), 1800)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create recipe')
@@ -223,6 +259,29 @@ export default function AddRecipeScreen({ onNavigate, draft }: Props) {
                 <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
               ))}
             </select>
+          </div>
+
+          <div className="field">
+            <label>Cookbook</label>
+            <select
+              className="input"
+              value={cookbookId}
+              onChange={(e) => setCookbookId(e.target.value)}
+              style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}
+            >
+              <option value="">Don't file it anywhere</option>
+              {cookbooks.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <option value={NEW_COOKBOOK}>+ New cookbook…</option>
+            </select>
+            {cookbookId === NEW_COOKBOOK && (
+              <input
+                value={newCookbookName}
+                onChange={(e) => setNewCookbookName(e.target.value)}
+                placeholder="Name the cookbook, e.g. Weeknights"
+                className="input"
+                style={{ marginTop: '8px' }}
+              />
+            )}
           </div>
 
           <div className="field">
