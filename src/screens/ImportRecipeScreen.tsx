@@ -43,6 +43,10 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
   const [value, setValue] = useState('')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
+  // Social is two steps: fetch the caption, then let it be laid out. TikTok
+  // returns the caption with its line breaks flattened, and only a person can
+  // tell where they belonged.
+  const [caption, setCaption] = useState<{ text: string; imageUrl: string | null; sourceUrl: string; author: string | null } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const copy = COPY[mode]
 
@@ -51,11 +55,34 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
 
   const submitLink = async () => {
     setError('')
-    setBusy('Reading the page…')
+    setBusy(mode === 'social' ? 'Fetching the caption…' : 'Reading the page…')
     try {
-      review(await importAPI.url(value.trim()))
+      if (mode === 'social') {
+        const got: any = await importAPI.social(value.trim())
+        setCaption({ text: got.caption, imageUrl: got.imageUrl, sourceUrl: got.sourceUrl, author: got.author })
+      } else {
+        review(await importAPI.url(value.trim()))
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not import that link')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  /** Parses the caption the person has laid out, keeping the post's photo. */
+  const submitCaption = async () => {
+    setError('')
+    setBusy('Reading the recipe…')
+    try {
+      const draft: any = await importAPI.text(caption!.text)
+      review({
+        ...draft,
+        imageUrl: draft.imageUrl ?? caption!.imageUrl,
+        sourceUrl: caption!.sourceUrl,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not read that')
     } finally {
       setBusy('')
     }
@@ -109,7 +136,40 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
         </div>
         <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 18px', lineHeight: 1.5 }}>{copy.blurb}</p>
 
-        {mode === 'photo' ? (
+        {mode === 'social' && caption ? (
+          <>
+            {caption.imageUrl && (
+              <img
+                src={caption.imageUrl}
+                alt=""
+                style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '12px', marginBottom: '12px', display: 'block' }}
+                onError={e => { e.currentTarget.style.display = 'none' }}
+              />
+            )}
+            <div style={{ padding: '12px 14px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', marginBottom: '12px' }}>
+              <p style={{ margin: 0, fontSize: '12.5px', color: '#92400e', lineHeight: 1.55 }}>
+                TikTok hands the caption over with its line breaks removed, so the
+                ingredients tend to run together. Put each one on its own line
+                below and it can be read properly.
+              </p>
+            </div>
+            <textarea
+              value={caption.text}
+              onChange={e => setCaption({ ...caption, text: e.target.value })}
+              rows={11}
+              style={{ ...inputBase, resize: 'vertical', lineHeight: 1.6 }}
+            />
+            <button onClick={submitCaption} disabled={!!busy} style={{ ...primaryBtn(!!busy), marginTop: '12px' }}>
+              {busy || 'Read recipe'}
+            </button>
+            <button
+              onClick={() => { setCaption(null); setValue('') }}
+              style={{ width: '100%', marginTop: '8px', padding: '10px', background: 'none', border: 'none', color: '#94a3b8', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Try another link
+            </button>
+          </>
+        ) : mode === 'photo' ? (
           <>
             <input
               ref={fileRef}

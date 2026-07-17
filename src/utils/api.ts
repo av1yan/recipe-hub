@@ -114,6 +114,8 @@ export const authAPI = {
 // Import endpoints — both return a draft to review; neither saves anything.
 export const importAPI = {
   url: (url: string) => apiRequest('/recipes/import/url', { method: 'POST', body: { url } }),
+  /** Returns the post's caption to lay out, not a recipe. */
+  social: (url: string) => apiRequest('/recipes/import/social', { method: 'POST', body: { url } }),
   text: (text: string) => apiRequest('/recipes/import/text', { method: 'POST', body: { text } }),
 }
 
