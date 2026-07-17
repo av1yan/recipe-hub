@@ -1,8 +1,18 @@
+const PROD_API_URL = 'https://recipe-hub-backend-production.up.railway.app'
+
+/**
+ * Resolves the API base, in precedence order:
+ *   1. VITE_API_URL  — point this at a local backend (see .env.example)
+ *   2. the deployed backend
+ *
+ * Serving on localhost used to force `http://localhost:5001` and ignore
+ * VITE_API_URL entirely, so `npm run dev` was dead in the water unless a
+ * backend happened to be listening on that one port — and there was no way to
+ * override it short of editing this file.
+ */
 const API_BASE_URL = (() => {
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return 'http://localhost:5001/api'
-  }
-  const base = import.meta.env.VITE_API_URL || 'https://recipe-hub-backend-production.up.railway.app'
+  const configured = (import.meta.env.VITE_API_URL || '').trim()
+  const base = (configured || PROD_API_URL).replace(/\/+$/, '')
   return base.endsWith('/api') ? base : `${base}/api`
 })()
 
