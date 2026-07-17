@@ -83,10 +83,11 @@ export const authAPI = {
       requiresAuth: false,
     }),
 
-  login: (email: string, password: string) =>
+  /** `identifier` is an email address or a username. */
+  login: (identifier: string, password: string) =>
     apiRequest('/auth/login', {
       method: 'POST',
-      body: { email, password },
+      body: { identifier, password },
       requiresAuth: false,
     }),
 

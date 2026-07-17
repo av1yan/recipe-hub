@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, Lock } from 'lucide-react'
+import { Mail, Lock, AtSign } from 'lucide-react'
 import type { Screen } from '../types'
 
 interface Props {
@@ -115,12 +115,20 @@ export default function SignInScreen({ onSignIn, onSignUp }: Props) {
         )}
 
         <div>
-          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>Email</label>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>
+            {isSignUp ? 'Email' : 'Email or username'}
+          </label>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Mail size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
+            {isSignUp
+              ? <Mail size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
+              : <AtSign size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />}
             <input
-              type="email"
-              placeholder="Email"
+              // Signing up needs a real address, but signing in also takes a
+              // username -- type="email" would reject one as malformed.
+              type={isSignUp ? 'email' : 'text'}
+              placeholder={isSignUp ? 'Email' : 'Email or username'}
+              autoCapitalize="none"
+              autoCorrect="off"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

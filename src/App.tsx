@@ -52,32 +52,23 @@ export default function App() {
     setScreen(nextScreen)
   }
 
-  const handleSignIn = async (email: string, password: string) => {
-    try {
-      setLoading(true)
-      const response = await authAPI.login(email, password)
-      setAuthToken(response.token)
-      setUser(response.user)
-      setScreen('home')
-    } catch (error) {
-      alert(`Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      setLoading(false)
-    }
+  // `loading` gates the whole app behind a splash, so it must stay reserved for
+  // the initial auth check. Toggling it here unmounted the sign-in form
+  // mid-request and it remounted with its error state wiped -- which is why a
+  // failed login could only ever be reported through a native alert.
+  // SignInScreen tracks its own submitting state for the button.
+  const handleSignIn = async (identifier: string, password: string) => {
+    const response = await authAPI.login(identifier, password)
+    setAuthToken(response.token)
+    setUser(response.user)
+    setScreen('home')
   }
 
   const handleSignUp = async (email: string, name: string, password: string) => {
-    try {
-      setLoading(true)
-      const response = await authAPI.register(email, name, password)
-      setAuthToken(response.token)
-      setUser(response.user)
-      setScreen('onboarding')
-    } catch (error) {
-      alert(`Registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      setLoading(false)
-    }
+    const response = await authAPI.register(email, name, password)
+    setAuthToken(response.token)
+    setUser(response.user)
+    setScreen('onboarding')
   }
 
   const handleSignOut = () => {
