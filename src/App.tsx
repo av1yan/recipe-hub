@@ -20,8 +20,6 @@ import { AddRecipeSheet } from './components/AddRecipeSheet'
 import { setAuthToken, clearAuthToken, getAuthToken, authAPI } from './utils/api'
 import type { Screen, User, Recipe } from './types'
 
-const IMPORT_SCREENS: Screen[] = ['import-web', 'import-text', 'import-photo', 'import-social']
-
 export default function App() {
   const [screen, setScreen] = useState<Screen>('splash')
   const [user, setUser] = useState<User | null>(null)
@@ -115,14 +113,18 @@ export default function App() {
     if (nextScreen === 'cookbook' && data?.cookbookId) {
       setCookbookId(data.cookbookId)
     }
-    // Entering an import sub-screen: remember the screen the panel was open
-    // over so its Back button can reopen the panel there.
-    if (IMPORT_SCREENS.includes(nextScreen) && !IMPORT_SCREENS.includes(screen)) {
-      setAddSheetOrigin(screen)
-    }
     setScreen(nextScreen)
-    // Back from an import screen asks to bring the panel back up.
+    // Back from an import screen asks to bring the panel back up. The origin it
+    // reopens over is captured when the panel is opened (openAddSheet), not here
+    // -- deriving it from screen transitions misfires on Review -> import Back.
     setAddSheetOpen(Boolean(data?.openAddSheet))
+  }
+
+  // Opening the panel: remember the screen it's opening over, so a Back out of
+  // an import sub-screen reopens it there.
+  const openAddSheet = () => {
+    setAddSheetOrigin(screen)
+    setAddSheetOpen(true)
   }
 
   // `loading` gates the whole app behind a splash, so it must stay reserved for
@@ -211,7 +213,7 @@ export default function App() {
   }
 
   return (
-    <AppProvider user={user} openAddSheet={() => setAddSheetOpen(true)}>
+    <AppProvider user={user} openAddSheet={openAddSheet}>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f5f5f5', padding: '20px' }}>
         <div style={{
           width: '375px',
