@@ -120,6 +120,15 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
+  async function removeMeal(mealId: string) {
+    try {
+      await mealPlanAPI.removeMeal(mealId)
+      await loadData()
+    } catch (error) {
+      console.error('Failed to remove meal from plan:', error)
+    }
+  }
+
   function getDayNumber(index: number, weekStart: Date) {
     const date = new Date(weekStart)
     date.setDate(date.getDate() + index)
@@ -240,12 +249,32 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <div key={m.key} style={{ marginBottom: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', margin: 0 }}>{m.label}</h3>
-                <button
-                  onClick={() => setPickerFor(pickerOpen ? null : m.key)}
-                  style={{ background: 'none', border: 'none', color: '#f26d5b', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                >
-                  {pickerOpen ? <><X size={15} /> Close</> : <><Plus size={15} /> Add</>}
-                </button>
+                {/* A slot holds one recipe. Empty (or picking): offer Add/Close.
+                    Filled: no "add" -- offer Edit (swap the recipe) and Remove
+                    (clear the slot) instead. */}
+                {meals.length === 0 || pickerOpen ? (
+                  <button
+                    onClick={() => setPickerFor(pickerOpen ? null : m.key)}
+                    style={{ background: 'none', border: 'none', color: '#f26d5b', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                  >
+                    {pickerOpen ? <><X size={15} /> Close</> : <><Plus size={15} /> Add</>}
+                  </button>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <button
+                      onClick={() => setPickerFor(m.key)}
+                      style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => meals[0]?.mealId && removeMeal(meals[0].mealId)}
+                      style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    >
+                      <Trash2 size={14} /> Remove
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Planned meal cards */}
