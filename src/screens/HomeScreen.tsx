@@ -217,8 +217,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               </button>
             )}
           </div>
-        </div>
-      </div>
+
           {/* Cookbooks — same shelf shape as the recipes they group. */}
           <div style={{ marginBottom: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -268,7 +267,8 @@ export default function HomeScreen({ onNavigate }: Props) {
               </button>
             )}
           </div>
-
+        </div>
+      </div>
       <BottomNavigation active="home" onNavigate={onNavigate} />
     </div>
   )
