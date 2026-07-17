@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, Plus, CalendarDays, BookOpen } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { recipeAPI, mealPlanAPI } from '../utils/api'
+import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
 import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
 import { DAY_NAMES, MEALS, sameWeek, getMeals } from './MealPlanScreen'
@@ -10,6 +10,9 @@ import { DAY_NAMES, MEALS, sameWeek, getMeals } from './MealPlanScreen'
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
 }
+
+/** Warm tones, matching the covers on the Cookbooks screen. */
+const COOKBOOK_COLORS = ['#c67139', '#6ba356', '#d4a574', '#b8956a', '#a48a6e']
 
 const RECIPE_COLORS = ['#d4a574', '#6ba356', '#c67139', '#5b9acd', '#9b7ec8']
 
@@ -32,6 +35,7 @@ export default function HomeScreen({ onNavigate }: Props) {
   const [recipes, setRecipes] = useState<any[]>([])
   const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>([])
   const [plannedThisWeek, setPlannedThisWeek] = useState(0)
+  const [cookbooks, setCookbooks] = useState<any[]>([])
 
   // Prefer the person's first name; fall back to their username.
   const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
@@ -39,6 +43,8 @@ export default function HomeScreen({ onNavigate }: Props) {
 
   useEffect(() => {
     recipeAPI.list().then(setRecipes).catch(() => {})
+    // Home works without cookbooks -- a failure just means an empty shelf.
+    cookbookAPI.list().then((c: any) => setCookbooks(Array.isArray(c) ? c : [])).catch(() => {})
     loadToday()
   }, [])
 
@@ -165,19 +171,11 @@ export default function HomeScreen({ onNavigate }: Props) {
               <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
                 Your Recipes
               </h2>
-              {/* Cookbooks group your recipes, so the way in belongs beside them.
-                  Nothing linked to that screen before this. */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <button onClick={() => onNavigate('cookbooks')} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: '#94a3b8', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-                  <BookOpen size={13} />
-                  Cookbooks
+              {recipes.length > 0 && (
+                <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                  See all →
                 </button>
-                {recipes.length > 0 && (
-                  <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-                    See all →
-                  </button>
-                )}
-              </div>
+              )}
             </div>
 
             {recent.length > 0 ? (
@@ -221,6 +219,56 @@ export default function HomeScreen({ onNavigate }: Props) {
           </div>
         </div>
       </div>
+          {/* Cookbooks — same shelf shape as the recipes they group. */}
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
+                Cookbooks
+              </h2>
+              {cookbooks.length > 0 && (
+                <button onClick={() => onNavigate('cookbooks')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                  See all →
+                </button>
+              )}
+            </div>
+
+            {cookbooks.length > 0 ? (
+              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', marginLeft: '-2px', paddingLeft: '2px' }}>
+                {cookbooks.slice(0, 6).map((book: any, i: number) => (
+                  <div key={book.id} onClick={() => onNavigate('cookbooks')} style={{ minWidth: '110px', cursor: 'pointer' }}>
+                    <div style={{
+                      width: '110px', height: '100px', borderRadius: '14px',
+                      background: COOKBOOK_COLORS[i % COOKBOOK_COLORS.length],
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '32px', marginBottom: '8px',
+                    }}>
+                      📖
+                    </div>
+                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
+                      {book.name}
+                    </h4>
+                    <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                      {book.recipes?.length ?? 0} recipe{(book.recipes?.length ?? 0) === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <button
+                onClick={() => onNavigate('cookbooks')}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+              >
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <BookOpen size={18} color="#6ba356" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>No cookbooks yet</p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Group your recipes into one</p>
+                </div>
+              </button>
+            )}
+          </div>
+
       <BottomNavigation active="home" onNavigate={onNavigate} />
     </div>
   )
