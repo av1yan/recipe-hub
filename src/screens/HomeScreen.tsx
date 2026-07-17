@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Plus, CalendarDays, BookOpen } from 'lucide-react'
+import { Plus, CalendarDays, BookOpen } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
@@ -99,14 +99,6 @@ export default function HomeScreen({ onNavigate }: Props) {
             </button>
           </div>
 
-          {/* Search — hands off to Discover, which owns search */}
-          <button
-            onClick={() => onNavigate('browse')}
-            style={{ width: '100%', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '11px 14px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', cursor: 'pointer', textAlign: 'left' }}
-          >
-            <Search size={16} color="#94a3b8" />
-            <span style={{ flex: 1, fontSize: '14px', color: '#94a3b8' }}>What would you like to cook?</span>
-          </button>
         </div>
 
         <div style={{ padding: '20px 16px 0' }}>
