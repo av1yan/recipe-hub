@@ -198,16 +198,17 @@ export default function BrowseScreen({ onNavigate }: Props) {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {browsing ? (
           <>
-            {/* Popular searches */}
+            {/* Popular searches — one scrolling row rather than four wrapped
+                ones, so it stops eating the top of the screen. */}
             {popularChips.length > 0 && (
-              <div style={{ padding: '14px 16px 0' }}>
-                <p style={{ fontSize: '14px', fontWeight: '600', color: '#475569', margin: '0 0 10px' }}>Popular searches</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ padding: '14px 0 0' }}>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: '#475569', margin: '0 16px 10px' }}>Popular searches</p>
+                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '0 16px 2px', scrollbarWidth: 'none' }}>
                   {popularChips.map(c => (
                     <button
                       key={c.kind + c.value}
                       onClick={() => applyFilter({ kind: c.kind, value: c.value, label: c.label })}
-                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '999px', fontSize: '14px', fontWeight: '500', color: '#1e293b', cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 13px', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '999px', fontSize: '13.5px', fontWeight: '500', color: '#1e293b', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
                     >
                       <span>{c.emoji}</span> {c.label}
                     </button>
