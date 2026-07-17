@@ -25,6 +25,16 @@ export default function App() {
   // Check for existing auth token on load
   useEffect(() => {
     const checkAuth = async () => {
+      // An OAuth callback hands the token back in the fragment. Consume it
+      // before anything else, and strip it so a copied URL isn't a live
+      // credential.
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+      const oauthToken = hash.get('token')
+      if (oauthToken) {
+        setAuthToken(oauthToken)
+        history.replaceState(null, '', window.location.pathname)
+      }
+
       const token = getAuthToken()
       const onboardingCompleted = localStorage.getItem('onboardingCompleted')
       if (token) {

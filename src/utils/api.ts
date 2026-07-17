@@ -16,6 +16,14 @@ const API_BASE_URL = (() => {
   return base.endsWith('/api') ? base : `${base}/api`
 })()
 
+/**
+ * Where the Google/Apple buttons send the browser. This is a full navigation
+ * rather than a fetch, so it needs the absolute URL.
+ */
+export function oauthStartUrl(provider: string): string {
+  return `${API_BASE_URL}/auth/oauth/${provider}/start`
+}
+
 let authToken: string | null = null
 
 export function setAuthToken(token: string) {
@@ -90,6 +98,9 @@ export const authAPI = {
       body: { identifier, password },
       requiresAuth: false,
     }),
+
+  /** Which OAuth providers the API has credentials for, e.g. { google: true }. */
+  oauthProviders: () => apiRequest('/auth/oauth/providers', { requiresAuth: false }),
 
   getProfile: () => apiRequest('/auth/profile'),
 
