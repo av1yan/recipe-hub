@@ -1,4 +1,4 @@
-import { Image, Type, Link2, PenLine } from 'lucide-react'
+import { Image, Type, Link2, PenLine, X } from 'lucide-react'
 import type { Screen } from '../types'
 
 interface Props {
@@ -28,63 +28,74 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
   return (
     <>
       <div
-        onClick={onClose}
-        style={{
-          position: 'absolute', inset: 0, background: 'rgba(15, 23, 42, 0.4)',
-          zIndex: 40, animation: 'rh-fade 0.18s ease-out',
-        }}
-      />
-      <div
         role="dialog"
         aria-label="Add a recipe"
         style={{
-          position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 41,
-          background: '#fff', borderRadius: '22px 22px 0 0',
-          padding: '10px 16px 24px',
-          boxShadow: '0 -8px 40px rgba(0,0,0,0.16)',
-          animation: 'rh-sheet-up 0.24s cubic-bezier(0.32, 0.72, 0, 1)',
+          // Anchored to the phone frame, so it must start below the status bar
+          // (44px in App) rather than painting over it like no other screen does.
+          position: 'absolute', top: '44px', left: 0, right: 0, bottom: 0, zIndex: 41,
+          background: '#fff', display: 'flex', flexDirection: 'column',
+          animation: 'rh-panel-up 0.24s cubic-bezier(0.32, 0.72, 0, 1)',
         }}
       >
-        <div style={{ width: '38px', height: '4px', borderRadius: '2px', background: '#e2e8f0', margin: '0 auto 14px' }} />
-        <h2 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', textAlign: 'center', margin: '0 0 16px' }}>
-          Add a recipe
-        </h2>
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', flexShrink: 0 }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+            Add a recipe
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: '34px', height: '34px', borderRadius: '17px', border: 'none',
+              background: '#f1f5f9', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
+            }}
+          >
+            <X size={18} color="#64748b" />
+          </button>
+        </header>
 
-        <button onClick={() => go('import-social')} style={wideCard}>
-          <SocialIcons />
-          <div style={{ textAlign: 'left', minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
-              Import from social media
-            </p>
-            <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: '#94a3b8' }}>
-              Paste a link from Instagram or TikTok
-            </p>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px 20px' }}>
+          <p style={{ fontSize: '13.5px', color: '#94a3b8', margin: '0 0 16px', lineHeight: 1.55 }}>
+            Bring one in from somewhere, or start with a blank page. Anything
+            imported opens in the form for you to check first.
+          </p>
+
+          <button onClick={() => go('import-social')} style={wideCard}>
+            <SocialIcons />
+            <div style={{ textAlign: 'left', minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+                Import from social media
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: '#94a3b8' }}>
+                Paste a link from Instagram or TikTok
+              </p>
+            </div>
+          </button>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
+            <Tile icon={<Image size={19} color={GREEN} />} label="Import from photo" hint="Read a recipe card" onClick={() => go('import-photo')} />
+            <Tile icon={<Type size={19} color={GREEN} />} label="Import from text" hint="Paste and tidy" onClick={() => go('import-text')} />
+            <Tile icon={<Link2 size={19} color={GREEN} />} label="Import from web" hint="From a recipe page" onClick={() => go('import-web')} />
+            <Tile icon={<PenLine size={19} color={GREEN} />} label="Write from scratch" hint="A blank form" onClick={() => go('add-recipe')} />
           </div>
-        </button>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-          <Tile icon={<Image size={19} color={GREEN} />} label="Import from photo" onClick={() => go('import-photo')} />
-          <Tile icon={<Type size={19} color={GREEN} />} label="Import from text" onClick={() => go('import-text')} />
-          <Tile icon={<Link2 size={19} color={GREEN} />} label="Import from web" onClick={() => go('import-web')} />
-          <Tile icon={<PenLine size={19} color={GREEN} />} label="Write from scratch" onClick={() => go('add-recipe')} />
         </div>
       </div>
 
       <style>{`
-        @keyframes rh-sheet-up { from { transform: translateY(100%) } to { transform: translateY(0) } }
-        @keyframes rh-fade { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes rh-panel-up { from { transform: translateY(14px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
       `}</style>
     </>
   )
 }
 
-function Tile({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+function Tile({ icon, label, hint, onClick }: { icon: React.ReactNode; label: string; hint: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '20px',
-        padding: '14px', background: '#fff', border: '1px solid #e8eef0',
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px',
+        padding: '16px', background: '#fff', border: '1px solid #e8eef0',
         borderRadius: '14px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
       }}
     >
@@ -94,7 +105,10 @@ function Tile({ icon, label, onClick }: { icon: React.ReactNode; label: string; 
       }}>
         {icon}
       </span>
-      <span style={{ fontSize: '13.5px', fontWeight: '700', color: '#1e293b' }}>{label}</span>
+      <span style={{ minWidth: 0 }}>
+        <span style={{ display: 'block', fontSize: '13.5px', fontWeight: '700', color: '#1e293b' }}>{label}</span>
+        <span style={{ display: 'block', fontSize: '11.5px', color: '#94a3b8', marginTop: '2px' }}>{hint}</span>
+      </span>
     </button>
   )
 }
