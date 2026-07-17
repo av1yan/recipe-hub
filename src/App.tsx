@@ -37,6 +37,9 @@ export default function App() {
   const [recipeOrigin, setRecipeOrigin] = useState<Screen>('browse')
   // Where the Add Recipe form was opened from, so its back button returns there.
   const [addRecipeOrigin, setAddRecipeOrigin] = useState<Screen>('home')
+  // Whether the blank form was launched from the add panel, so Back reopens the
+  // panel rather than dropping onto the screen behind it.
+  const [addRecipeFromPanel, setAddRecipeFromPanel] = useState(false)
   // The "Add a recipe" panel, held here so it can be reopened from anywhere --
   // Back on an import sub-screen brings it back instead of dumping you on Home.
   const [addSheetOpen, setAddSheetOpen] = useState(false)
@@ -107,6 +110,7 @@ export default function App() {
       setDraft(data?.draft ?? null)
       // Remember where we came from; 'add-recipe' -> 'add-recipe' would strand you.
       if (screen !== 'add-recipe') setAddRecipeOrigin(screen)
+      setAddRecipeFromPanel(Boolean(data?.fromAddPanel))
     }
     if (nextScreen === 'cookbook' && data?.cookbookId) {
       setCookbookId(data.cookbookId)
@@ -180,7 +184,7 @@ export default function App() {
       case 'recipe':
         return <RecipeDetailScreen recipe={currentRecipe} backTo={recipeOrigin} onNavigate={handleNavigation} />
       case 'add-recipe':
-        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} />
+        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} reopenPanelOnBack={addRecipeFromPanel} />
       case 'import-web':
         return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} backTo={addSheetOrigin} />
       case 'import-text':

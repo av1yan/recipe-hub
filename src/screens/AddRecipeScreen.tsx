@@ -13,6 +13,9 @@ interface Props {
   draft?: any
   /** Where the back button goes — wherever this form was opened from. */
   backTo?: Screen
+  /** When the blank form was opened from the add panel, Back reopens that panel
+      over `backTo` instead of just landing on the screen behind it. */
+  reopenPanelOnBack?: boolean
 }
 
 /** A small section heading, so the long form reads as groups not one list. */
@@ -75,7 +78,7 @@ const stepBadge: React.CSSProperties = {
   fontSize: '13px', fontWeight: '700', marginTop: '5px',
 }
 
-export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home' }: Props) {
+export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', reopenPanelOnBack = false }: Props) {
   // An import arrives here as a draft to be checked over. Seeding useState
   // rather than assigning in an effect means the fields are already filled on
   // first paint, and stay editable like any other.
@@ -214,7 +217,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home' }: 
   return (
     <div className="screen" style={{ position: 'relative' }}>
       <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button onClick={() => onNavigate(backTo)} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
+        <button onClick={() => onNavigate(backTo, reopenPanelOnBack ? { openAddSheet: true } : undefined)} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
         </button>
         <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>{draft ? 'Review recipe' : 'Add Recipe'}</h2>

@@ -78,7 +78,7 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
             <Tile icon={<Image size={19} color={GREEN} />} label="Import from photo" hint="Read a recipe card" onClick={() => go('import-photo')} />
             <Tile icon={<Type size={19} color={GREEN} />} label="Import from text" hint="Paste and tidy" onClick={() => go('import-text')} />
             <Tile icon={<Link2 size={19} color={GREEN} />} label="Import from web" hint="From a recipe page" onClick={() => go('import-web')} />
-            <Tile icon={<PenLine size={19} color={GREEN} />} label="Write from scratch" hint="A blank form" onClick={() => go('add-recipe')} />
+            <Tile icon={<PenLine size={19} color={GREEN} />} label="Write from scratch" hint="A blank form" onClick={() => go('add-recipe', { fromAddPanel: true })} />
           </div>
         </div>
 
