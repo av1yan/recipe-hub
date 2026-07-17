@@ -29,6 +29,9 @@ export default function App() {
   const [resetToken, setResetToken] = useState<string | null>(null)
   // Which cookbook is open.
   const [cookbookId, setCookbookId] = useState<string | null>(null)
+  // Where a recipe was opened from, so its back button returns there rather
+  // than always dumping you on Browse.
+  const [recipeOrigin, setRecipeOrigin] = useState<Screen>('browse')
   const [loading, setLoading] = useState(true)
 
   // Check for existing auth token on load
@@ -85,6 +88,8 @@ export default function App() {
   const handleNavigation = (nextScreen: Screen, data?: any) => {
     if (nextScreen === 'recipe' && data?.recipe) {
       setCurrentRecipe(data.recipe)
+      // 'recipe' -> 'recipe' would strand you; cooking-mode returns here itself.
+      if (screen !== 'recipe') setRecipeOrigin(screen)
     }
     // Only carry a draft into the form when one was just parsed; opening the
     // form any other way must start blank.
@@ -154,7 +159,7 @@ export default function App() {
       case 'browse':
         return <BrowseScreen onNavigate={handleNavigation} />
       case 'recipe':
-        return <RecipeDetailScreen recipe={currentRecipe} onNavigate={handleNavigation} />
+        return <RecipeDetailScreen recipe={currentRecipe} backTo={recipeOrigin} onNavigate={handleNavigation} />
       case 'add-recipe':
         return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} />
       case 'import-web':

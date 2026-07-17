@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Plus, CalendarDays, BookOpen } from 'lucide-react'
+import { Plus, CalendarDays, BookOpen, X } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
 import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
-import { DAY_NAMES, MEALS, sameWeek, getMeals } from './MealPlanScreen'
+import { DAY_NAMES, MEALS, sameWeek, getMeals, mondayOf } from './MealPlanScreen'
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -36,6 +36,10 @@ export default function HomeScreen({ onNavigate }: Props) {
   const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>([])
   const [plannedThisWeek, setPlannedThisWeek] = useState(0)
   const [cookbooks, setCookbooks] = useState<any[]>([])
+  const [planId, setPlanId] = useState<string | null>(null)
+  // Which slot the add panel is filling, or null when it is closed.
+  const [addingSlot, setAddingSlot] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
 
   // Prefer the person's first name; fall back to their username.
   const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
@@ -53,7 +57,8 @@ export default function HomeScreen({ onNavigate }: Props) {
       const plans = await mealPlanAPI.list()
       const today = new Date()
       const plan = plans.find((p: any) => sameWeek(p.weekStart, today))
-      if (!plan) return
+      if (!plan) { setPlanId(null); setTodayMeals([]); return }
+      setPlanId(plan.id)
       const dayName = DAY_NAMES[(today.getDay() + 6) % 7]
       const found: { meal: any; cfg: typeof MEALS[number] }[] = []
       MEALS.forEach(cfg => getMeals(plan, dayName, cfg.key).forEach(meal => found.push({ meal, cfg })))
@@ -63,6 +68,46 @@ export default function HomeScreen({ onNavigate }: Props) {
       )
     } catch {
       /* home still works without a plan */
+    }
+  }
+
+  const todayName = DAY_NAMES[(new Date().getDay() + 6) % 7]
+  const filledSlots = new Set(todayMeals.map(m => m.cfg.key))
+
+  /** Takes a meal off today. mealId comes from the plan's link row. */
+  async function removeMeal(mealId: string) {
+    if (!mealId || busy) return
+    setBusy(true)
+    const before = todayMeals
+    setTodayMeals(prev => prev.filter(m => m.meal.mealId !== mealId))
+    try {
+      await mealPlanAPI.removeMeal(mealId)
+      await loadToday()
+    } catch {
+      setTodayMeals(before)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  /** Puts a recipe in one of today's slots, making this week's plan if needed. */
+  async function addMeal(recipeId: string, slot: string) {
+    if (busy) return
+    setBusy(true)
+    try {
+      let id = planId
+      if (!id) {
+        const created: any = await mealPlanAPI.create(mondayOf(new Date()))
+        id = created.id
+        setPlanId(id)
+      }
+      await mealPlanAPI.addMeal(id!, recipeId, todayName, slot)
+      setAddingSlot(null)
+      await loadToday()
+    } catch {
+      /* leave the panel open so it can be tried again */
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -117,7 +162,9 @@ export default function HomeScreen({ onNavigate }: Props) {
               todayMeals.map(({ meal, cfg }, i) => (
                 <div
                   key={i}
-                  onClick={() => onNavigate('recipe', { recipe: meal })}
+                  // The meal-plan API strips ingredients from its recipes, so
+                  // open the full one we already loaded; the meal is the fallback.
+                  onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
                 >
                   <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: cfg.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0, overflow: 'hidden' }}>
@@ -139,6 +186,15 @@ export default function HomeScreen({ onNavigate }: Props) {
                     </p>
                     {meal.calories && <p style={{ fontSize: '11px', color: '#94a3b8', margin: '2px 0 0' }}>{meal.calories} cal</p>}
                   </div>
+                  {/* Taking a meal off the day, not deleting the recipe, so no
+                      confirming -- it is put straight back by adding it again. */}
+                  <button
+                    onClick={e => { e.stopPropagation(); removeMeal(meal.mealId) }}
+                    aria-label={`Remove ${meal.name} from ${cfg.label}`}
+                    style={{ flexShrink: 0, width: '26px', height: '26px', borderRadius: '13px', background: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                  >
+                    <X size={13} color="#94a3b8" />
+                  </button>
                 </div>
               ))
             ) : (
@@ -154,6 +210,58 @@ export default function HomeScreen({ onNavigate }: Props) {
                   <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Tap to plan your day</p>
                 </div>
               </button>
+            )}
+
+            {/* Add a meal without leaving Home. Inline, like the meal plan's
+                own picker, rather than a popup. */}
+            {addingSlot === null ? (
+              MEALS.some(cfg => !filledSlots.has(cfg.key)) && (
+                <button
+                  onClick={() => setAddingSlot(MEALS.find(cfg => !filledSlots.has(cfg.key))!.key)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '10px', background: '#f0f7ed', color: '#6ba356', border: '1.5px dashed #c8e0bc', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  <Plus size={14} /> Add a meal
+                </button>
+              )
+            ) : (
+              <div style={{ background: '#fff', border: '1px solid #e8eef0', borderRadius: '14px', padding: '12px' }}>
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                  {MEALS.filter(cfg => !filledSlots.has(cfg.key)).map(cfg => (
+                    <button
+                      key={cfg.key}
+                      onClick={() => setAddingSlot(cfg.key)}
+                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? '#6ba356' : '#e2e8f0'), background: addingSlot === cfg.key ? '#6ba356' : '#fff', color: addingSlot === cfg.key ? '#fff' : '#64748b', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                    >
+                      {cfg.label}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ maxHeight: '168px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {recipes.map((r: any) => (
+                    <button
+                      key={r.id}
+                      onClick={() => addMeal(r.id, addingSlot)}
+                      disabled={busy}
+                      style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '7px', background: 'none', border: 'none', borderRadius: '10px', cursor: busy ? 'default' : 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' }}
+                    >
+                      <span style={{ width: '32px', height: '32px', borderRadius: '9px', background: '#f1f5f9', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
+                        {r.imageUrl
+                          ? <img src={recipeImageSrc(r.imageUrl, 32, 32)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                          : '🍽️'}
+                      </span>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: '13px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {r.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setAddingSlot(null)}
+                  style={{ width: '100%', marginTop: '8px', padding: '8px', background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Cancel
+                </button>
+              </div>
             )}
           </div>
 

@@ -6,6 +6,8 @@ import { BottomNavigation } from '../components/BottomNavigation'
 interface Props {
   recipe: Recipe | null
   onNavigate: (screen: Screen, data?: any) => void
+  /** Where the back button goes — wherever this recipe was opened from. */
+  backTo?: Screen
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -32,7 +34,7 @@ function sourceLabel(url: string): string {
   }
 }
 
-export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
+export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'browse' }: Props) {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set())
   const [isFavorited, setIsFavorited] = useState(recipe?.isFavorite || false)
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions'>('ingredients')
@@ -41,7 +43,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
     return (
       <div className="screen" style={{ background: '#f8fafc' }}>
         <header style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={() => onNavigate('browse')} className="btn btn-icon" style={{ background: 'none' }}>
+          <button onClick={() => onNavigate(backTo)} className="btn btn-icon" style={{ background: 'none' }}>
             <ArrowLeft size={22} />
           </button>
           <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>Recipe</h2>
@@ -49,7 +51,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
           <p>Recipe not found</p>
         </div>
-        <BottomNavigation active="browse" onNavigate={(s) => onNavigate(s as Screen)} />
+        <BottomNavigation active={backTo === 'home' ? 'home' : 'browse'} onNavigate={(s) => onNavigate(s as Screen)} />
       </div>
     )
   }
@@ -88,7 +90,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
           flexShrink: 0,
         }}>
           <button
-            onClick={() => onNavigate('browse')}
+            onClick={() => onNavigate(backTo)}
             style={{
               position: 'absolute', top: '12px', left: '12px',
               width: '36px', height: '36px', borderRadius: '10px',
@@ -326,7 +328,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate }: Props) {
         </div>
 
       </div>
-      <BottomNavigation active="browse" onNavigate={(s) => onNavigate(s as Screen)} />
+      <BottomNavigation active={backTo === 'home' ? 'home' : 'browse'} onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
 }
