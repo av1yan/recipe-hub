@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { ChevronLeft, Link2, Type, Image as ImageIcon, Loader2, ClipboardPaste } from 'lucide-react'
+import { ChevronLeft, Link2, Type, Image as ImageIcon, Loader2 } from 'lucide-react'
 import type { Screen } from '../types'
 import { importAPI } from '../utils/api'
 
@@ -90,6 +90,16 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
 
   const submitText = async (text: string) => {
     setError('')
+    // The button always presses. Say what is missing instead of sitting there
+    // greyed out with no reason given.
+    if (!text.trim()) {
+      setError('Paste or type a recipe into the box first')
+      return
+    }
+    if (text.trim().length < 12) {
+      setError("That's too short to read as a recipe — paste the whole thing")
+      return
+    }
     setBusy('Reading the recipe…')
     try {
       review(await importAPI.text(text))
@@ -97,19 +107,6 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
       setError(err instanceof Error ? err.message : 'Could not read that')
     } finally {
       setBusy('')
-    }
-  }
-
-  /** The obvious action on a phone, and it saves a fiddly long-press. */
-  const pasteFromClipboard = async () => {
-    setError('')
-    try {
-      const text = await navigator.clipboard.readText()
-      if (!text.trim()) { setError('There is nothing on the clipboard to paste'); return }
-      setValue(text)
-    } catch {
-      // Denied, or a browser that will not hand the clipboard over.
-      setError('Your browser would not share the clipboard — paste into the box with ⌘V instead')
     }
   }
 
@@ -200,16 +197,11 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', letterSpacing: '0.05em' }}>RECIPE</span>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button type="button" onClick={pasteFromClipboard} style={miniBtn}>
-                  <ClipboardPaste size={13} /> Paste
+              {value && (
+                <button type="button" onClick={() => { setValue(''); setError('') }} style={miniBtn}>
+                  Clear
                 </button>
-                {value && (
-                  <button type="button" onClick={() => { setValue(''); setError('') }} style={miniBtn}>
-                    Clear
-                  </button>
-                )}
-              </div>
+              )}
             </div>
             <textarea
               value={value}
@@ -218,14 +210,9 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
               rows={11}
               style={{ ...inputBase, resize: 'vertical', lineHeight: 1.5 }}
             />
-            <button onClick={() => submitText(value)} disabled={!!busy || value.trim().length < 12} style={{ ...primaryBtn(!!busy || value.trim().length < 12), marginTop: '12px' }}>
+            <button onClick={() => submitText(value)} disabled={!!busy} style={{ ...primaryBtn(!!busy), marginTop: '12px' }}>
               {busy || copy.cta}
             </button>
-            {!busy && value.trim().length < 12 && (
-              <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#94a3b8', textAlign: 'center' }}>
-                {value.trim() ? 'A little more than that to go on, please.' : 'Paste or type a recipe to turn this on.'}
-              </p>
-            )}
           </>
         ) : (
           <>
