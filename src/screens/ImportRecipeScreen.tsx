@@ -219,18 +219,20 @@ export default function ImportRecipeScreen({ mode, onNavigate }: Props) {
           </div>
         )}
 
-        {mode === 'social' && (
+        {mode === 'social' && !caption && (
           <p style={{ marginTop: '16px', fontSize: '12px', color: '#94a3b8', lineHeight: 1.6 }}>
-            Instagram and TikTok only hand out post captions to approved apps, so
-            many links can’t be read automatically. If one fails, copy the caption
-            and use <strong style={{ color: '#64748b' }}>Import from text</strong>.
+            TikTok links work. Instagram and Facebook only hand captions to apps
+            they have approved, so those can’t be read — copy the caption and use{' '}
+            <strong style={{ color: '#64748b' }}>Import from text</strong> instead.
           </p>
         )}
 
-        <p style={{ marginTop: '18px', fontSize: '12px', color: '#94a3b8', lineHeight: 1.6 }}>
-          Nothing is saved until you’ve looked it over — the recipe opens in the
-          normal form first.
-        </p>
+        {!caption && (
+          <p style={{ marginTop: '18px', fontSize: '12px', color: '#94a3b8', lineHeight: 1.6 }}>
+            Nothing is saved until you’ve looked it over — the recipe opens in the
+            normal form first.
+          </p>
+        )}
       </div>
 
       <style>{`.rh-spin { animation: rh-rot 1s linear infinite } @keyframes rh-rot { to { transform: rotate(360deg) } }`}</style>
