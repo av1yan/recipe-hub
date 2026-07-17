@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import { Home, Search, Plus, Calendar, ShoppingCart } from 'lucide-react'
+import { AddRecipeSheet } from './AddRecipeSheet'
+import type { Screen } from '../types'
 
 interface Props {
   active: string
@@ -14,7 +17,12 @@ const tabs = [
 ]
 
 export function BottomNavigation({ active, onNavigate }: Props) {
+  // The "+" now offers every way in, not just the blank form.
+  const [sheetOpen, setSheetOpen] = useState(false)
+
   return (
+    <>
+    <AddRecipeSheet open={sheetOpen} onClose={() => setSheetOpen(false)} onNavigate={onNavigate as (s: Screen, d?: any) => void} />
     <nav style={{
       display: 'flex',
       alignItems: 'center',
@@ -33,7 +41,8 @@ export function BottomNavigation({ active, onNavigate }: Props) {
           return (
             <button
               key={tab.id}
-              onClick={() => onNavigate(tab.screen)}
+              onClick={() => setSheetOpen(true)}
+              aria-label="Add a recipe"
               style={{
                 flex: 1, display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
@@ -93,5 +102,6 @@ export function BottomNavigation({ active, onNavigate }: Props) {
         )
       })}
     </nav>
+    </>
   )
 }

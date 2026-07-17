@@ -111,6 +111,12 @@ export const authAPI = {
     }),
 }
 
+// Import endpoints — both return a draft to review; neither saves anything.
+export const importAPI = {
+  url: (url: string) => apiRequest('/recipes/import/url', { method: 'POST', body: { url } }),
+  text: (text: string) => apiRequest('/recipes/import/text', { method: 'POST', body: { text } }),
+}
+
 // Recipe endpoints
 export const recipeAPI = {
   create: (data: any) =>

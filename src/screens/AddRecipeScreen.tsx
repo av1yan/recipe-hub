@@ -8,7 +8,29 @@ import { Toast, useToast } from '../components/Toast'
 import { fileToCompressedDataUrl } from '../utils/image'
 
 interface Props {
-  onNavigate: (screen: Screen) => void
+  onNavigate: (screen: Screen, data?: any) => void
+  /** A parsed import to review, or null when starting from scratch. */
+  draft?: any
+}
+
+/** Draft numbers arrive as numbers or null; the form's inputs want strings. */
+function numField(v: unknown): string {
+  return v === null || v === undefined || v === 0 ? '' : String(v)
+}
+
+// A <select> given a value it has no option for silently displays its first
+// option instead, so anything missing here is quietly rewritten on save. These
+// must cover every value the data or the importer can produce -- "Middle
+// Eastern" already exists on a saved recipe, and imports emit "Other".
+const CUISINES = [
+  'Italian', 'Asian', 'Mexican', 'American', 'Mediterranean',
+  'Indian', 'Middle Eastern', 'French', 'Other',
+]
+const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert']
+
+/** Keeps a draft's value only when the form can actually represent it. */
+function inList(value: unknown, list: string[], fallback: string): string {
+  return typeof value === 'string' && list.includes(value) ? value : fallback
 }
 
 type IngredientRow = { name: string; quantity: string; unit: string }
@@ -39,19 +61,30 @@ const stepBadge: React.CSSProperties = {
   fontSize: '13px', fontWeight: '700', marginTop: '5px',
 }
 
-export default function AddRecipeScreen({ onNavigate }: Props) {
-  const [name, setName] = useState('')
-  const [cuisine, setCuisine] = useState('Italian')
-  const [mealType, setMealType] = useState('lunch')
-  const [difficulty, setDifficulty] = useState('easy')
-  const [prepTime, setPrepTime] = useState('')
-  const [cookTime, setCookTime] = useState('')
-  const [servings, setServings] = useState('2')
-  const [calories, setCalories] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [tags, setTags] = useState<string[]>([])
-  const [ingredients, setIngredients] = useState<IngredientRow[]>([{ name: '', quantity: '', unit: '' }])
-  const [instructions, setInstructions] = useState<InstructionRow[]>([{ text: '', duration: '' }])
+export default function AddRecipeScreen({ onNavigate, draft }: Props) {
+  // An import arrives here as a draft to be checked over. Seeding useState
+  // rather than assigning in an effect means the fields are already filled on
+  // first paint, and stay editable like any other.
+  const [name, setName] = useState(draft?.name ?? '')
+  const [cuisine, setCuisine] = useState(inList(draft?.cuisine, CUISINES, 'Italian'))
+  const [mealType, setMealType] = useState(inList(draft?.mealType, MEAL_TYPES, 'lunch'))
+  const [difficulty, setDifficulty] = useState(inList(draft?.difficulty, ['easy', 'medium', 'hard'], 'easy'))
+  const [prepTime, setPrepTime] = useState(numField(draft?.prepTime))
+  const [cookTime, setCookTime] = useState(numField(draft?.cookTime))
+  const [servings, setServings] = useState(numField(draft?.servings) || '2')
+  const [calories, setCalories] = useState(numField(draft?.calories))
+  const [imageUrl, setImageUrl] = useState(draft?.imageUrl ?? '')
+  const [tags, setTags] = useState<string[]>(draft?.tags ?? [])
+  const [ingredients, setIngredients] = useState<IngredientRow[]>(
+    draft?.ingredients?.length
+      ? draft.ingredients.map((i: any) => ({ name: i.name, quantity: numField(i.quantity), unit: i.unit ?? '' }))
+      : [{ name: '', quantity: '', unit: '' }]
+  )
+  const [instructions, setInstructions] = useState<InstructionRow[]>(
+    draft?.instructions?.length
+      ? draft.instructions.map((i: any) => ({ text: i.text, duration: numField(i.duration) }))
+      : [{ text: '', duration: '' }]
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [photoBusy, setPhotoBusy] = useState(false)
@@ -156,22 +189,16 @@ export default function AddRecipeScreen({ onNavigate }: Props) {
           <div className="field">
             <label>Cuisine</label>
             <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
-              <option>Italian</option>
-              <option>Asian</option>
-              <option>Mexican</option>
-              <option>American</option>
-              <option>Mediterranean</option>
-              <option>Indian</option>
+              {CUISINES.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
 
           <div className="field">
             <label>Meal Type</label>
             <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
-              <option value="breakfast">Breakfast</option>
-              <option value="lunch">Lunch</option>
-              <option value="dinner">Dinner</option>
-              <option value="snack">Snack</option>
+              {MEAL_TYPES.map(m => (
+                <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
+              ))}
             </select>
           </div>
 

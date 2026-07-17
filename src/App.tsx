@@ -3,6 +3,7 @@ import { AppProvider } from './context/AppContext'
 import SplashScreen from './screens/SplashScreen'
 import SignInScreen from './screens/SignInScreen'
 import OnboardingScreen from './screens/OnboardingScreen'
+import ImportRecipeScreen from './screens/ImportRecipeScreen'
 import DietPreferencesScreen from './screens/DietPreferencesScreen'
 import HomeScreen from './screens/HomeScreen'
 import BrowseScreen from './screens/BrowseScreen'
@@ -20,6 +21,8 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('splash')
   const [user, setUser] = useState<User | null>(null)
   const [currentRecipe, setCurrentRecipe] = useState<Recipe | null>(null)
+  // A parsed import waiting to be reviewed in the Add Recipe form.
+  const [draft, setDraft] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   // Check for existing auth token on load
@@ -58,6 +61,11 @@ export default function App() {
   const handleNavigation = (nextScreen: Screen, data?: any) => {
     if (nextScreen === 'recipe' && data?.recipe) {
       setCurrentRecipe(data.recipe)
+    }
+    // Only carry a draft into the form when one was just parsed; opening the
+    // form any other way must start blank.
+    if (nextScreen === 'add-recipe') {
+      setDraft(data?.draft ?? null)
     }
     setScreen(nextScreen)
   }
@@ -117,7 +125,15 @@ export default function App() {
       case 'recipe':
         return <RecipeDetailScreen recipe={currentRecipe} onNavigate={handleNavigation} />
       case 'add-recipe':
-        return <AddRecipeScreen onNavigate={handleNavigation} />
+        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} />
+      case 'import-web':
+        return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} />
+      case 'import-text':
+        return <ImportRecipeScreen mode="text" onNavigate={handleNavigation} />
+      case 'import-photo':
+        return <ImportRecipeScreen mode="photo" onNavigate={handleNavigation} />
+      case 'import-social':
+        return <ImportRecipeScreen mode="social" onNavigate={handleNavigation} />
       case 'meal-plan':
         return <MealPlanScreen onNavigate={handleNavigation} />
       case 'grocery':
