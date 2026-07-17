@@ -13,6 +13,10 @@ export default function CookbooksScreen({ onNavigate }: Props) {
   const [newCookbookName, setNewCookbookName] = useState('')
   const [newCookbookDesc, setNewCookbookDesc] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
+  // Which cookbook is asking to be confirmed. Inline, not a popup.
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     loadCookbooks()
@@ -40,6 +44,20 @@ export default function CookbooksScreen({ onNavigate }: Props) {
       setShowCreateForm(false)
     } catch (error) {
       console.error('Failed to create cookbook:', error)
+    }
+  }
+
+  async function deleteCookbook(id: string) {
+    setError('')
+    setDeleting(true)
+    try {
+      await cookbookAPI.delete(id)
+      setCookbooks(prev => prev.filter(c => c.id !== id))
+      setConfirmId(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not delete that cookbook')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -121,6 +139,12 @@ export default function CookbooksScreen({ onNavigate }: Props) {
           </div>
         )}
 
+        {error && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: '#b91c1c' }}>{error}</p>
+          </div>
+        )}
+
         {cookbooks.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8', gap: '16px' }}>
             <p>No cookbooks yet</p>
@@ -156,9 +180,23 @@ export default function CookbooksScreen({ onNavigate }: Props) {
                     color: '#fff',
                     fontSize: '32px',
                     fontWeight: 'bold',
+                    position: 'relative',
                   }}
                 >
                   📖
+                  <button
+                    onClick={() => { setConfirmId(cookbook.id); setError('') }}
+                    aria-label={`Delete ${cookbook.name}`}
+                    style={{
+                      position: 'absolute', top: '6px', right: '6px',
+                      width: '28px', height: '28px', borderRadius: '14px',
+                      background: 'rgba(255,255,255,0.9)', border: 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Trash2 size={14} color="#64748b" />
+                  </button>
                 </div>
                 <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>
@@ -166,12 +204,35 @@ export default function CookbooksScreen({ onNavigate }: Props) {
                   </div>
                   {cookbook.description && (
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '8px', lineHeight: '1.4' }}>
-                      {cookbook.description.substring(0, 60)}...
+                      {cookbook.description.length > 60 ? cookbook.description.slice(0, 60) + '…' : cookbook.description}
                     </div>
                   )}
                   <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: 'auto' }}>
                     {cookbook.recipes?.length || 0} recipes
                   </div>
+
+                  {confirmId === cookbook.id && (
+                    <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                      <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 8px', lineHeight: 1.45 }}>
+                        Delete this cookbook? The recipes in it stay.
+                      </p>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                          onClick={() => setConfirmId(null)}
+                          style={{ flex: 1, padding: '7px', borderRadius: '8px', background: '#f1f5f9', color: '#64748b', border: 'none', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                        >
+                          Keep
+                        </button>
+                        <button
+                          onClick={() => deleteCookbook(cookbook.id)}
+                          disabled={deleting}
+                          style={{ flex: 1, padding: '7px', borderRadius: '8px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '12px', fontWeight: '700', cursor: deleting ? 'default' : 'pointer', opacity: deleting ? 0.6 : 1, fontFamily: 'inherit' }}
+                        >
+                          {deleting ? '…' : 'Delete'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

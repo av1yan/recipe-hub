@@ -239,6 +239,9 @@ export const cookbookAPI = {
 
   get: (id: string) => apiRequest(`/cookbooks/${id}`),
 
+  /** Deletes the cookbook only — the recipes in it stay. */
+  delete: (id: string) => apiRequest(`/cookbooks/${id}`, { method: 'DELETE' }),
+
   addRecipe: (cookbookId: string, recipeId: string) =>
     apiRequest(`/cookbooks/${cookbookId}/recipes`, {
       method: 'POST',

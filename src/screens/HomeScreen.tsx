@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Plus, CalendarDays } from 'lucide-react'
+import { Search, Plus, CalendarDays, BookOpen } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI } from '../utils/api'
@@ -165,11 +165,19 @@ export default function HomeScreen({ onNavigate }: Props) {
               <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
                 Your Recipes
               </h2>
-              {recipes.length > 0 && (
-                <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-                  See all →
+              {/* Cookbooks group your recipes, so the way in belongs beside them.
+                  Nothing linked to that screen before this. */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <button onClick={() => onNavigate('cookbooks')} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', color: '#94a3b8', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                  <BookOpen size={13} />
+                  Cookbooks
                 </button>
-              )}
+                {recipes.length > 0 && (
+                  <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                    See all →
+                  </button>
+                )}
+              </div>
             </div>
 
             {recent.length > 0 ? (
