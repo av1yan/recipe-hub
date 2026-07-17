@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Settings, Plus, CalendarDays } from 'lucide-react'
+import { Search, Plus, CalendarDays } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI } from '../utils/api'
@@ -73,29 +73,24 @@ export default function HomeScreen({ onNavigate }: Props) {
                 {getDateLabel()}
               </p>
               <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: 0, lineHeight: 1.2 }}>
-                {getGreeting()}{displayName ? `, ${displayName}` : ''} 👋
+                {/* The wave is joined by a non-breaking space so it wraps with
+                    the last word instead of stranding itself on its own line. */}
+                {getGreeting()}{displayName ? `,\u00A0${displayName}` : ''}{'\u00A0\u{1F44B}'}
               </h1>
               <p style={{ fontSize: '13px', color: '#94a3b8', margin: '6px 0 0' }}>
                 {recipes.length} recipe{recipes.length === 1 ? '' : 's'} · {plannedThisWeek} meal{plannedThisWeek === 1 ? '' : 's'} planned this week
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-              <button
-                onClick={() => onNavigate('settings')}
-                aria-label="Settings"
-                style={{ background: '#f1f5f9', border: 'none', width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-              >
-                <Settings size={18} color="#64748b" />
-              </button>
-              <button
-                onClick={() => onNavigate('settings')}
-                aria-label="Your account"
-                title={user?.name || undefined}
-                style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', fontSize: '15px', fontWeight: '700' }}
-              >
-                {initial}
-              </button>
-            </div>
+            {/* The avatar is the only way into settings from here -- a gear
+                beside it went to the same place and just split the target. */}
+            <button
+              onClick={() => onNavigate('settings')}
+              aria-label="Settings"
+              title={user?.name || undefined}
+              style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}
+            >
+              {initial}
+            </button>
           </div>
 
           {/* Search — hands off to Discover, which owns search */}
