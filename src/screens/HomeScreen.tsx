@@ -111,8 +111,7 @@ export default function HomeScreen({ onNavigate }: Props) {
     }
   }
 
-  const favCount = recipes.filter((r: any) => r.isFavorite).length
-  const recent = recipes.slice(0, 6)
+  const favorites = recipes.filter((r: any) => r.isFavorite)
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafc' }}>
@@ -266,40 +265,25 @@ export default function HomeScreen({ onNavigate }: Props) {
             )}
           </div>
 
-          {/* Your recipes */}
+          {/* Favorites — the recipes you've hearted, in the shelf shape that
+              used to hold "Your Recipes". "See all" opens the full list. */}
           <div style={{ marginBottom: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
-                Your Recipes
+                Favorites
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                {favCount > 0 && (
-                  <button
-                    onClick={() => onNavigate('favorites')}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer',
-                      background: 'none', border: 'none', padding: '4px 0',
-                      color: '#ef4444', fontSize: '13px', fontWeight: '700',
-                    }}
-                  >
-                    <Heart size={14} fill="#ef4444" color="#ef4444" />
-                    Favorites ({favCount})
-                  </button>
-                )}
-                {recipes.length > 0 && (
-                  <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-                    See all →
-                  </button>
-                )}
-              </div>
+              {favorites.length > 0 && (
+                <button onClick={() => onNavigate('favorites')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                  See all →
+                </button>
+              )}
             </div>
 
-            {recent.length > 0 ? (
+            {favorites.length > 0 ? (
               <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', marginLeft: '-2px', paddingLeft: '2px' }}>
-                {recent.map((recipe: any, i: number) => (
+                {favorites.slice(0, 6).map((recipe: any, i: number) => (
                   <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ minWidth: '110px', cursor: 'pointer' }}>
                     <div style={{
-                      position: 'relative',
                       width: '110px', height: '100px', borderRadius: '14px',
                       background: RECIPE_COLORS[i % RECIPE_COLORS.length] + '33',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -309,16 +293,6 @@ export default function HomeScreen({ onNavigate }: Props) {
                       {recipe.imageUrl
                         ? <img src={recipeImageSrc(recipe.imageUrl, 110, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                         : '🍽️'}
-                      {recipe.isFavorite && (
-                        <span style={{
-                          position: 'absolute', top: '6px', right: '6px',
-                          width: '22px', height: '22px', borderRadius: '11px',
-                          background: 'rgba(255,255,255,0.92)', display: 'flex',
-                          alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <Heart size={12} fill="#ef4444" color="#ef4444" />
-                        </span>
-                      )}
                     </div>
                     <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
                       {recipe.name}
@@ -331,15 +305,15 @@ export default function HomeScreen({ onNavigate }: Props) {
               </div>
             ) : (
               <button
-                onClick={() => onNavigate('add-recipe')}
+                onClick={() => onNavigate('browse')}
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
               >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Plus size={18} color="#6ba356" />
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Heart size={18} color="#ef4444" />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>No recipes yet</p>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Add your first one</p>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>No favorites yet</p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Tap the heart on a recipe to save it</p>
                 </div>
               </button>
             )}
