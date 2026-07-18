@@ -13,6 +13,7 @@ import AddRecipeScreen from './screens/AddRecipeScreen'
 import MealPlanScreen from './screens/MealPlanScreen'
 import GroceryListScreen from './screens/GroceryListScreen'
 import CookbooksScreen from './screens/CookbooksScreen'
+import FavoritesScreen from './screens/FavoritesScreen'
 import RecipeDetailScreen from './screens/RecipeDetailScreen'
 import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
@@ -203,6 +204,8 @@ export default function App() {
         return <CookbookDetailScreen cookbookId={cookbookId} onNavigate={handleNavigation} />
       case 'cookbooks':
         return <CookbooksScreen onNavigate={handleNavigation} />
+      case 'favorites':
+        return <FavoritesScreen onNavigate={handleNavigation} />
       case 'cooking-mode':
         return <CookingModeScreen recipe={currentRecipe} onNavigate={handleNavigation} />
       case 'settings':

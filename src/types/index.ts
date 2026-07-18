@@ -19,6 +19,7 @@ export type Screen =
   | 'cookbooks'
   | 'cookbook'
   | 'cooking-mode'
+  | 'favorites'
   | 'settings'
 
 export interface User {

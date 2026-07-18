@@ -40,8 +40,6 @@ export default function HomeScreen({ onNavigate }: Props) {
   // Which slot the add panel is filling, or null when it is closed.
   const [addingSlot, setAddingSlot] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  // Show only favorites in the Your Recipes shelf.
-  const [favOnly, setFavOnly] = useState(false)
 
   // Prefer the person's first name; fall back to their username.
   const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
@@ -114,7 +112,7 @@ export default function HomeScreen({ onNavigate }: Props) {
   }
 
   const favCount = recipes.filter((r: any) => r.isFavorite).length
-  const recent = (favOnly ? recipes.filter((r: any) => r.isFavorite) : recipes).slice(0, 6)
+  const recent = recipes.slice(0, 6)
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafc' }}>
@@ -277,17 +275,15 @@ export default function HomeScreen({ onNavigate }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 {favCount > 0 && (
                   <button
-                    onClick={() => setFavOnly(v => !v)}
-                    aria-pressed={favOnly}
+                    onClick={() => onNavigate('favorites')}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer',
-                      background: favOnly ? '#fee2e2' : 'none', border: 'none',
-                      borderRadius: '999px', padding: favOnly ? '4px 10px' : '4px 0',
-                      color: favOnly ? '#ef4444' : '#94a3b8', fontSize: '13px', fontWeight: '700',
+                      background: 'none', border: 'none', padding: '4px 0',
+                      color: '#ef4444', fontSize: '13px', fontWeight: '700',
                     }}
                   >
-                    <Heart size={14} fill={favOnly ? '#ef4444' : 'none'} color={favOnly ? '#ef4444' : '#94a3b8'} />
-                    {favOnly ? 'Favorites' : `Favorites (${favCount})`}
+                    <Heart size={14} fill="#ef4444" color="#ef4444" />
+                    Favorites ({favCount})
                   </button>
                 )}
                 {recipes.length > 0 && (
