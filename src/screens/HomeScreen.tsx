@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, CalendarDays, BookOpen, X, Heart } from 'lucide-react'
+import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
@@ -333,25 +333,33 @@ export default function HomeScreen({ onNavigate }: Props) {
             </div>
 
             {cookbooks.length > 0 ? (
-              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', marginLeft: '-2px', paddingLeft: '2px' }}>
-                {cookbooks.slice(0, 6).map((book: any, i: number) => (
-                  <div key={book.id} onClick={() => onNavigate('cookbook', { cookbookId: book.id })} style={{ minWidth: '110px', cursor: 'pointer' }}>
-                    <div style={{
-                      width: '110px', height: '100px', borderRadius: '14px',
-                      background: COOKBOOK_COLORS[i % COOKBOOK_COLORS.length],
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '32px', marginBottom: '8px',
-                    }}>
-                      📖
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {cookbooks.slice(0, 6).map((book: any, i: number) => {
+                  const count = book.recipes?.length ?? 0
+                  const tint = COOKBOOK_COLORS[i % COOKBOOK_COLORS.length]
+                  return (
+                    <div
+                      key={book.id}
+                      onClick={() => onNavigate('cookbook', { cookbookId: book.id })}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                    >
+                      {/* Small tinted book tile, echoing the meal cards' icon squares
+                          rather than the old full-bleed colour block. */}
+                      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
+                        📖
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {book.name}
+                        </h4>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                          {count} recipe{count === 1 ? '' : 's'}
+                        </p>
+                      </div>
+                      <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
                     </div>
-                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text)', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
-                      {book.name}
-                    </h4>
-                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: 0 }}>
-                      {book.recipes?.length ?? 0} recipe{(book.recipes?.length ?? 0) === 1 ? '' : 's'}
-                    </p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <button
