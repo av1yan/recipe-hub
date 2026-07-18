@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Trash2, Plus, Check, Camera, Loader2, X } from 'lucide-react'
-import type { Screen, GroceryList } from '../types'
+import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
@@ -22,6 +22,17 @@ function cleanLine(l: string): string {
     .replace(/^\s*\d+[.)]\s+/, '')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+// The backend folds a repeat add into an existing line, so it may return an
+// item we already have (same id, new quantity). Replace it in place rather than
+// appending, which would otherwise show a duplicate until the next reload.
+function upsertItem(items: GroceryItem[], item: GroceryItem): GroceryItem[] {
+  const idx = items.findIndex(i => i.id === item.id)
+  if (idx === -1) return [...items, item]
+  const next = items.slice()
+  next[idx] = item
+  return next
 }
 
 function parseGroceryLines(text: string): string[] {
@@ -116,7 +127,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       })
       setLists(lists.map(list =>
         list.id === selectedListId
-          ? { ...list, items: [...(list.items || []), item] }
+          ? { ...list, items: upsertItem(list.items || [], item) }
           : list
       ))
       setNewItemName('')
@@ -205,15 +216,16 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         setNewListName('')
         listId = list.id
       }
-      const added: any[] = []
+      let working: GroceryItem[] = lists.find(l => l.id === listId)?.items || []
       for (const raw of items) {
         const { name, quantity, unit } = parseItemParts(raw)
         const item = await groceryAPI.addItem(listId, { name, quantity, unit, category: 'general' })
-        added.push(item)
+        working = upsertItem(working, item)
       }
-      setLists(prev => prev.map(l => (l.id === listId ? { ...l, items: [...(l.items || []), ...added] } : l)))
+      const finalItems = working
+      setLists(prev => prev.map(l => (l.id === listId ? { ...l, items: finalItems } : l)))
       setScanned(null)
-      show(`Added ${added.length} item${added.length === 1 ? '' : 's'}`)
+      show(`Added ${items.length} item${items.length === 1 ? '' : 's'}`)
     } catch (err) {
       console.error('Failed to add scanned items:', err)
       show('Could not save items', 'error')

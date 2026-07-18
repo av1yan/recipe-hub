@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   ChevronRight, ChevronLeft, User, Crown,
-  SlidersHorizontal, HelpCircle, Zap, BookOpen,
-  Monitor, UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf, Sun, Moon,
+  SlidersHorizontal, HelpCircle,
+  UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf, Sun, Moon,
 } from 'lucide-react'
 import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
@@ -47,8 +47,7 @@ function selectElementText(el: HTMLElement | null) {
 
 type SubPage =
   | 'account' | 'subscription'
-  | 'preferences' | 'help' | 'shortcut'
-  | 'import-guides' | 'desktop' | 'invite' | null
+  | 'preferences' | 'help' | 'invite' | null
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -58,7 +57,7 @@ interface Props {
 const FAQ = [
   { q: 'How do I add a recipe?', a: 'Tap "Add Recipe" on the home screen. Fill in the recipe details, ingredients, and step-by-step instructions.' },
   { q: 'How does meal planning work?', a: 'Go to the Meals tab, create a new plan, then tap any day to assign a recipe to breakfast, lunch, or dinner.' },
-  { q: 'Can I import recipes from other apps?', a: 'Yes! Check "Read our import guides" in the Get Set Up section for step-by-step instructions for Paprika, AnyList, and more.' },
+  { q: 'Can I import recipes from other apps?', a: 'Yes! Tap the + button and choose Import — from a web link, a photo of a recipe card, or pasted text.' },
   { q: 'Can I use recipHub offline?', a: 'Once loaded, recipHub works offline for browsing your saved recipes. Adding or editing recipes requires an internet connection.' },
   { q: 'How do I delete my account?', a: 'Go to Account Settings and scroll to "Delete account". This action is permanent and cannot be undone.' },
 ]
@@ -330,53 +329,6 @@ function Preferences({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   )
 }
 
-function AppIconPage({ onBack }: { onBack: () => void }) {
-  const ua = navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua)
-  const isAndroid = /Android/.test(ua)
-  const showBoth = !isIOS && !isAndroid
-
-  const iosSteps = ['Tap the Share button at the bottom of Safari (the box with ↑ arrow)', 'Scroll down and tap "Add to Home Screen"', 'Tap "Add" in the top right corner']
-  const androidSteps = ['Tap the ⋮ menu in the top right of Chrome', 'Tap "Add to Home screen"', 'Tap "Add" to confirm']
-
-  return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
-      <SubHeader title="Add to Home Screen" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ fontSize: '56px', marginBottom: '12px' }}>📱</div>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px' }}>Add recipHub to your home screen</h3>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>Access it instantly like a native app — no app store needed.</p>
-        </div>
-
-        {(isIOS || showBoth) && (
-          <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
-            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 12px' }}>ON iPhone / iPad (Safari)</p>
-            {iosSteps.map((step, i) => (
-              <div key={i} style={{ display: 'flex', gap: '12px', marginBottom: i < iosSteps.length - 1 ? '10px' : 0 }}>
-                <div style={{ width: '22px', height: '22px', borderRadius: '11px', background: '#6ba356', color: '#fff', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
-                <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{step}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {(isAndroid || showBoth) && (
-          <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)' }}>
-            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 12px' }}>ON Android (Chrome)</p>
-            {androidSteps.map((step, i) => (
-              <div key={i} style={{ display: 'flex', gap: '12px', marginBottom: i < androidSteps.length - 1 ? '10px' : 0 }}>
-                <div style={{ width: '22px', height: '22px', borderRadius: '11px', background: '#6ba356', color: '#fff', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
-                <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{step}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 function HelpPage({ onBack }: { onBack: () => void }) {
   const [open, setOpen] = useState<number | null>(null)
   return (
@@ -401,78 +353,6 @@ function HelpPage({ onBack }: { onBack: () => void }) {
           ))}
         </div>
       </div>
-    </div>
-  )
-}
-
-function ImportGuides({ onBack }: { onBack: () => void }) {
-  const guides = [
-    { app: 'Paprika', steps: ['Open Paprika → Settings → Export', 'Choose "Paprika Recipe Format (.paprikarecipes)"', 'Share the file to recipHub via the Import option'] },
-    { app: 'AnyList', steps: ['Go to AnyList → My Recipes', 'Tap Share → Export as CSV', 'In recipHub, tap Add Recipe → Import'] },
-    { app: 'From the web', steps: ['Find any recipe on a website and copy its URL', 'In recipHub, tap Add Recipe → "Import from URL"', 'Paste the URL and tap Import'] },
-  ]
-
-  return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
-      <SubHeader title="Import Guides" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-        <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 20px', lineHeight: 1.5 }}>Bring your recipes from other apps into recipHub.</p>
-        {guides.map((guide, gi) => (
-          <div key={gi} style={{ marginBottom: '16px' }}>
-            <SectionHeader label={guide.app.toUpperCase()} />
-            <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)' }}>
-              {guide.steps.map((step, si) => (
-                <div key={si} style={{ display: 'flex', gap: '12px', marginBottom: si < guide.steps.length - 1 ? '10px' : 0 }}>
-                  <div style={{ width: '22px', height: '22px', borderRadius: '11px', background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{si + 1}</div>
-                  <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{step}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function DesktopPage({ onBack }: { onBack: () => void }) {
-  const urlRef = useRef<HTMLParagraphElement>(null)
-  const { toast, show } = useToast()
-  const url = window.location.origin
-
-  const copy = async () => {
-    const ok = await copyText(url)
-    if (ok) {
-      show('Link copied to clipboard')
-    } else {
-      selectElementText(urlRef.current)
-      show('Link selected — press copy to save it', 'error')
-    }
-  }
-
-  return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)', position: 'relative' }}>
-      <SubHeader title="Use on Desktop" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ fontSize: '56px', marginBottom: '12px' }}>🖥️</div>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px' }}>recipHub on desktop</h3>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0 }}>Open the link below in any browser on your computer.</p>
-        </div>
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
-          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>URL</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <p ref={urlRef} style={{ flex: 1, fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{url}</p>
-            <button onClick={copy} aria-label="Copy link" title="Copy link" style={{ flexShrink: 0, width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Copy size={16} color="#6ba356" />
-            </button>
-          </div>
-        </div>
-        <button onClick={copy} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          <Copy size={16} /> Copy Link
-        </button>
-      </div>
-      {toast && <Toast message={toast.message} tone={toast.tone} />}
     </div>
   )
 }
@@ -544,10 +424,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} />
   if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} onNavigate={onNavigate} />
-  if (subPage === 'shortcut') return <AppIconPage onBack={() => setSubPage(null)} />
   if (subPage === 'help') return <HelpPage onBack={() => setSubPage(null)} />
-  if (subPage === 'import-guides') return <ImportGuides onBack={() => setSubPage(null)} />
-  if (subPage === 'desktop') return <DesktopPage onBack={() => setSubPage(null)} />
   if (subPage === 'invite') return <InvitePage onBack={() => setSubPage(null)} />
 
   return (
@@ -603,17 +480,6 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
                 ))}
               </div>
             </div>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <SectionHeader label="GET SET UP" />
-          <div style={{ borderRadius: '14px', overflow: 'hidden', margin: '0 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', border: '1px solid var(--color-subtle)' }}>
-            <Row icon={<Zap size={18} color="#6ba356" />} label="Add the recipHub shortcut" onPress={() => setSubPage('shortcut')} />
-            <Divider />
-            <Row icon={<BookOpen size={18} color="var(--color-text-secondary)" />} label="Read our import guides" onPress={() => setSubPage('import-guides')} />
-            <Divider />
-            <Row icon={<Monitor size={18} color="var(--color-text-secondary)" />} label="Use recipHub on desktop" onPress={() => setSubPage('desktop')} />
           </div>
         </div>
 
