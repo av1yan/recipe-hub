@@ -102,16 +102,18 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
 
       {/* Ingredients overlay */}
       {showIngredients && (
-        <div style={{ position: 'absolute', top: '67px', left: 0, right: 0, bottom: 0, background: 'var(--color-card)', zIndex: 10, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'absolute', top: '67px', left: 0, right: 0, bottom: 0, background: 'var(--color-bg)', zIndex: 10, display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 16px' }}>Ingredients</h3>
             {(recipe as any).ingredients?.length > 0 ? (
-              (recipe as any).ingredients.map((ing: any) => (
-                <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--color-subtle)' }}>
-                  <span style={{ fontSize: '14px', color: 'var(--color-text)' }}>{ing.name}</span>
-                  <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: '600' }}>{ing.quantity} {ing.unit}</span>
-                </div>
-              ))
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {(recipe as any).ingredients.map((ing: any) => (
+                  <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ing.name}</span>
+                    <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>{ing.quantity} {ing.unit}</span>
+                  </div>
+                ))}
+              </div>
             ) : (
               <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '32px' }}>No ingredients listed</p>
             )}
