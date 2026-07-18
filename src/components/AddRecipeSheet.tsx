@@ -36,7 +36,10 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
           // (44px in App) rather than painting over it like no other screen does.
           position: 'absolute', top: '44px', left: 0, right: 0, bottom: 0, zIndex: 41,
           background: 'var(--color-bg)', display: 'flex', flexDirection: 'column',
-          animation: 'rh-panel-up 0.24s cubic-bezier(0.32, 0.72, 0, 1)',
+          // A plain fade, not a slide. A translateY entrance offsets the panel
+          // (and its nav) from the home screen showing through during the fade,
+          // which ghosts and settles -- read as a "shake" on open.
+          animation: 'rh-panel-in 0.18s ease',
         }}
       >
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', flexShrink: 0 }}>
@@ -91,7 +94,7 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
       </div>
 
       <style>{`
-        @keyframes rh-panel-up { from { transform: translateY(14px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+        @keyframes rh-panel-in { from { opacity: 0 } to { opacity: 1 } }
       `}</style>
     </>
   )
