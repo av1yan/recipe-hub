@@ -106,7 +106,9 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
       if (!list?.id) list = await groceryAPI.create('Groceries')
       const items = recipe!.ingredients || []
       await Promise.all(items.map((ing: any) =>
-        groceryAPI.addItem(list.id, { name: ing.name, quantity: round2((ing.quantity || 1) * scale), unit: ing.unit })
+        // category is required by the grocery item model; match the grocery
+        // screen's default.
+        groceryAPI.addItem(list.id, { name: ing.name, quantity: round2((ing.quantity || 1) * scale), unit: ing.unit, category: 'general' })
       ))
       show(`Added ${items.length} item${items.length === 1 ? '' : 's'} to groceries`)
     } catch {
