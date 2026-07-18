@@ -298,20 +298,33 @@ export default function BrowseScreen({ onNavigate }: Props) {
 
             {/* Explore recipes by */}
             <div style={{ padding: '22px 16px 0' }}>
-              <p style={{ fontSize: '14px', fontWeight: '600', color: '#475569', margin: '0 0 10px' }}>Explore recipes by</p>
+              <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-secondary)', margin: '0 0 10px' }}>Explore recipes by</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                {EXPLORE.map(cat => (
-                  <button
-                    key={cat.key}
-                    onClick={() => setExploreCat(exploreCat === cat.key ? null : cat.key)}
-                    disabled={cat.values.length === 0}
-                    style={{ background: cat.bg, border: exploreCat === cat.key ? '2px solid #1e293b' : '2px solid transparent', borderRadius: '14px', padding: '14px', textAlign: 'left', cursor: cat.values.length ? 'pointer' : 'default', opacity: cat.values.length ? 1 : 0.5 }}
-                  >
-                    <div style={{ fontSize: '20px', marginBottom: '18px' }}>{cat.emoji}</div>
-                    {/* Fixed dark: cat.bg is a light pastel in both themes. */}
-                    <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b' }}>{cat.label}</div>
-                  </button>
-                ))}
+                {EXPLORE.map(cat => {
+                  const selected = exploreCat === cat.key
+                  return (
+                    <button
+                      key={cat.key}
+                      onClick={() => setExploreCat(selected ? null : cat.key)}
+                      disabled={cat.values.length === 0}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px',
+                        background: 'var(--color-card)',
+                        border: `2px solid ${selected ? '#6ba356' : 'var(--color-subtle)'}`,
+                        borderRadius: '14px', padding: '14px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                        textAlign: 'left', cursor: cat.values.length ? 'pointer' : 'default',
+                        opacity: cat.values.length ? 1 : 0.5, fontFamily: 'inherit',
+                      }}
+                    >
+                      {/* Emoji in a category-tinted tile, matching the app's card tiles. */}
+                      <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: cat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                        {cat.emoji}
+                      </div>
+                      <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text)' }}>{cat.label}</div>
+                    </button>
+                  )
+                })}
               </div>
 
               {/* Inline values for the chosen category */}
