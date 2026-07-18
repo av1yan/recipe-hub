@@ -18,6 +18,12 @@
   --color-bg: #f8fafc;
   --color-card: #ffffff;
   --color-input: #f1f5f9;
+  --color-subtle: #f1f5f9;
+  --color-accent: #6ba356;
+  /* The area behind the phone mockup, and the translucent bottom nav. */
+  --color-desk: #f5f5f5;
+  --color-nav-bg: rgba(255, 255, 255, 0.82);
+  --color-nav-border: rgba(0, 0, 0, 0.12);
 
   /* Borders */
   --color-border: #e2e8f0;
@@ -49,6 +55,31 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+}
+
+/* Dark theme -- the app root gets data-theme="dark" (from the saved setting or
+   the system preference). Only the palette flips; brand green and reds carry
+   over. Set once here rather than per component. */
+:root[data-theme="dark"] {
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+
+  --color-bg: #0f172a;
+  --color-card: #1e293b;
+  --color-input: #334155;
+  --color-subtle: #334155;
+  --color-border: #334155;
+
+  --color-primary-bg: rgba(107, 163, 86, 0.20);
+  --color-primary-border: rgba(107, 163, 86, 0.45);
+  --color-error-bg: rgba(239, 68, 68, 0.20);
+
+  --color-desk: #0a0e17;
+  --color-nav-bg: rgba(15, 23, 42, 0.82);
+  --color-nav-border: rgba(255, 255, 255, 0.10);
+
+  color-scheme: dark;
 }
 
 * {
@@ -113,7 +144,7 @@ img {
 }
 
 .text-muted {
-  color: rgba(32, 30, 29, 0.55);
+  color: var(--color-text-muted);
 }
 
 .app-container {
@@ -130,7 +161,7 @@ img {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--color-bg);
   overflow-x: hidden;
   overflow-y: auto;
   box-sizing: border-box;
@@ -175,7 +206,7 @@ img {
 
 .btn-secondary {
   border-color: var(--color-divider);
-  background: #fff;
+  background: var(--color-card);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -208,7 +239,7 @@ img {
 
 .field > label {
   font-size: 12px;
-  color: rgba(32, 30, 29, 0.7);
+  color: var(--color-text-secondary);
   font-weight: 600;
 }
 
@@ -221,8 +252,8 @@ img {
   font-size: 14px;
   color: var(--color-text);
   caret-color: var(--color-accent);
-  background: #f1f5f9;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--color-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   transition: border-color 0.2s ease;
   box-sizing: border-box;

@@ -7,7 +7,7 @@ export function Toast({ message, tone, bottom = '28px' }: { message: string; ton
     <div style={{ position: 'absolute', bottom, left: '16px', right: '16px', display: 'flex', justifyContent: 'center', zIndex: 100, pointerEvents: 'none' }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: '9px',
-        background: tone === 'error' ? '#334155' : '#1e293b', color: '#fff',
+        background: tone === 'error' ? '#b91c1c' : '#334155', color: '#fff',
         padding: '12px 18px', borderRadius: '999px', fontSize: '14px', fontWeight: '600',
         boxShadow: '0 10px 28px rgba(0,0,0,0.3)', maxWidth: '100%',
         animation: 'toastPop 0.3s cubic-bezier(0.16, 1, 0.3, 1)',

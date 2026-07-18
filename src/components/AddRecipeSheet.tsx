@@ -8,7 +8,7 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
 }
 
-const TINT = '#eaf3e6'
+const TINT = 'var(--color-primary-bg)'
 const GREEN = '#6ba356'
 
 /**
@@ -35,12 +35,12 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
           // Anchored to the phone frame, so it must start below the status bar
           // (44px in App) rather than painting over it like no other screen does.
           position: 'absolute', top: '44px', left: 0, right: 0, bottom: 0, zIndex: 41,
-          background: '#fff', display: 'flex', flexDirection: 'column',
+          background: 'var(--color-card)', display: 'flex', flexDirection: 'column',
           animation: 'rh-panel-up 0.24s cubic-bezier(0.32, 0.72, 0, 1)',
         }}
       >
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', flexShrink: 0 }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>
             Add a recipe
           </h2>
           <button
@@ -48,16 +48,16 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
             aria-label="Close"
             style={{
               width: '34px', height: '34px', borderRadius: '17px', border: 'none',
-              background: '#f1f5f9', display: 'flex', alignItems: 'center',
+              background: 'var(--color-subtle)', display: 'flex', alignItems: 'center',
               justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
             }}
           >
-            <X size={18} color="#64748b" />
+            <X size={18} color="var(--color-text-secondary)" />
           </button>
         </header>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px 20px' }}>
-          <p style={{ fontSize: '13.5px', color: '#94a3b8', margin: '0 0 16px', lineHeight: 1.55 }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', margin: '0 0 16px', lineHeight: 1.55 }}>
             Bring one in from somewhere, or start with a blank page. Anything
             imported opens in the form for you to check first.
           </p>
@@ -65,10 +65,10 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
           <button onClick={() => go('import-social')} style={wideCard}>
             <SocialIcons />
             <div style={{ textAlign: 'left', minWidth: 0 }}>
-              <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+              <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>
                 Import from social media
               </p>
-              <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: '#94a3b8' }}>
+              <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: 'var(--color-text-muted)' }}>
                 Paste a link from Instagram or TikTok
               </p>
             </div>
@@ -103,7 +103,7 @@ function Tile({ icon, label, hint, onClick }: { icon: React.ReactNode; label: st
       onClick={onClick}
       style={{
         display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px',
-        padding: '16px', background: '#fff', border: '1px solid #e8eef0',
+        padding: '16px', background: 'var(--color-card)', border: '1px solid #e8eef0',
         borderRadius: '14px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
       }}
     >
@@ -114,8 +114,8 @@ function Tile({ icon, label, hint, onClick }: { icon: React.ReactNode; label: st
         {icon}
       </span>
       <span style={{ minWidth: 0 }}>
-        <span style={{ display: 'block', fontSize: '13.5px', fontWeight: '700', color: '#1e293b' }}>{label}</span>
-        <span style={{ display: 'block', fontSize: '11.5px', color: '#94a3b8', marginTop: '2px' }}>{hint}</span>
+        <span style={{ display: 'block', fontSize: '13.5px', fontWeight: '700', color: 'var(--color-text)' }}>{label}</span>
+        <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{hint}</span>
       </span>
     </button>
   )
@@ -123,7 +123,7 @@ function Tile({ icon, label, hint, onClick }: { icon: React.ReactNode; label: st
 
 const wideCard: React.CSSProperties = {
   width: '100%', display: 'flex', alignItems: 'center', gap: '14px',
-  padding: '16px 14px', background: '#fff', border: '1px solid #e8eef0',
+  padding: '16px 14px', background: 'var(--color-card)', border: '1px solid #e8eef0',
   borderRadius: '14px', cursor: 'pointer', fontFamily: 'inherit',
 }
 

@@ -47,14 +47,14 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: '#f0f7ed', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--color-primary-bg)', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ padding: '32px 24px 16px', textAlign: 'center', flexShrink: 0 }}>
         <div style={{ fontSize: '52px', marginBottom: '12px' }}>🥗</div>
-        <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px' }}>
           Your Diet
         </h1>
-        <p style={{ fontSize: '15px', color: '#64748b', margin: 0 }}>
+        <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0 }}>
           Select your preferences so we can tailor suggestions.
         </p>
       </div>
@@ -71,7 +71,7 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '6px',
                   padding: '11px 18px',
-                  background: active ? '#6ba356' : '#fff',
+                  background: active ? '#6ba356' : 'var(--color-card)',
                   color: active ? '#fff' : '#334155',
                   border: active ? '2px solid #6ba356' : '2px solid #d7e8cd',
                   borderRadius: '999px',
@@ -89,7 +89,7 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
           })}
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: '13px', color: '#94a3b8', marginTop: '20px' }}>
+        <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '20px' }}>
           {selectedDiet.length === 0
             ? 'Tap any that apply — or skip for now.'
             : `${selectedDiet.length} selected`}

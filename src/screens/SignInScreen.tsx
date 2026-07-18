@@ -60,20 +60,20 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
   }
 
   return (
-    <div className="screen" style={{ background: '#fff', padding: '24px 16px', display: 'flex', flexDirection: 'column' }}>
+    <div className="screen" style={{ background: 'var(--color-card)', padding: '24px 16px', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <div style={{ fontSize: '36px', marginBottom: '12px' }}>📖</div>
-        <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: 0, marginBottom: '6px', wordBreak: 'break-word' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--color-text)', margin: 0, marginBottom: '6px', wordBreak: 'break-word' }}>
           {isSignUp ? 'Create Account' : 'Welcome back'}
         </h1>
-        <p style={{ fontSize: '13px', color: '#64748b', margin: 0, wordBreak: 'break-word' }}>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, wordBreak: 'break-word' }}>
           {isSignUp ? 'Join recipHub to start cooking smarter' : 'Sign in to your recipHub'}
         </p>
       </div>
 
       {error && (
-        <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '20px', color: '#991b1b', fontSize: '13px' }}>
+        <div style={{ background: 'var(--color-error-bg)', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '20px', color: '#991b1b', fontSize: '13px' }}>
           {error}
         </div>
       )}
@@ -82,7 +82,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px', width: '100%', boxSizing: 'border-box' }}>
         {isSignUp && (
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>Name</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Name</label>
             <input
               type="text"
               placeholder="John Doe"
@@ -93,9 +93,9 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
                 width: '100%',
                 padding: '12px 14px',
                 fontSize: '14px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--color-border)',
                 borderRadius: '10px',
-                background: '#f8fafc',
+                background: 'var(--color-bg)',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit'
               }}
@@ -104,7 +104,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
         )}
 
         <div>
-          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
             {isSignUp ? 'Email' : 'Email or username'}
           </label>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -125,9 +125,9 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
                 width: '100%',
                 padding: '12px 14px 12px 40px',
                 fontSize: '14px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--color-border)',
                 borderRadius: '10px',
-                background: '#f8fafc',
+                background: 'var(--color-bg)',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit'
               }}
@@ -136,7 +136,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>Password</label>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Password</label>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Lock size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
             <input
@@ -149,9 +149,9 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
                 width: '100%',
                 padding: '12px 14px 12px 40px',
                 fontSize: '14px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--color-border)',
                 borderRadius: '10px',
-                background: '#f8fafc',
+                background: 'var(--color-bg)',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit'
               }}
@@ -204,7 +204,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
       <button
         type="button"
         onClick={() => { setIsSignUp(!isSignUp); setError('') }}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#64748b', padding: '4px 0 18px', fontFamily: 'inherit', width: '100%' }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--color-text-secondary)', padding: '4px 0 18px', fontFamily: 'inherit', width: '100%' }}
       >
         {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
         <strong style={{ color: '#6ba356' }}>{isSignUp ? 'Sign in' : 'Sign up'}</strong>
@@ -215,9 +215,9 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
       {(providers.google || providers.apple) && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-            <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '500' }}>or</span>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+            <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontWeight: '500' }}>or</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -248,17 +248,17 @@ function OAuthButton({ provider, label, icon }: { provider: string; label: strin
         justifyContent: 'center',
         gap: '8px',
         padding: '12px 16px',
-        border: '1px solid #e2e8f0',
-        background: '#fff',
+        border: '1px solid var(--color-border)',
+        background: 'var(--color-card)',
         borderRadius: '10px',
         fontSize: '14px',
         fontWeight: '600',
-        color: '#1e293b',
+        color: 'var(--color-text)',
         cursor: 'pointer',
         transition: 'all 0.3s ease',
         fontFamily: 'inherit',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg)'}
       onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
     >
       {icon}
@@ -280,7 +280,7 @@ function GoogleIcon() {
 
 function AppleIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 384 512" aria-hidden="true" fill="#1e293b">
+    <svg width="16" height="16" viewBox="0 0 384 512" aria-hidden="true" fill="var(--color-text)">
       <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
   )

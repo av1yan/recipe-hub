@@ -217,11 +217,11 @@ export default function App() {
 
   return (
     <AppProvider user={user} openAddSheet={openAddSheet}>
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#f5f5f5', padding: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: 'var(--color-desk)', padding: '20px' }}>
         <div style={{
           width: '375px',
           height: '812px',
-          background: '#fff',
+          background: 'var(--color-card)',
           borderRadius: '40px',
           boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
           overflow: 'hidden',
@@ -231,7 +231,7 @@ export default function App() {
           border: '12px solid #000'
         }}>
           {/* Status bar */}
-          <div style={{ height: '44px', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', fontSize: '14px', fontWeight: '600' }}>
+          <div style={{ height: '44px', background: 'var(--color-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', fontSize: '14px', fontWeight: '600' }}>
             <span>9:41</span>
             <span>📶 🔋</span>
           </div>

@@ -114,21 +114,21 @@ export default function HomeScreen({ onNavigate }: Props) {
   const favorites = recipes.filter((r: any) => r.isFavorite)
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafc' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--color-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {/* Header */}
-        <div style={{ background: '#fff', padding: '16px 16px 0', borderBottom: '1px solid #f1f5f9' }}>
+        <div style={{ background: 'var(--color-card)', padding: '16px 16px 0', borderBottom: '1px solid var(--color-subtle)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '12px' }}>
             <div style={{ minWidth: 0 }}>
-              <p style={{ color: '#94a3b8', fontSize: '11px', fontWeight: '600', letterSpacing: '0.06em', margin: '0 0 2px' }}>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '11px', fontWeight: '600', letterSpacing: '0.06em', margin: '0 0 2px' }}>
                 {getDateLabel()}
               </p>
-              <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', margin: 0, lineHeight: 1.2 }}>
+              <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--color-text)', margin: 0, lineHeight: 1.2 }}>
                 {/* The wave is joined by a non-breaking space so it wraps with
                     the last word instead of stranding itself on its own line. */}
                 {getGreeting()}{displayName ? `,\u00A0${displayName}` : ''}{'\u00A0\u{1F44B}'}
               </h1>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: '6px 0 0' }}>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
                 {recipes.length} recipe{recipes.length === 1 ? '' : 's'} · {plannedThisWeek} meal{plannedThisWeek === 1 ? '' : 's'} planned this week
               </p>
             </div>
@@ -149,7 +149,7 @@ export default function HomeScreen({ onNavigate }: Props) {
         <div style={{ padding: '20px 16px 0' }}>
           {/* Today's meals — real plan data */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: 0, letterSpacing: '-0.01em' }}>
               Today's Meals
             </h2>
             <button onClick={() => onNavigate('meal-plan')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
@@ -165,7 +165,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                   // The meal-plan API strips ingredients from its recipes, so
                   // open the full one we already loaded; the meal is the fallback.
                   onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}
-                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
                 >
                   <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: cfg.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0, overflow: 'hidden' }}>
                     {meal.imageUrl
@@ -173,41 +173,41 @@ export default function HomeScreen({ onNavigate }: Props) {
                       : cfg.emoji}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', margin: 0, letterSpacing: '0.06em' }}>
+                    <p style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.06em' }}>
                       {cfg.label.toUpperCase()}
                     </p>
-                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {meal.name}
                     </h3>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', margin: 0 }}>
+                    <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: '500', margin: 0 }}>
                       {(meal.prepTime || 0) + (meal.cookTime || 0)} min
                     </p>
-                    {meal.calories && <p style={{ fontSize: '11px', color: '#94a3b8', margin: '2px 0 0' }}>{meal.calories} cal</p>}
+                    {meal.calories && <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>{meal.calories} cal</p>}
                   </div>
                   {/* Taking a meal off the day, not deleting the recipe, so no
                       confirming -- it is put straight back by adding it again. */}
                   <button
                     onClick={e => { e.stopPropagation(); removeMeal(meal.mealId) }}
                     aria-label={`Remove ${meal.name} from ${cfg.label}`}
-                    style={{ flexShrink: 0, width: '26px', height: '26px', borderRadius: '13px', background: '#f8fafc', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    style={{ flexShrink: 0, width: '26px', height: '26px', borderRadius: '13px', background: 'var(--color-bg)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                   >
-                    <X size={13} color="#94a3b8" />
+                    <X size={13} color="var(--color-text-muted)" />
                   </button>
                 </div>
               ))
             ) : (
               <button
                 onClick={() => onNavigate('meal-plan')}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
               >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <CalendarDays size={18} color="#6ba356" />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>Nothing planned today</p>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Tap to plan your day</p>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>Nothing planned today</p>
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Tap to plan your day</p>
                 </div>
               </button>
             )}
@@ -218,19 +218,19 @@ export default function HomeScreen({ onNavigate }: Props) {
               MEALS.some(cfg => !filledSlots.has(cfg.key)) && (
                 <button
                   onClick={() => setAddingSlot(MEALS.find(cfg => !filledSlots.has(cfg.key))!.key)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '10px', background: '#f0f7ed', color: '#6ba356', border: '1.5px dashed #c8e0bc', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: '#6ba356', border: '1.5px dashed var(--color-primary-border)', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   <Plus size={14} /> Add a meal
                 </button>
               )
             ) : (
-              <div style={{ background: '#fff', border: '1px solid #e8eef0', borderRadius: '14px', padding: '12px' }}>
+              <div style={{ background: 'var(--color-card)', border: '1px solid #e8eef0', borderRadius: '14px', padding: '12px' }}>
                 <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
                   {MEALS.filter(cfg => !filledSlots.has(cfg.key)).map(cfg => (
                     <button
                       key={cfg.key}
                       onClick={() => setAddingSlot(cfg.key)}
-                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? '#6ba356' : '#e2e8f0'), background: addingSlot === cfg.key ? '#6ba356' : '#fff', color: addingSlot === cfg.key ? '#fff' : '#64748b', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? '#6ba356' : 'var(--color-border)'), background: addingSlot === cfg.key ? '#6ba356' : 'var(--color-card)', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       {cfg.label}
                     </button>
@@ -244,12 +244,12 @@ export default function HomeScreen({ onNavigate }: Props) {
                       disabled={busy}
                       style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '7px', background: 'none', border: 'none', borderRadius: '10px', cursor: busy ? 'default' : 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' }}
                     >
-                      <span style={{ width: '32px', height: '32px', borderRadius: '9px', background: '#f1f5f9', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
+                      <span style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'var(--color-subtle)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
                         {r.imageUrl
                           ? <img src={recipeImageSrc(r.imageUrl, 32, 32)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                           : '🍽️'}
                       </span>
-                      <span style={{ flex: 1, minWidth: 0, fontSize: '13px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: '13px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {r.name}
                       </span>
                     </button>
@@ -257,7 +257,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 </div>
                 <button
                   onClick={() => setAddingSlot(null)}
-                  style={{ width: '100%', marginTop: '8px', padding: '8px', background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ width: '100%', marginTop: '8px', padding: '8px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   Cancel
                 </button>
@@ -269,7 +269,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               used to hold "Your Recipes". "See all" opens the full list. */}
           <div style={{ marginBottom: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: 0, letterSpacing: '-0.01em' }}>
                 Favorites
               </h2>
               {favorites.length > 0 && (
@@ -294,10 +294,10 @@ export default function HomeScreen({ onNavigate }: Props) {
                         ? <img src={recipeImageSrc(recipe.imageUrl, 110, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                         : '🍽️'}
                     </div>
-                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
+                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text)', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
                       {recipe.name}
                     </h4>
-                    <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: 0 }}>
                       {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
                     </p>
                   </div>
@@ -306,14 +306,14 @@ export default function HomeScreen({ onNavigate }: Props) {
             ) : (
               <button
                 onClick={() => onNavigate('browse')}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
               >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-error-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Heart size={18} color="#ef4444" />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>No favorites yet</p>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Tap the heart on a recipe to save it</p>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>No favorites yet</p>
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Tap the heart on a recipe to save it</p>
                 </div>
               </button>
             )}
@@ -322,7 +322,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           {/* Cookbooks — same shelf shape as the recipes they group. */}
           <div style={{ marginBottom: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
+              <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: 0, letterSpacing: '-0.01em' }}>
                 Cookbooks
               </h2>
               {cookbooks.length > 0 && (
@@ -344,10 +344,10 @@ export default function HomeScreen({ onNavigate }: Props) {
                     }}>
                       📖
                     </div>
-                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
+                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text)', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
                       {book.name}
                     </h4>
-                    <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: 0 }}>
                       {book.recipes?.length ?? 0} recipe{(book.recipes?.length ?? 0) === 1 ? '' : 's'}
                     </p>
                   </div>
@@ -356,14 +356,14 @@ export default function HomeScreen({ onNavigate }: Props) {
             ) : (
               <button
                 onClick={() => onNavigate('cookbooks')}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
               >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <BookOpen size={18} color="#6ba356" />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>No cookbooks yet</p>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Group your recipes into one</p>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>No cookbooks yet</p>
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Group your recipes into one</p>
                 </div>
               </button>
             )}

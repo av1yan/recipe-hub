@@ -65,14 +65,14 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
 
   if (!recipe) {
     return (
-      <div className="screen" style={{ background: '#f8fafc' }}>
-        <header style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="screen" style={{ background: 'var(--color-bg)' }}>
+        <header style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={() => onNavigate(backTo)} className="btn btn-icon" style={{ background: 'none' }}>
             <ArrowLeft size={22} />
           </button>
           <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>Recipe</h2>
         </header>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
           <p>Recipe not found</p>
         </div>
         <BottomNavigation active={backTo === 'home' ? 'home' : 'browse'} onNavigate={(s) => onNavigate(s as Screen)} />
@@ -160,7 +160,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   ]
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafc' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--color-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
 
         {/* Hero */}
@@ -185,7 +185,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               zIndex: 2,
             }}
           >
-            <ArrowLeft size={18} color="#1e293b" />
+            <ArrowLeft size={18} color="var(--color-text)" />
           </button>
           <button
             onClick={toggleFavorite}
@@ -202,7 +202,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               zIndex: 2,
             }}
           >
-            <Heart size={18} color={isFavorited ? '#ef4444' : '#94a3b8'} fill={isFavorited ? '#ef4444' : 'none'} />
+            <Heart size={18} color={isFavorited ? '#ef4444' : 'var(--color-text-muted)'} fill={isFavorited ? '#ef4444' : 'none'} />
             {isFavorited && <span style={{ fontSize: '13px', fontWeight: '700', color: '#ef4444' }}>Saved</span>}
           </button>
           {recipe.imageUrl ? (
@@ -220,15 +220,15 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         </div>
 
         {/* Title + stats */}
-        <div style={{ background: '#fff', padding: '16px 16px 0', borderBottom: '1px solid #f1f5f9' }}>
+        <div style={{ background: 'var(--color-card)', padding: '16px 16px 0', borderBottom: '1px solid var(--color-subtle)' }}>
           <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
             {recipe.cuisine && (
-              <span style={{ background: '#f0f7ed', color: '#6ba356', fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '6px', letterSpacing: '0.04em' }}>
+              <span style={{ background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '6px', letterSpacing: '0.04em' }}>
                 {recipe.cuisine.toUpperCase()}
               </span>
             )}
             {recipe.mealType && (
-              <span style={{ background: '#f1f5f9', color: '#64748b', fontSize: '11px', fontWeight: '600', padding: '3px 9px', borderRadius: '6px', textTransform: 'capitalize' }}>
+              <span style={{ background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '11px', fontWeight: '600', padding: '3px 9px', borderRadius: '6px', textTransform: 'capitalize' }}>
                 {recipe.mealType}
               </span>
             )}
@@ -243,11 +243,11 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             )}
           </div>
 
-          <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px', lineHeight: 1.2 }}>
+          <h1 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px', lineHeight: 1.2 }}>
             {recipe.name}
           </h1>
           {recipe.description && (
-            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 14px', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 14px', lineHeight: 1.5 }}>
               {recipe.description}
             </p>
           )}
@@ -271,17 +271,17 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
           )}
 
           {/* Stats row */}
-          <div style={{ display: 'flex', borderTop: '1px solid #f1f5f9', paddingTop: '14px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', borderTop: '1px solid var(--color-subtle)', paddingTop: '14px', marginBottom: '16px' }}>
             {stats.map((stat, i) => (
               <div key={i} style={{
                 flex: 1, textAlign: 'center',
-                borderRight: i < stats.length - 1 ? '1px solid #f1f5f9' : 'none',
+                borderRight: i < stats.length - 1 ? '1px solid var(--color-subtle)' : 'none',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6ba356', marginBottom: '3px' }}>
                   {stat.icon}
                 </div>
-                <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>{stat.value}</div>
-                <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', letterSpacing: '0.04em' }}>{stat.label}</div>
+                <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{stat.value}</div>
+                <div style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontWeight: '600', letterSpacing: '0.04em' }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -295,7 +295,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         </div>
 
         {/* Tabs */}
-        <div style={{ background: '#fff', display: 'flex', borderBottom: '1px solid #e2e8f0', marginTop: '8px' }}>
+        <div style={{ background: 'var(--color-card)', display: 'flex', borderBottom: '1px solid var(--color-border)', marginTop: '8px' }}>
           {(['ingredients', 'instructions'] as const).map(tab => (
             <button
               key={tab}
@@ -305,7 +305,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                 background: 'none', border: 'none', borderBottom: `2px solid ${activeTab === tab ? '#6ba356' : 'transparent'}`,
                 cursor: 'pointer',
                 fontSize: '13px', fontWeight: activeTab === tab ? '700' : '500',
-                color: activeTab === tab ? '#6ba356' : '#94a3b8',
+                color: activeTab === tab ? '#6ba356' : 'var(--color-text-muted)',
                 transition: 'all 0.2s',
                 textTransform: 'capitalize',
               }}
@@ -326,12 +326,12 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               {/* Servings scaler — amounts below follow this. */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e2e8f0', borderRadius: '999px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-border)', borderRadius: '999px' }}>
                     <button onClick={() => setServings(s => Math.max(1, s - 1))} aria-label="Fewer servings" style={stepBtn}><Minus size={15} /></button>
-                    <span style={{ minWidth: '26px', textAlign: 'center', fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>{servings}</span>
+                    <span style={{ minWidth: '26px', textAlign: 'center', fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{servings}</span>
                     <button onClick={() => setServings(s => s + 1)} aria-label="More servings" style={stepBtn}><Plus size={15} /></button>
                   </div>
-                  <span style={{ fontSize: '13px', color: '#64748b' }}>servings</span>
+                  <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>servings</span>
                 </div>
                 {servings !== baseServings && (
                   <button onClick={() => setServings(baseServings)} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Reset</button>
@@ -347,25 +347,25 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                       style={{
                         display: 'flex', alignItems: 'center', gap: '12px',
                         padding: '12px 14px',
-                        background: '#fff', borderRadius: '12px',
-                        border: `1px solid ${checked ? '#c8e0bc' : '#f1f5f9'}`,
+                        background: 'var(--color-card)', borderRadius: '12px',
+                        border: `1px solid ${checked ? 'var(--color-primary-border)' : 'var(--color-subtle)'}`,
                         cursor: 'pointer', opacity: checked ? 0.55 : 1,
                         transition: 'all 0.15s',
                       }}
                     >
                       <div style={{
                         width: '20px', height: '20px', borderRadius: '6px', flexShrink: 0,
-                        border: `2px solid ${checked ? '#6ba356' : '#e2e8f0'}`,
+                        border: `2px solid ${checked ? '#6ba356' : 'var(--color-border)'}`,
                         background: checked ? '#6ba356' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'all 0.15s',
                       }}>
                         {checked && <span style={{ color: '#fff', fontSize: '11px', fontWeight: '800', lineHeight: 1 }}>✓</span>}
                       </div>
-                      <span style={{ flex: 1, fontSize: '14px', color: '#1e293b', textDecoration: checked ? 'line-through' : 'none' }}>
+                      <span style={{ flex: 1, fontSize: '14px', color: 'var(--color-text)', textDecoration: checked ? 'line-through' : 'none' }}>
                         {ing.name}
                       </span>
-                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', flexShrink: 0 }}>
+                      <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>
                         {fmtQty((ing.quantity || 0) * scale)} {ing.unit}
                       </span>
                     </div>
@@ -374,7 +374,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               </div>
               </>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-muted)' }}>
                 <div style={{ fontSize: '36px', marginBottom: '8px' }}>🥄</div>
                 <p style={{ fontSize: '14px', margin: 0 }}>No ingredients added yet</p>
               </div>
@@ -385,7 +385,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                 {recipe.instructions.map((step, i) => (
                   <div key={step.id} style={{
                     display: 'flex', gap: '14px',
-                    padding: '14px', background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9',
+                    padding: '14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)',
                   }}>
                     <div style={{
                       width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
@@ -396,9 +396,9 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                       {step.stepNumber || i + 1}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '14px', color: '#1e293b', margin: 0, lineHeight: 1.5 }}>{step.text}</p>
+                      <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{step.text}</p>
                       {step.duration && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', color: '#64748b', fontSize: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', color: 'var(--color-text-secondary)', fontSize: '12px' }}>
                           <Clock size={12} />
                           <span>{step.duration} min</span>
                         </div>
@@ -408,7 +408,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-muted)' }}>
                 <div style={{ fontSize: '36px', marginBottom: '8px' }}>📋</div>
                 <p style={{ fontSize: '14px', margin: 0 }}>No instructions added yet</p>
               </div>
@@ -419,10 +419,10 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         {/* Nutrition — per serving, so it doesn't move when servings do. */}
         {recipe.nutrition && (
           <div style={{ padding: '0 16px 8px' }}>
-            <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #f1f5f9', padding: '16px' }}>
+            <div style={{ background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Nutrition</h3>
-                <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>Per serving</span>
+                <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>Nutrition</h3>
+                <span style={{ fontSize: '11.5px', color: 'var(--color-text-muted)' }}>Per serving</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
                 <MacroDonut protein={recipe.nutrition.protein} carbs={recipe.nutrition.carbs} fat={recipe.nutrition.fat} calories={recipe.nutrition.calories || recipe.calories || 0} />
@@ -475,7 +475,7 @@ function fmtQty(n: number): string {
 
 const stepBtn: React.CSSProperties = {
   width: '34px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'none', border: 'none', color: '#64748b', cursor: 'pointer',
+  background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer',
 }
 
 /** One of the round quick-action buttons under the stats. */
@@ -491,7 +491,7 @@ function ActionButton({ icon, label, onClick, busy }: { icon: React.ReactNode; l
       }}
     >
       <span style={{
-        width: '46px', height: '46px', borderRadius: '23px', border: '1px solid #e2e8f0',
+        width: '46px', height: '46px', borderRadius: '23px', border: '1px solid var(--color-border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#334155',
       }}>
         {icon}
@@ -505,8 +505,8 @@ function MacroRow({ color, label, grams }: { color: string; label: string; grams
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: color, flexShrink: 0 }} />
-      <span style={{ fontSize: '13px', color: '#64748b', flex: 1 }}>{label}</span>
-      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>{round2(grams)} g</span>
+      <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', flex: 1 }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>{round2(grams)} g</span>
     </div>
   )
 }
@@ -523,7 +523,7 @@ function MacroDonut({ protein, carbs, fat, calories }: { protein: number; carbs:
   let offset = 0
   return (
     <svg width="86" height="86" viewBox="0 0 88 88" style={{ flexShrink: 0 }}>
-      <circle cx="44" cy="44" r={r} fill="none" stroke="#f1f5f9" strokeWidth="10" />
+      <circle cx="44" cy="44" r={r} fill="none" stroke="var(--color-subtle)" strokeWidth="10" />
       {segs.map((s, i) => {
         const len = (s.v / total) * C
         const el = (
@@ -536,8 +536,8 @@ function MacroDonut({ protein, carbs, fat, calories }: { protein: number; carbs:
         offset += len
         return el
       })}
-      <text x="44" y="42" textAnchor="middle" fontSize="17" fontWeight="700" fill="#1e293b">{calories}</text>
-      <text x="44" y="56" textAnchor="middle" fontSize="9" fill="#94a3b8" letterSpacing="0.5">CAL</text>
+      <text x="44" y="42" textAnchor="middle" fontSize="17" fontWeight="700" fill="var(--color-text)">{calories}</text>
+      <text x="44" y="56" textAnchor="middle" fontSize="9" fill="var(--color-text-muted)" letterSpacing="0.5">CAL</text>
     </svg>
   )
 }

@@ -44,14 +44,14 @@ export default function FavoritesScreen({ onNavigate }: Props) {
 
   return (
     <div className="screen" style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
         <button onClick={() => onNavigate('home')} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h2 style={{ fontSize: '18px', margin: 0 }}>Favorites</h2>
           {!loading && !error && (
-            <p style={{ fontSize: '12px', color: '#94a3b8', margin: '1px 0 0' }}>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '1px 0 0' }}>
               {recipes.length} recipe{recipes.length === 1 ? '' : 's'}
             </p>
           )}
@@ -66,14 +66,14 @@ export default function FavoritesScreen({ onNavigate }: Props) {
         )}
 
         {loading ? (
-          <p style={{ color: '#94a3b8', fontSize: '14px', textAlign: 'center', paddingTop: '32px' }}>Loading…</p>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', textAlign: 'center', paddingTop: '32px' }}>Loading…</p>
         ) : recipes.length === 0 && !error ? (
           <div style={{ textAlign: 'center', paddingTop: '40px' }}>
-            <div style={{ width: '52px', height: '52px', borderRadius: '26px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+            <div style={{ width: '52px', height: '52px', borderRadius: '26px', background: 'var(--color-error-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
               <Heart size={22} color={RED} />
             </div>
-            <p style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: '0 0 4px' }}>No favorites yet</p>
-            <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 18px', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 4px' }}>No favorites yet</p>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '0 0 18px', lineHeight: 1.5 }}>
               Tap the heart on any recipe to save it here.
             </p>
             <button
@@ -91,7 +91,7 @@ export default function FavoritesScreen({ onNavigate }: Props) {
               <div key={recipe.id} style={{ position: 'relative', minWidth: 0 }}>
                 <div onClick={() => onNavigate('recipe', { recipe: { ...recipe, isFavorite: true } })} style={{ cursor: 'pointer' }}>
                   <div style={{
-                    width: '100%', height: '100px', borderRadius: '14px', background: '#f1f5f9',
+                    width: '100%', height: '100px', borderRadius: '14px', background: 'var(--color-subtle)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '30px', marginBottom: '8px', overflow: 'hidden',
                   }}>
@@ -99,10 +99,10 @@ export default function FavoritesScreen({ onNavigate }: Props) {
                       ? <img src={recipeImageSrc(recipe.imageUrl, 160, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                       : '🍽️'}
                   </div>
-                  <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text)', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {recipe.name}
                   </h4>
-                  <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                  <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: 0 }}>
                     {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
                   </p>
                 </div>

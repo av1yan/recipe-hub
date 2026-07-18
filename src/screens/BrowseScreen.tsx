@@ -150,22 +150,22 @@ export default function BrowseScreen({ onNavigate }: Props) {
   ]
 
   const header = (
-    <header style={{ padding: '14px 16px 12px', background: '#fff', flexShrink: 0, position: 'relative', zIndex: 30 }}>
-      <h1 style={{ fontFamily: SERIF, fontSize: '28px', fontWeight: '400', color: '#1e293b', margin: '0 0 12px' }}>
+    <header style={{ padding: '14px 16px 12px', background: 'var(--color-card)', flexShrink: 0, position: 'relative', zIndex: 30 }}>
+      <h1 style={{ fontFamily: SERIF, fontSize: '28px', fontWeight: '400', color: 'var(--color-text)', margin: '0 0 12px' }}>
         Discover
       </h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '999px', padding: '11px 16px', minWidth: 0 }}>
-          <Search size={17} color="#94a3b8" />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--color-card)', border: '1.5px solid var(--color-border)', borderRadius: '999px', padding: '11px 16px', minWidth: 0 }}>
+          <Search size={17} color="var(--color-text-muted)" />
           <input
             type="text"
             placeholder="What would you like to cook?"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '15px', color: '#1e293b', fontFamily: 'inherit', minWidth: 0 }}
+            style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '15px', color: 'var(--color-text)', fontFamily: 'inherit', minWidth: 0 }}
           />
           {q && (
-            <button onClick={() => setSearchTerm('')} aria-label="Clear search" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: '#94a3b8' }}>
+            <button onClick={() => setSearchTerm('')} aria-label="Clear search" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: 'var(--color-text-muted)' }}>
               <X size={16} />
             </button>
           )}
@@ -178,14 +178,14 @@ export default function BrowseScreen({ onNavigate }: Props) {
             aria-label="Filters"
             style={{
               position: 'relative', flexShrink: 0, width: '46px', height: '46px', borderRadius: '999px',
-              border: '1.5px solid ' + (activeFilter || filterOpen ? '#6ba356' : '#e2e8f0'),
-              background: activeFilter || filterOpen ? '#6ba356' : '#fff',
+              border: '1.5px solid ' + (activeFilter || filterOpen ? '#6ba356' : 'var(--color-border)'),
+              background: activeFilter || filterOpen ? '#6ba356' : 'var(--color-card)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             }}
           >
-            <SlidersHorizontal size={18} color={activeFilter || filterOpen ? '#fff' : '#64748b'} />
+            <SlidersHorizontal size={18} color={activeFilter || filterOpen ? '#fff' : 'var(--color-text-secondary)'} />
             {activeFilter && !filterOpen && (
-              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: '#fff', border: '1.5px solid #6ba356' }} />
+              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: 'var(--color-card)', border: '1.5px solid #6ba356' }} />
             )}
           </button>
         )}
@@ -195,9 +195,9 @@ export default function BrowseScreen({ onNavigate }: Props) {
         <>
           {/* Tap-away backdrop. */}
           <div onClick={() => setFilterOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 39 }} />
-          <div style={{ position: 'absolute', top: '100%', right: '16px', marginTop: '6px', width: '250px', maxHeight: '340px', overflowY: 'auto', background: '#fff', border: '1px solid #e8eef0', borderRadius: '14px', boxShadow: '0 8px 30px rgba(15,23,42,0.14)', zIndex: 40, padding: '12px' }}>
+          <div style={{ position: 'absolute', top: '100%', right: '16px', marginTop: '6px', width: '250px', maxHeight: '340px', overflowY: 'auto', background: 'var(--color-card)', border: '1px solid #e8eef0', borderRadius: '14px', boxShadow: '0 8px 30px rgba(15,23,42,0.14)', zIndex: 40, padding: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>Filter by</span>
+              <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>Filter by</span>
               {activeFilter && (
                 <button onClick={() => { setActiveFilter(null); setFilterOpen(false) }} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12px', fontWeight: '700', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                   Clear
@@ -209,7 +209,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
               if (!chips.length) return null
               return (
                 <div key={group.kind} style={{ marginBottom: '12px' }}>
-                  <p style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.05em', margin: '0 0 7px' }}>{group.label.toUpperCase()}</p>
+                  <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 7px' }}>{group.label.toUpperCase()}</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {chips.map(c => {
                       const on = activeFilter?.kind === c.kind && activeFilter?.value === c.value
@@ -217,7 +217,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                         <button
                           key={c.value}
                           onClick={() => { applyFilter({ kind: c.kind, value: c.value, label: c.label }); setFilterOpen(false) }}
-                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? '#6ba356' : '#e2e8f0'), background: on ? '#f0f7ed' : '#fff', color: on ? '#4d7a3c' : '#1e293b', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? '#6ba356' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? '#4d7a3c' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                         >
                           <span>{c.emoji}</span> {c.label}
                         </button>
@@ -237,7 +237,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
     return (
       <div className="screen">
         {header}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
           <p>Loading recipes...</p>
         </div>
         <BottomNavigation active="browse" onNavigate={(s) => onNavigate(s as Screen)} />
@@ -246,11 +246,11 @@ export default function BrowseScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen" style={{ background: '#fff' }}>
+    <div className="screen" style={{ background: 'var(--color-card)' }}>
       {header}
 
       {dietPrefs.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#f0f7ed', borderBottom: '1px solid #e2e8f0', overflowX: 'auto', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'var(--color-primary-bg)', borderBottom: '1px solid var(--color-border)', overflowX: 'auto', flexShrink: 0 }}>
           <SlidersHorizontal size={15} color="#6ba356" style={{ flexShrink: 0 }} />
           <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
             {dietPrefs.map(pref => (
@@ -259,7 +259,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
               </span>
             ))}
           </div>
-          <button onClick={() => setDietPrefs([])} aria-label="Clear diet filters" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '3px', background: 'none', border: 'none', color: '#64748b', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+          <button onClick={() => setDietPrefs([])} aria-label="Clear diet filters" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '3px', background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
             <X size={13} /> Clear
           </button>
         </div>
@@ -274,6 +274,8 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 <p style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '19px', color: '#6ba356', margin: '0 0 10px' }}>
                   Recipe of the day
                 </p>
+                {/* Fixed dark text -- this card keeps its cream background in
+                    both themes, so themed (light-in-dark) text would vanish. */}
                 <h2 style={{ fontFamily: SERIF, fontSize: '25px', fontWeight: '400', color: '#1e293b', margin: '0 0 8px', lineHeight: 1.2 }}>
                   {rotd.name}
                 </h2>
@@ -306,6 +308,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                     style={{ background: cat.bg, border: exploreCat === cat.key ? '2px solid #1e293b' : '2px solid transparent', borderRadius: '14px', padding: '14px', textAlign: 'left', cursor: cat.values.length ? 'pointer' : 'default', opacity: cat.values.length ? 1 : 0.5 }}
                   >
                     <div style={{ fontSize: '20px', marginBottom: '18px' }}>{cat.emoji}</div>
+                    {/* Fixed dark: cat.bg is a light pastel in both themes. */}
                     <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b' }}>{cat.label}</div>
                   </button>
                 ))}
@@ -313,13 +316,13 @@ export default function BrowseScreen({ onNavigate }: Props) {
 
               {/* Inline values for the chosen category */}
               {exploreCat && (
-                <div style={{ marginTop: '12px', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '12px', background: '#fafafa' }}>
+                <div style={{ marginTop: '12px', border: '1.5px solid var(--color-border)', borderRadius: '14px', padding: '12px', background: 'var(--color-subtle)' }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {(EXPLORE.find(c => c.key === exploreCat)?.values || []).map(v => (
                       <button
                         key={v}
                         onClick={() => applyFilter({ kind: exploreCat, value: v, label: labelFor(exploreCat, v) })}
-                        style={{ padding: '8px 13px', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '999px', fontSize: '13px', fontWeight: '500', color: '#1e293b', cursor: 'pointer', textTransform: exploreCat === 'mealType' ? 'capitalize' : 'none' }}
+                        style={{ padding: '8px 13px', background: 'var(--color-card)', border: '1.5px solid var(--color-border)', borderRadius: '999px', fontSize: '13px', fontWeight: '500', color: 'var(--color-text)', cursor: 'pointer', textTransform: exploreCat === 'mealType' ? 'capitalize' : 'none' }}
                       >
                         {labelFor(exploreCat, v)}
                       </button>
@@ -331,7 +334,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
 
             {/* All recipes */}
             <div style={{ padding: '22px 16px 16px' }}>
-              <h3 style={{ fontFamily: SERIF, fontSize: '20px', fontWeight: '400', color: '#1e293b', margin: '0 0 12px' }}>
+              <h3 style={{ fontFamily: SERIF, fontSize: '20px', fontWeight: '400', color: 'var(--color-text)', margin: '0 0 12px' }}>
                 All recipes
               </h3>
               <RecipeList recipes={displayed} onNavigate={onNavigate} />
@@ -341,20 +344,20 @@ export default function BrowseScreen({ onNavigate }: Props) {
           <div style={{ padding: '14px 16px 16px' }}>
             {activeFilter && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#1e293b', color: '#fff', fontSize: '13px', fontWeight: '600', padding: '6px 12px', borderRadius: '999px', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#334155', color: '#fff', fontSize: '13px', fontWeight: '600', padding: '6px 12px', borderRadius: '999px', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
                   {activeFilter.label}
                   <button onClick={() => setActiveFilter(null)} aria-label="Remove filter" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: 0 }}>
                     <X size={13} />
                   </button>
                 </span>
-                <span style={{ fontSize: '13px', color: '#94a3b8' }}>
+                <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
                   {displayed.length} recipe{displayed.length === 1 ? '' : 's'}
                 </span>
               </div>
             )}
 
             {displayed.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
+              <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--color-text-muted)' }}>
                 <div style={{ fontSize: '38px', marginBottom: '10px' }}>🔍</div>
                 <p style={{ fontSize: '14px', margin: '0 0 16px' }}>Nothing matches that yet.</p>
                 <button onClick={clearAll} style={{ padding: '9px 18px', background: '#6ba356', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '700' }}>
@@ -375,7 +378,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
 
 function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s: Screen, d?: any) => void }) {
   if (recipes.length === 0) {
-    return <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px', padding: '24px 0', margin: 0 }}>No recipes yet.</p>
+    return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', padding: '24px 0', margin: 0 }}>No recipes yet.</p>
   }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -383,7 +386,7 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
         <div
           key={recipe.id}
           onClick={() => onNavigate('recipe', { recipe })}
-          style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', background: '#fff', borderRadius: '14px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+          style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', cursor: 'pointer' }}
         >
           <div style={{ width: '62px', height: '62px', borderRadius: '12px', background: TILE_COLORS[index % TILE_COLORS.length], flexShrink: 0, overflow: 'hidden' }}>
             {recipe.imageUrl && (
@@ -391,8 +394,8 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
             )}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '4px' }}>{recipe.name}</div>
-            <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+            <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', marginBottom: '4px' }}>{recipe.name}</div>
+            <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
               {recipe.cuisine} · {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
               {recipe.calories ? ` · ${recipe.calories} cal` : ''}
             </div>

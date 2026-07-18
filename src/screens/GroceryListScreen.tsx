@@ -233,10 +233,10 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   if (isLoading) {
     return (
       <div className="screen">
-        <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff' }}>
+        <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)' }}>
           <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
         </header>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
           <p>Loading...</p>
         </div>
         <BottomNavigation active="grocery" onNavigate={(s) => onNavigate(s as Screen)} />
@@ -248,19 +248,19 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     <div className="screen" style={{ position: 'relative' }}>
       {hiddenFileInput}
 
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff' }}>
+      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedList ? '12px' : 0 }}>
           <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
           <button
             onClick={openCamera}
             aria-label="Scan a grocery note"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f0f7ed', color: '#6ba356', border: '1.5px solid #c8e0bc', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: '#6ba356', border: '1.5px solid var(--color-primary-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
           >
             <Camera size={16} /> Scan
           </button>
         </div>
         {selectedList && (
-          <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
             {checkedCount} of {totalCount} items checked
           </div>
         )}
@@ -268,7 +268,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column' }}>
         {lists.length === 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#94a3b8', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--color-text-muted)', gap: '16px' }}>
             <p style={{ marginBottom: 0 }}>No grocery lists yet</p>
             <div style={{ width: '100%', maxWidth: '300px' }}>
               <input
@@ -286,7 +286,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
               <button
                 onClick={openCamera}
                 className="btn"
-                style={{ width: '100%', background: '#fff', color: '#6ba356', border: '1.5px solid #c8e0bc', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ width: '100%', background: 'var(--color-card)', color: '#6ba356', border: '1.5px solid var(--color-primary-border)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
                 <Camera size={16} /> Scan a note
               </button>
@@ -303,8 +303,8 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     padding: '8px 12px',
                     borderRadius: '8px',
                     border: 'none',
-                    background: list.id === selectedListId ? '#6ba356' : '#f1f5f9',
-                    color: list.id === selectedListId ? '#fff' : '#1e293b',
+                    background: list.id === selectedListId ? '#6ba356' : 'var(--color-subtle)',
+                    color: list.id === selectedListId ? '#fff' : 'var(--color-text)',
                     fontSize: '13px',
                     fontWeight: '600',
                     cursor: 'pointer',
@@ -318,7 +318,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
             {selectedList && (
               <>
-                <div style={{ marginBottom: '16px', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--color-bg)', borderRadius: '8px' }}>
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                     <input
                       type="text"
@@ -374,7 +374,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                           alignItems: 'center',
                           gap: '12px',
                           padding: '12px',
-                          background: '#fff',
+                          background: 'var(--color-card)',
                           borderRadius: '8px',
                           border: '1px solid rgba(15, 23, 42, 0.08)',
                           opacity: item.checked ? 0.6 : 1,
@@ -402,7 +402,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                           <div style={{ fontSize: '14px', fontWeight: '500', textDecoration: item.checked ? 'line-through' : 'none' }}>
                             {item.name}
                           </div>
-                          <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
                             {item.quantity} {item.unit}
                           </div>
                         </div>
@@ -416,7 +416,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                       </div>
                     ))
                   ) : (
-                    <p style={{ textAlign: 'center', color: '#94a3b8', margin: '24px 0' }}>No items in this list</p>
+                    <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', margin: '24px 0' }}>No items in this list</p>
                   )}
                 </div>
               </>
@@ -429,25 +429,25 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       {scanning && (
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.96)', zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
           <Loader2 size={40} color="#6ba356" style={{ animation: 'spin 1s linear infinite' }} />
-          <p style={{ fontSize: '15px', color: '#1e293b', fontWeight: '600', margin: 0 }}>Reading your note…</p>
-          <div style={{ width: '200px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+          <p style={{ fontSize: '15px', color: 'var(--color-text)', fontWeight: '600', margin: 0 }}>Reading your note…</p>
+          <div style={{ width: '200px', height: '6px', background: 'var(--color-border)', borderRadius: '3px', overflow: 'hidden' }}>
             <div style={{ height: '100%', background: '#6ba356', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
           </div>
-          <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
         </div>
       )}
 
       {/* Review overlay */}
       {scanned && (
-        <div style={{ position: 'absolute', inset: 0, background: '#fff', zIndex: 20, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'var(--color-card)', zIndex: 20, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button onClick={() => setScanned(null)} aria-label="Cancel scan" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
-              <X size={22} color="#1e293b" />
+              <X size={22} color="var(--color-text)" />
             </button>
             <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: '#1e293b' }}>Review items</h3>
-              <p style={{ fontSize: '12px', color: '#94a3b8', margin: '2px 0 0' }}>Edit or remove any misreads, then add.</p>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: 'var(--color-text)' }}>Review items</h3>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Edit or remove any misreads, then add.</p>
             </div>
           </div>
 
@@ -457,20 +457,20 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                 <input
                   value={item}
                   onChange={e => updateScanned(i, e.target.value)}
-                  style={{ flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #e2e8f0', fontSize: '14px', color: '#1e293b', background: '#fff', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                  style={{ flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: '10px', border: '1.5px solid var(--color-border)', fontSize: '14px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                 />
-                <button onClick={() => removeScanned(i)} aria-label="Remove item" style={{ flexShrink: 0, width: '36px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: '10px', color: '#94a3b8', cursor: 'pointer' }}>
+                <button onClick={() => removeScanned(i)} aria-label="Remove item" style={{ flexShrink: 0, width: '36px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-card)', border: '1.5px solid var(--color-border)', borderRadius: '10px', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
                   <X size={15} />
                 </button>
               </div>
             ))}
             {scanned.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#94a3b8', marginTop: '24px' }}>No items — cancel and try again.</p>
+              <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', marginTop: '24px' }}>No items — cancel and try again.</p>
             )}
           </div>
 
-          <div style={{ padding: '12px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '10px' }}>
-            <button onClick={() => setScanned(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: '#f1f5f9', color: '#64748b', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+          <div style={{ padding: '12px 16px', borderTop: '1px solid var(--color-subtle)', display: 'flex', gap: '10px' }}>
+            <button onClick={() => setScanned(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
               Cancel
             </button>
             <button

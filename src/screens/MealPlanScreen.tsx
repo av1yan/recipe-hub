@@ -141,10 +141,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   if (isLoading) {
     return (
       <div className="screen">
-        <header style={{ padding: '16px', background: '#fff' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
+        <header style={{ padding: '16px', background: 'var(--color-card)' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: 'var(--color-text)' }}>Meal Plan</h1>
         </header>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
           <p>Loading meal plans...</p>
         </div>
         <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
@@ -153,13 +153,13 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen" style={{ background: '#fff' }}>
-      <header style={{ padding: '16px 16px 14px', background: '#fff' }}>
+    <div className="screen" style={{ background: 'var(--color-card)' }}>
+      <header style={{ padding: '16px 16px 14px', background: 'var(--color-card)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: '#1e293b' }}>Meal Plan</h1>
+          <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: 'var(--color-text)' }}>Meal Plan</h1>
           <div style={{ display: 'flex', gap: '8px' }}>
             {currentPlan && (
-              <button onClick={() => { setConfirmDelete(v => !v); setShowWeeks(false) }} aria-label="Delete week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: '#fff', color: '#94a3b8', border: '1.5px solid #e9edf2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={() => { setConfirmDelete(v => !v); setShowWeeks(false) }} aria-label="Delete week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'var(--color-card)', color: 'var(--color-text-muted)', border: '1.5px solid var(--color-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Trash2 size={16} />
               </button>
             )}
@@ -181,8 +181,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 onClick={() => { setSelectedDay(dayName); setPickerFor(null) }}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
               >
-                <span style={{ fontSize: '12px', fontWeight: '600', color: active ? '#f26d5b' : '#94a3b8' }}>{short}</span>
-                <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? '#f26d5b' : 'transparent', color: active ? '#fff' : '#1e293b', boxShadow: active ? '0 4px 10px rgba(242,109,91,0.35)' : 'none', transition: 'all 0.2s ease' }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: active ? '#f26d5b' : 'var(--color-text-muted)' }}>{short}</span>
+                <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? '#f26d5b' : 'transparent', color: active ? '#fff' : 'var(--color-text)', boxShadow: active ? '0 4px 10px rgba(242,109,91,0.35)' : 'none', transition: 'all 0.2s ease' }}>
                   {num}
                 </span>
               </button>
@@ -191,9 +191,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         </div>
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px', background: '#f7f8f5' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px', background: 'var(--color-bg)' }}>
         {showWeeks && (
-          <div style={{ marginBottom: '18px', border: '1.5px solid #f7d2ca', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
+          <div style={{ marginBottom: '18px', border: '1.5px solid #f7d2ca', borderRadius: '16px', overflow: 'hidden', background: 'var(--color-card)' }}>
             <div style={{ padding: '9px 14px', fontSize: '11px', fontWeight: '800', color: '#f26d5b', letterSpacing: '0.05em', background: '#fdeeeb' }}>
               JUMP TO A WEEK
             </div>
@@ -212,11 +212,11 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', background: isCurrent ? '#fff7f5' : 'none', border: 'none', borderTop: offset === -1 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left' }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>
                       {weekLabel(ws)}
                       {offset === 0 && <span style={{ fontSize: '11px', fontWeight: '700', color: '#f26d5b', marginLeft: '7px' }}>THIS WEEK</span>}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
                       {plan ? `${planned} meal${planned === 1 ? '' : 's'} planned` : 'Nothing planned'}
                     </div>
                   </div>
@@ -228,11 +228,11 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         )}
 
         {confirmDelete && (
-          <div style={{ marginBottom: '18px', background: '#fff', border: '1.5px solid #fecdca', borderRadius: '14px', padding: '14px' }}>
-            <p style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: '0 0 4px' }}>Delete this week's plan?</p>
-            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 12px', lineHeight: 1.5 }}>This removes the week and any meals planned in it. It can't be undone.</p>
+          <div style={{ marginBottom: '18px', background: 'var(--color-card)', border: '1.5px solid #fecdca', borderRadius: '14px', padding: '14px' }}>
+            <p style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 4px' }}>Delete this week's plan?</p>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 12px', lineHeight: 1.5 }}>This removes the week and any meals planned in it. It can't be undone.</p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setConfirmDelete(false)} style={{ flex: 1, padding: '11px', borderRadius: '10px', background: '#f1f5f9', color: '#64748b', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+              <button onClick={() => setConfirmDelete(false)} style={{ flex: 1, padding: '11px', borderRadius: '10px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
                 Cancel
               </button>
               <button onClick={deleteWeek} disabled={deleting} style={{ flex: 1, padding: '11px', borderRadius: '10px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: deleting ? 0.6 : 1 }}>
@@ -248,7 +248,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           return (
             <div key={m.key} style={{ marginBottom: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', margin: 0 }}>{m.label}</h3>
+                <h3 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{m.label}</h3>
                 {/* A slot holds one recipe. Empty (or picking): offer Add/Close.
                     Filled: no "add" -- offer Edit (swap the recipe) and Remove
                     (clear the slot) instead. */}
@@ -263,7 +263,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <button
                       onClick={() => setPickerFor(m.key)}
-                      style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+                      style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
                     >
                       Edit
                     </button>
@@ -281,13 +281,13 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               {meals.length > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: pickerOpen ? '10px' : 0 }}>
                   {meals.map((meal, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#fff', border: '1px solid #f1f5f9', borderRadius: '16px', padding: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', padding: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                       <div style={{ width: '62px', height: '62px', borderRadius: '13px', background: m.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', flexShrink: 0 }}>
                         {meal.emoji || m.emoji}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '5px', lineHeight: 1.25 }}>{meal.name}</div>
-                        <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+                        <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', marginBottom: '5px', lineHeight: 1.25 }}>{meal.name}</div>
+                        <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
                           {(meal.prepTime || 0) + (meal.cookTime || 0)} Mins · {meal.servings || 1} Serving
                         </div>
                       </div>
@@ -298,13 +298,13 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
               {/* Inline recipe picker */}
               {pickerOpen && (
-                <div style={{ border: '1.5px solid #f7d2ca', borderRadius: '16px', overflow: 'hidden', background: '#fff' }}>
+                <div style={{ border: '1.5px solid #f7d2ca', borderRadius: '16px', overflow: 'hidden', background: 'var(--color-card)' }}>
                   <div style={{ padding: '9px 14px', fontSize: '11px', fontWeight: '800', color: '#f26d5b', letterSpacing: '0.05em', background: '#fdeeeb' }}>
                     CHOOSE A RECIPE
                   </div>
                   <div style={{ maxHeight: '256px', overflowY: 'auto' }}>
                     {recipes.length === 0 ? (
-                      <p style={{ padding: '18px', textAlign: 'center', color: '#94a3b8', fontSize: '14px', margin: 0 }}>No recipes yet — add some first.</p>
+                      <p style={{ padding: '18px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', margin: 0 }}>No recipes yet — add some first.</p>
                     ) : (
                       recipes.map((r, i) => (
                         <button
@@ -316,8 +316,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                             {(r as any).emoji || m.emoji}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{r.name}</div>
-                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)' }}>{r.name}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
                               {r.cuisine} · {(r.prepTime || 0) + (r.cookTime || 0)} min
                             </div>
                           </div>
@@ -331,11 +331,11 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
               {/* Empty state (no meals, picker closed) */}
               {meals.length === 0 && !pickerOpen && (
-                <button onClick={() => setPickerFor(m.key)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#fff', border: '1.5px dashed #f0d8d2', borderRadius: '16px', cursor: 'pointer', textAlign: 'left' }}>
+                <button onClick={() => setPickerFor(m.key)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed #f0d8d2', borderRadius: '16px', cursor: 'pointer', textAlign: 'left' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Plus size={18} color="#f26d5b" />
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#94a3b8' }}>Add a {m.label.toLowerCase()} recipe</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)' }}>Add a {m.label.toLowerCase()} recipe</span>
                 </button>
               )}
             </div>

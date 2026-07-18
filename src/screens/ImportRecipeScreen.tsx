@@ -135,19 +135,19 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
   const icon = mode === 'text' ? <Type size={20} color={GREEN} /> : mode === 'photo' ? <ImageIcon size={20} color={GREEN} /> : <Link2 size={20} color={GREEN} />
 
   return (
-    <div className="screen" style={{ background: '#f8fafc', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', background: '#fff', borderBottom: '1px solid #f1f5f9', flexShrink: 0 }}>
+    <div className="screen" style={{ background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', background: 'var(--color-card)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
         <button onClick={() => onNavigate(backTo, { openAddSheet: true })} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
-          <ChevronLeft size={22} color="#1e293b" />
+          <ChevronLeft size={22} color="var(--color-text)" />
         </button>
-        <h1 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', margin: 0 }}>{copy.title}</h1>
+        <h1 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{copy.title}</h1>
       </header>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
-        <div style={{ width: '44px', height: '44px', borderRadius: '22px', background: '#eaf3e6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+        <div style={{ width: '44px', height: '44px', borderRadius: '22px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
           {icon}
         </div>
-        <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 18px', lineHeight: 1.5 }}>{copy.blurb}</p>
+        <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 18px', lineHeight: 1.5 }}>{copy.blurb}</p>
 
         {mode === 'social' && caption ? (
           <>
@@ -177,7 +177,7 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
             </button>
             <button
               onClick={() => { setCaption(null); setValue('') }}
-              style={{ width: '100%', marginTop: '8px', padding: '10px', background: 'none', border: 'none', color: '#94a3b8', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ width: '100%', marginTop: '8px', padding: '10px', background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Try another link
             </button>
@@ -199,7 +199,7 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
         ) : mode === 'text' ? (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', letterSpacing: '0.05em' }}>RECIPE</span>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em' }}>RECIPE</span>
               {value && (
                 <button type="button" onClick={() => { setValue(''); setError('') }} style={miniBtn}>
                   Clear
@@ -241,15 +241,15 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
         )}
 
         {mode === 'social' && !caption && (
-          <p style={{ marginTop: '16px', fontSize: '12px', color: '#94a3b8', lineHeight: 1.6 }}>
+          <p style={{ marginTop: '16px', fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
             TikTok links work. Instagram and Facebook only hand captions to apps
             they have approved, so those can’t be read — copy the caption and use{' '}
-            <strong style={{ color: '#64748b' }}>Import from text</strong> instead.
+            <strong style={{ color: 'var(--color-text-secondary)' }}>Import from text</strong> instead.
           </p>
         )}
 
         {!caption && (
-          <p style={{ marginTop: '18px', fontSize: '12px', color: '#94a3b8', lineHeight: 1.6 }}>
+          <p style={{ marginTop: '18px', fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
             Nothing is saved until you’ve looked it over — the recipe opens in the
             normal form first.
           </p>
@@ -262,15 +262,15 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
 }
 
 const inputBase: React.CSSProperties = {
-  width: '100%', padding: '13px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0',
-  fontSize: '15px', color: '#1e293b', background: '#fff', outline: 'none',
+  width: '100%', padding: '13px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)',
+  fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none',
   boxSizing: 'border-box', fontFamily: 'inherit',
 }
 
 const miniBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px',
-  background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px',
-  fontSize: '12px', fontWeight: '700', color: '#64748b', cursor: 'pointer',
+  background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '8px',
+  fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', cursor: 'pointer',
   fontFamily: 'inherit',
 }
 

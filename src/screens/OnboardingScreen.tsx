@@ -28,21 +28,21 @@ export default function OnboardingScreen({ onNavigate }: Props) {
       icon: '📅',
       title: 'Plan Your Week',
       description: 'Drag recipes into your meal planner. Stay organized and discover new meals.',
-      bgColor: '#f0f7ed',
+      bgColor: 'var(--color-primary-bg)',
       accentColor: '#6ba356',
     },
     {
       icon: '🛒',
       title: 'Auto Grocery List',
       description: 'One tap generates your full shopping list from the meal plan.',
-      bgColor: '#f0f7ed',
+      bgColor: 'var(--color-primary-bg)',
       accentColor: '#6ba356',
     },
     {
       icon: '👨‍🍳',
       title: 'Cook Smarter',
       description: 'Full-screen step-by-step guides with timers. Hands-free cooking made easy.',
-      bgColor: '#f8fafc',
+      bgColor: 'var(--color-bg)',
       accentColor: '#c67139',
     },
   ]
@@ -77,7 +77,7 @@ export default function OnboardingScreen({ onNavigate }: Props) {
               width: '6px',
               height: '6px',
               borderRadius: '50%',
-              background: idx === currentStep ? step.accentColor : '#e2e8f0',
+              background: idx === currentStep ? step.accentColor : 'var(--color-border)',
               transition: 'all 0.3s ease',
             }}
           />
@@ -88,11 +88,11 @@ export default function OnboardingScreen({ onNavigate }: Props) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '80px', marginBottom: '24px', display: 'block' }}>{step.icon}</div>
 
-        <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1e293b', marginBottom: '12px', margin: 0 }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--color-text)', marginBottom: '12px', margin: 0 }}>
           {step.title}
         </h1>
 
-        <p style={{ fontSize: '15px', color: '#64748b', lineHeight: '1.6', marginTop: '12px', maxWidth: '280px' }}>
+        <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginTop: '12px', maxWidth: '280px' }}>
           {step.description}
         </p>
       </div>
@@ -150,7 +150,7 @@ export default function OnboardingScreen({ onNavigate }: Props) {
               width: '100%',
               padding: '12px',
               background: 'transparent',
-              color: '#64748b',
+              color: 'var(--color-text-secondary)',
               border: 'none',
               borderRadius: '10px',
               fontSize: '14px',
@@ -160,11 +160,11 @@ export default function OnboardingScreen({ onNavigate }: Props) {
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#1e293b'
+              e.currentTarget.style.color = 'var(--color-text)'
               e.currentTarget.style.background = 'rgba(0,0,0,0.05)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#64748b'
+              e.currentTarget.style.color = 'var(--color-text-secondary)'
               e.currentTarget.style.background = 'transparent'
             }}
           >

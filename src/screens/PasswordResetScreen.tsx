@@ -52,12 +52,12 @@ export default function PasswordResetScreen({ mode, token, onNavigate }: Props) 
   }
 
   return (
-    <div className="screen" style={{ background: '#fff', display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="screen" style={{ background: 'var(--color-card)', display: 'flex', flexDirection: 'column', height: '100%' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', flexShrink: 0 }}>
         <button onClick={() => { sessionStorage.removeItem('pendingReset'); onNavigate('signin') }} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
-          <ChevronLeft size={22} color="#1e293b" />
+          <ChevronLeft size={22} color="var(--color-text)" />
         </button>
-        <h1 style={{ fontSize: '17px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+        <h1 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>
           {mode === 'request' ? 'Forgot password' : 'Choose a new password'}
         </h1>
       </header>
@@ -66,30 +66,30 @@ export default function PasswordResetScreen({ mode, token, onNavigate }: Props) 
         {/* ── asked for a link, and it has gone ── */}
         {mode === 'request' && sent ? (
           <div style={{ textAlign: 'center', paddingTop: '28px' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '28px', background: '#eaf3e6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '28px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <MailCheck size={26} color={GREEN} />
             </div>
-            <h2 style={{ fontSize: '19px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px' }}>Check your inbox</h2>
-            <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, margin: '0 0 20px' }}>
-              If <strong style={{ color: '#1e293b' }}>{email}</strong> has an account, a
+            <h2 style={{ fontSize: '19px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px' }}>Check your inbox</h2>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: '0 0 20px' }}>
+              If <strong style={{ color: 'var(--color-text)' }}>{email}</strong> has an account, a
               reset link is on its way. It works once and expires in an hour.
             </p>
             <button onClick={() => onNavigate('signin')} style={primaryBtn(false)}>Back to sign in</button>
           </div>
         ) : mode === 'reset' && done ? (
           <div style={{ textAlign: 'center', paddingTop: '28px' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '28px', background: '#eaf3e6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '28px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Lock size={24} color={GREEN} />
             </div>
-            <h2 style={{ fontSize: '19px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px' }}>Password changed</h2>
-            <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, margin: '0 0 20px' }}>
+            <h2 style={{ fontSize: '19px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px' }}>Password changed</h2>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: '0 0 20px' }}>
               You can sign in with it now.
             </p>
             <button onClick={() => onNavigate('signin')} style={primaryBtn(false)}>Sign in</button>
           </div>
         ) : mode === 'request' ? (
           <>
-            <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, margin: '10px 0 18px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: '10px 0 18px' }}>
               Enter the email address on your account and we’ll send a link to
               pick a new password.
             </p>
@@ -109,7 +109,7 @@ export default function PasswordResetScreen({ mode, token, onNavigate }: Props) 
           </>
         ) : (
           <>
-            <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.6, margin: '10px 0 18px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: '10px 0 18px' }}>
               Pick a new password for your account. At least 8 characters.
             </p>
             <label style={labelStyle}>NEW PASSWORD</label>
@@ -133,13 +133,13 @@ export default function PasswordResetScreen({ mode, token, onNavigate }: Props) 
 }
 
 const labelStyle: React.CSSProperties = {
-  fontSize: '12px', fontWeight: '700', color: '#64748b', letterSpacing: '0.05em',
+  fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em',
   display: 'block', marginBottom: '6px',
 }
 
 const inputBase: React.CSSProperties = {
-  width: '100%', padding: '13px 14px', borderRadius: '12px', border: '1.5px solid #e2e8f0',
-  fontSize: '15px', color: '#1e293b', background: '#f8fafc', outline: 'none',
+  width: '100%', padding: '13px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)',
+  fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-bg)', outline: 'none',
   boxSizing: 'border-box', fontFamily: 'inherit',
 }
 

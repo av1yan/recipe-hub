@@ -21,7 +21,7 @@ interface Props {
 /** A small section heading, so the long form reads as groups not one list. */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.05em', textTransform: 'uppercase', margin: '8px 0 -4px' }}>
+    <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase', margin: '8px 0 -4px' }}>
       {children}
     </p>
   )
@@ -54,21 +54,21 @@ type IngredientRow = { name: string; quantity: string; unit: string }
 type InstructionRow = { text: string; duration: string }
 
 const rowInput: React.CSSProperties = {
-  padding: '9px 10px', borderRadius: '10px', border: '1.5px solid #e2e8f0',
-  fontSize: '14px', color: '#1e293b', background: '#fff', outline: 'none',
+  padding: '9px 10px', borderRadius: '10px', border: '1.5px solid var(--color-border)',
+  fontSize: '14px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none',
   boxSizing: 'border-box', fontFamily: 'inherit', width: '100%',
 }
 
 const removeBtn: React.CSSProperties = {
   flexShrink: 0, width: '34px', height: '38px', display: 'flex', alignItems: 'center',
-  justifyContent: 'center', background: '#fff', border: '1.5px solid #e2e8f0',
-  borderRadius: '10px', color: '#94a3b8', cursor: 'pointer',
+  justifyContent: 'center', background: 'var(--color-card)', border: '1.5px solid var(--color-border)',
+  borderRadius: '10px', color: 'var(--color-text-muted)', cursor: 'pointer',
 }
 
 const addBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-  width: '100%', padding: '10px', background: '#f0f7ed', color: '#6ba356',
-  border: '1.5px dashed #c8e0bc', borderRadius: '10px', fontSize: '13px',
+  width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: '#6ba356',
+  border: '1.5px dashed var(--color-primary-border)', borderRadius: '10px', fontSize: '13px',
   fontWeight: '700', cursor: 'pointer',
 }
 
@@ -216,7 +216,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
   return (
     <div className="screen" style={{ position: 'relative' }}>
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button onClick={() => onNavigate(backTo, reopenPanelOnBack ? { openAddSheet: true } : undefined)} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
         </button>
@@ -225,7 +225,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
         {error && (
-          <div style={{ background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#ef4444', fontSize: '14px' }}>
+          <div style={{ background: 'var(--color-error-bg)', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#ef4444', fontSize: '14px' }}>
             {error}
           </div>
         )}
@@ -246,7 +246,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
         )}
 
         {draft && !draft.warnings?.length && (
-          <div style={{ background: '#f0f7ed', border: '1px solid #c8e0bc', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
+          <div style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
             <p style={{ margin: 0, fontSize: '12.5px', color: '#4d7a3c', lineHeight: 1.5 }}>
               Imported — look it over and change anything that isn’t right.
             </p>
@@ -263,13 +263,13 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="field">
               <label>Cuisine</label>
-              <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
+              <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}>
                 {CUISINES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div className="field">
               <label>Meal Type</label>
-              <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
+              <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}>
                 {MEAL_TYPES.map(m => (
                   <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
                 ))}
@@ -279,7 +279,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
           <div className="field">
             <label>Difficulty</label>
-            <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}>
+            <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
@@ -311,18 +311,18 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
           <SectionLabel>Photo</SectionLabel>
           <div className="field">
-            <label>Photo <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+            <label>Photo <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span></label>
             <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: 'none' }} />
 
             {imageUrl ? (
               <div style={{ marginTop: '6px' }}>
-                <div style={{ position: 'relative', height: '160px', borderRadius: '12px', overflow: 'hidden', background: '#f1f5f9', border: '1px solid #eef2f6' }}>
+                <div style={{ position: 'relative', height: '160px', borderRadius: '12px', overflow: 'hidden', background: 'var(--color-subtle)', border: '1px solid #eef2f6' }}>
                   <img src={imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   <button
                     type="button"
                     onClick={() => setImageUrl('')}
                     aria-label="Remove photo"
-                    style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '9px', background: 'rgba(255,255,255,0.94)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1e293b' }}
+                    style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '9px', background: 'rgba(255,255,255,0.94)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}
                   >
                     <X size={16} />
                   </button>
@@ -340,12 +340,12 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={photoBusy}
-                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#fff', border: '1.5px dashed #dbe2d6', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
+                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
               >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#f0f7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Camera size={18} color="#6ba356" />
                 </div>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#94a3b8' }}>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)' }}>
                   {photoBusy ? 'Processing photo…' : 'Add a photo'}
                 </span>
               </button>
@@ -401,7 +401,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
           {/* Dietary Tags */}
           <SectionLabel>Dietary tags</SectionLabel>
           <div className="field">
-            <label>Dietary Tags <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+            <label>Dietary Tags <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span></label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '6px' }}>
               {DIET_OPTIONS.map(opt => {
                 const active = tags.includes(opt.id)
@@ -413,9 +413,9 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                     style={{
                       display: 'flex', alignItems: 'center', gap: '5px',
                       padding: '8px 14px',
-                      background: active ? '#6ba356' : '#fff',
+                      background: active ? '#6ba356' : 'var(--color-card)',
                       color: active ? '#fff' : '#334155',
-                      border: active ? '2px solid #6ba356' : '2px solid #e2e8f0',
+                      border: active ? '2px solid #6ba356' : '2px solid var(--color-border)',
                       borderRadius: '999px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                     }}
                   >
@@ -425,7 +425,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 )
               })}
             </div>
-            <p style={{ fontSize: '12px', color: '#94a3b8', margin: '8px 0 0' }}>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '8px 0 0' }}>
               These let the recipe show up when filtering by diet in Browse.
             </p>
           </div>
@@ -436,7 +436,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
               className="input"
               value={cookbookId}
               onChange={(e) => setCookbookId(e.target.value)}
-              style={{ background: '#fff', color: '#1e293b', cursor: 'pointer' }}
+              style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}
             >
               <option value="">Don't file it anywhere</option>
               {cookbooks.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -457,7 +457,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
       {/* Save is pinned above the nav so it's always in reach, not buried at the
           bottom of a long scroll. */}
-      <div style={{ flexShrink: 0, padding: '10px 16px', borderTop: '1px solid #f1f5f9', background: '#fff' }}>
+      <div style={{ flexShrink: 0, padding: '10px 16px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
         <button
           type="submit"
           form="addRecipeForm"

@@ -29,10 +29,10 @@ export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
       display: 'flex',
       alignItems: 'center',
       flexShrink: 0,
-      background: 'rgba(255, 255, 255, 0.82)',
+      background: 'var(--color-nav-bg)',
       backdropFilter: 'saturate(180%) blur(24px)',
       WebkitBackdropFilter: 'saturate(180%) blur(24px)',
-      borderTop: '0.5px solid rgba(0, 0, 0, 0.12)',
+      borderTop: '0.5px solid var(--color-nav-border)',
       boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.04)',
       paddingBottom: '6px',
       paddingTop: '2px',
@@ -73,7 +73,7 @@ export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
               padding: '8px 0 4px',
               border: 'none', background: 'none', cursor: 'pointer',
               gap: '3px',
-              color: isActive ? '#6ba356' : '#94a3b8',
+              color: isActive ? '#6ba356' : 'var(--color-text-muted)',
               transition: 'color 0.2s ease',
               position: 'relative',
             }}
@@ -91,7 +91,7 @@ export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
             <tab.icon
               size={22}
               strokeWidth={isActive ? 2.2 : 1.8}
-              color={isActive ? '#6ba356' : '#94a3b8'}
+              color={isActive ? '#6ba356' : 'var(--color-text-muted)'}
             />
             <span style={{
               fontSize: '10px',
