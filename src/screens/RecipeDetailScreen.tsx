@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Clock, Users, Flame, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2 } from 'lucide-react'
+import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2 } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, groceryAPI, mealPlanAPI } from '../utils/api'
@@ -152,13 +152,6 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
     } catch { /* the person dismissed the share sheet */ }
   }
 
-  const stats = [
-    ...(recipe.prepTime != null ? [{ icon: <Clock size={14} />, label: 'PREP', value: `${recipe.prepTime}m` }] : []),
-    ...(recipe.cookTime != null ? [{ icon: <Clock size={14} />, label: 'COOK', value: `${recipe.cookTime}m` }] : []),
-    ...(recipe.servings != null ? [{ icon: <Users size={14} />, label: 'SERVES', value: String(recipe.servings) }] : []),
-    ...(recipe.calories ? [{ icon: <Flame size={14} />, label: 'CAL', value: String(recipe.calories) }] : []),
-  ]
-
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--color-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
@@ -270,24 +263,8 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             </a>
           )}
 
-          {/* Stats row */}
-          <div style={{ display: 'flex', borderTop: '1px solid var(--color-subtle)', paddingTop: '14px', marginBottom: '16px' }}>
-            {stats.map((stat, i) => (
-              <div key={i} style={{
-                flex: 1, textAlign: 'center',
-                borderRight: i < stats.length - 1 ? '1px solid var(--color-subtle)' : 'none',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6ba356', marginBottom: '3px' }}>
-                  {stat.icon}
-                </div>
-                <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{stat.value}</div>
-                <div style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontWeight: '600', letterSpacing: '0.04em' }}>{stat.label}</div>
-              </div>
-            ))}
-          </div>
-
           {/* Quick actions — one tap to shop, plan, or pass it on. */}
-          <div style={{ display: 'flex', gap: '10px', paddingBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '10px', borderTop: '1px solid var(--color-subtle)', paddingTop: '16px', paddingBottom: '16px' }}>
             <ActionButton icon={<ShoppingCart size={18} />} label="Groceries" onClick={addToGroceries} busy={actionBusy === 'groceries'} />
             <ActionButton icon={<CalendarPlus size={18} />} label="Meal Plan" onClick={addToMealPlan} busy={actionBusy === 'mealplan'} />
             <ActionButton icon={<Share2 size={18} />} label="Share" onClick={share} />
