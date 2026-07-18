@@ -280,28 +280,35 @@ export default function HomeScreen({ onNavigate }: Props) {
             </div>
 
             {favorites.length > 0 ? (
-              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', marginLeft: '-2px', paddingLeft: '2px' }}>
-                {favorites.slice(0, 6).map((recipe: any, i: number) => (
-                  <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ minWidth: '110px', cursor: 'pointer' }}>
-                    <div style={{
-                      width: '110px', height: '100px', borderRadius: '14px',
-                      background: RECIPE_COLORS[i % RECIPE_COLORS.length] + '33',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '32px', marginBottom: '8px', overflow: 'hidden',
-                      border: '1px solid ' + RECIPE_COLORS[i % RECIPE_COLORS.length] + '22',
-                    }}>
-                      {recipe.imageUrl
-                        ? <img src={recipeImageSrc(recipe.imageUrl, 110, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                        : '🍽️'}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {favorites.slice(0, 6).map((recipe: any, i: number) => {
+                  const tint = RECIPE_COLORS[i % RECIPE_COLORS.length]
+                  const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+                  return (
+                    <div
+                      key={recipe.id}
+                      onClick={() => onNavigate('recipe', { recipe })}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                    >
+                      {/* Recipe photo in the same tile the cookbook cards use, so
+                          the whole Home shelf reads as one card system. */}
+                      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
+                        {recipe.imageUrl
+                          ? <img src={recipeImageSrc(recipe.imageUrl, 48, 48)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                          : '🍽️'}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {recipe.name}
+                        </h4>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                          {time} min
+                        </p>
+                      </div>
+                      <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
                     </div>
-                    <h4 style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text)', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
-                      {recipe.name}
-                    </h4>
-                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: 0 }}>
-                      {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
-                    </p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <button
