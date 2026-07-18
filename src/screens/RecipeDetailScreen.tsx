@@ -326,14 +326,15 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                       style={{
                         display: 'flex', alignItems: 'center', gap: '12px',
                         padding: '12px 14px',
-                        background: 'var(--color-card)', borderRadius: '12px',
+                        background: 'var(--color-card)', borderRadius: '14px',
                         border: `1px solid ${checked ? 'var(--color-primary-border)' : 'var(--color-subtle)'}`,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                         cursor: 'pointer', opacity: checked ? 0.55 : 1,
                         transition: 'all 0.15s',
                       }}
                     >
                       <div style={{
-                        width: '20px', height: '20px', borderRadius: '6px', flexShrink: 0,
+                        width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0,
                         border: `2px solid ${checked ? '#6ba356' : 'var(--color-border)'}`,
                         background: checked ? '#6ba356' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -341,7 +342,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                       }}>
                         {checked && <span style={{ color: '#fff', fontSize: '11px', fontWeight: '800', lineHeight: 1 }}>✓</span>}
                       </div>
-                      <span style={{ flex: 1, fontSize: '14px', color: 'var(--color-text)', textDecoration: checked ? 'line-through' : 'none' }}>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', textDecoration: checked ? 'line-through' : 'none' }}>
                         {ing.name}
                       </span>
                       <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>
