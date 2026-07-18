@@ -35,6 +35,10 @@
   /* Disabled control fill */
   --color-disabled: #cbd5e1;
 
+  /* Frosted buttons floating over hero images (back / favorite). */
+  --color-overlay: rgba(255, 255, 255, 0.92);
+  --color-overlay-border: rgba(0, 0, 0, 0.06);
+
   /* Typography */
   --font-heading: "Caprasimo", system-ui, -apple-system, sans-serif;
   --font-body: "Figtree", system-ui, -apple-system, sans-serif;
@@ -78,6 +82,8 @@
   --color-primary-border: rgba(107, 163, 86, 0.45);
   --color-error-bg: rgba(239, 68, 68, 0.20);
   --color-disabled: #475569;
+  --color-overlay: rgba(15, 23, 42, 0.60);
+  --color-overlay-border: rgba(255, 255, 255, 0.14);
 
   --color-desk: #0a0e17;
   --color-nav-bg: rgba(15, 23, 42, 0.82);

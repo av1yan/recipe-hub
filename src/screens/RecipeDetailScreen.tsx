@@ -171,10 +171,11 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             style={{
               position: 'absolute', top: '12px', left: '12px',
               width: '36px', height: '36px', borderRadius: '10px',
-              background: 'rgba(255,255,255,0.92)',
-              border: 'none', cursor: 'pointer',
+              background: 'var(--color-overlay)',
+              border: '1px solid var(--color-overlay-border)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backdropFilter: 'blur(8px)',
+              backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
               zIndex: 2,
             }}
           >
@@ -188,10 +189,11 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               position: 'absolute', top: '12px', right: '12px',
               height: '36px', borderRadius: '10px',
               padding: isFavorited ? '0 12px 0 10px' : '0', width: isFavorited ? 'auto' : '36px',
-              background: 'rgba(255,255,255,0.92)',
-              border: 'none', cursor: 'pointer',
+              background: 'var(--color-overlay)',
+              border: '1px solid var(--color-overlay-border)', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              backdropFilter: 'blur(8px)',
+              backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
               zIndex: 2,
             }}
           >
@@ -468,12 +470,12 @@ function ActionButton({ icon, label, onClick, busy }: { icon: React.ReactNode; l
       }}
     >
       <span style={{
-        width: '46px', height: '46px', borderRadius: '23px', border: '1px solid var(--color-border)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#334155',
+        width: '46px', height: '46px', borderRadius: '23px', background: 'var(--color-subtle)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)',
       }}>
         {icon}
       </span>
-      <span style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>{label}</span>
+      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>{label}</span>
     </button>
   )
 }
