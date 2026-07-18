@@ -280,19 +280,23 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               {/* Planned meal cards */}
               {meals.length > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: pickerOpen ? '10px' : 0 }}>
-                  {meals.map((meal, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', padding: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                      <div style={{ width: '62px', height: '62px', borderRadius: '13px', background: m.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', flexShrink: 0 }}>
-                        {meal.emoji || m.emoji}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', marginBottom: '5px', lineHeight: 1.25 }}>{meal.name}</div>
-                        <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                          {(meal.prepTime || 0) + (meal.cookTime || 0)} Mins · {meal.servings || 1} Serving
+                  {meals.map((meal, i) => {
+                    const servings = meal.servings || 1
+                    return (
+                      <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                        {/* Small tinted tile, matching the Home/Browse cards. */}
+                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: m.tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
+                          {meal.emoji || m.emoji}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
+                          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                            {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
+                          </p>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
 
