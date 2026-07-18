@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, CalendarDays, BookOpen, X } from 'lucide-react'
+import { Plus, CalendarDays, BookOpen, X, Heart } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
@@ -40,6 +40,8 @@ export default function HomeScreen({ onNavigate }: Props) {
   // Which slot the add panel is filling, or null when it is closed.
   const [addingSlot, setAddingSlot] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // Show only favorites in the Your Recipes shelf.
+  const [favOnly, setFavOnly] = useState(false)
 
   // Prefer the person's first name; fall back to their username.
   const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
@@ -111,7 +113,8 @@ export default function HomeScreen({ onNavigate }: Props) {
     }
   }
 
-  const recent = recipes.slice(0, 6)
+  const favCount = recipes.filter((r: any) => r.isFavorite).length
+  const recent = (favOnly ? recipes.filter((r: any) => r.isFavorite) : recipes).slice(0, 6)
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#f8fafc' }}>
@@ -271,11 +274,28 @@ export default function HomeScreen({ onNavigate }: Props) {
               <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: 0, letterSpacing: '-0.01em' }}>
                 Your Recipes
               </h2>
-              {recipes.length > 0 && (
-                <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-                  See all →
-                </button>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                {favCount > 0 && (
+                  <button
+                    onClick={() => setFavOnly(v => !v)}
+                    aria-pressed={favOnly}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer',
+                      background: favOnly ? '#fee2e2' : 'none', border: 'none',
+                      borderRadius: '999px', padding: favOnly ? '4px 10px' : '4px 0',
+                      color: favOnly ? '#ef4444' : '#94a3b8', fontSize: '13px', fontWeight: '700',
+                    }}
+                  >
+                    <Heart size={14} fill={favOnly ? '#ef4444' : 'none'} color={favOnly ? '#ef4444' : '#94a3b8'} />
+                    {favOnly ? 'Favorites' : `Favorites (${favCount})`}
+                  </button>
+                )}
+                {recipes.length > 0 && (
+                  <button onClick={() => onNavigate('browse')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                    See all →
+                  </button>
+                )}
+              </div>
             </div>
 
             {recent.length > 0 ? (
@@ -283,6 +303,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 {recent.map((recipe: any, i: number) => (
                   <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ minWidth: '110px', cursor: 'pointer' }}>
                     <div style={{
+                      position: 'relative',
                       width: '110px', height: '100px', borderRadius: '14px',
                       background: RECIPE_COLORS[i % RECIPE_COLORS.length] + '33',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -292,6 +313,16 @@ export default function HomeScreen({ onNavigate }: Props) {
                       {recipe.imageUrl
                         ? <img src={recipeImageSrc(recipe.imageUrl, 110, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                         : '🍽️'}
+                      {recipe.isFavorite && (
+                        <span style={{
+                          position: 'absolute', top: '6px', right: '6px',
+                          width: '22px', height: '22px', borderRadius: '11px',
+                          background: 'rgba(255,255,255,0.92)', display: 'flex',
+                          alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          <Heart size={12} fill="#ef4444" color="#ef4444" />
+                        </span>
+                      )}
                     </div>
                     <h4 style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', margin: '0 0 2px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '110px' }}>
                       {recipe.name}

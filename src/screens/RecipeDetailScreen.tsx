@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowLeft, Clock, Users, Flame, ChefHat, Heart, ExternalLink } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
+import { recipeAPI } from '../utils/api'
 
 interface Props {
   recipe: Recipe | null
@@ -37,7 +38,24 @@ function sourceLabel(url: string): string {
 export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'browse' }: Props) {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set())
   const [isFavorited, setIsFavorited] = useState(recipe?.isFavorite || false)
+  const [favBusy, setFavBusy] = useState(false)
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions'>('ingredients')
+
+  // Persist the favorite so it survives leaving the screen. Optimistic: flip
+  // the heart first, roll back if the save fails.
+  async function toggleFavorite() {
+    if (!recipe?.id || favBusy) return
+    const next = !isFavorited
+    setIsFavorited(next)
+    setFavBusy(true)
+    try {
+      await (next ? recipeAPI.save(recipe.id) : recipeAPI.unsave(recipe.id))
+    } catch {
+      setIsFavorited(!next)
+    } finally {
+      setFavBusy(false)
+    }
+  }
 
   if (!recipe) {
     return (
@@ -104,18 +122,22 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             <ArrowLeft size={18} color="#1e293b" />
           </button>
           <button
-            onClick={() => setIsFavorited(!isFavorited)}
+            onClick={toggleFavorite}
+            aria-label={isFavorited ? 'Remove from favorites' : 'Save to favorites'}
+            aria-pressed={isFavorited}
             style={{
               position: 'absolute', top: '12px', right: '12px',
-              width: '36px', height: '36px', borderRadius: '10px',
+              height: '36px', borderRadius: '10px',
+              padding: isFavorited ? '0 12px 0 10px' : '0', width: isFavorited ? 'auto' : '36px',
               background: 'rgba(255,255,255,0.92)',
               border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
               backdropFilter: 'blur(8px)',
               zIndex: 2,
             }}
           >
             <Heart size={18} color={isFavorited ? '#ef4444' : '#94a3b8'} fill={isFavorited ? '#ef4444' : 'none'} />
+            {isFavorited && <span style={{ fontSize: '13px', fontWeight: '700', color: '#ef4444' }}>Saved</span>}
           </button>
           {recipe.imageUrl ? (
             <img
