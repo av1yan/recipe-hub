@@ -35,7 +35,7 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
           // Anchored to the phone frame, so it must start below the status bar
           // (44px in App) rather than painting over it like no other screen does.
           position: 'absolute', top: '44px', left: 0, right: 0, bottom: 0, zIndex: 41,
-          background: 'var(--color-card)', display: 'flex', flexDirection: 'column',
+          background: 'var(--color-bg)', display: 'flex', flexDirection: 'column',
           animation: 'rh-panel-up 0.24s cubic-bezier(0.32, 0.72, 0, 1)',
         }}
       >
@@ -102,13 +102,13 @@ function Tile({ icon, label, hint, onClick }: { icon: React.ReactNode; label: st
     <button
       onClick={onClick}
       style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px',
-        padding: '16px', background: 'var(--color-card)', border: '1px solid #e8eef0',
-        borderRadius: '14px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px',
+        padding: '16px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)',
+        borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
       }}
     >
       <span style={{
-        width: '38px', height: '38px', borderRadius: '19px', background: TINT,
+        width: '40px', height: '40px', borderRadius: '11px', background: TINT,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       }}>
         {icon}
@@ -123,8 +123,8 @@ function Tile({ icon, label, hint, onClick }: { icon: React.ReactNode; label: st
 
 const wideCard: React.CSSProperties = {
   width: '100%', display: 'flex', alignItems: 'center', gap: '14px',
-  padding: '16px 14px', background: 'var(--color-card)', border: '1px solid #e8eef0',
-  borderRadius: '14px', cursor: 'pointer', fontFamily: 'inherit',
+  padding: '16px 14px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)',
+  borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', fontFamily: 'inherit',
 }
 
 /** The overlapping platform marks from the reference, drawn rather than fetched. */
