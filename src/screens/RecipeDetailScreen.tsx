@@ -361,21 +361,22 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             )
           ) : (
             recipe.instructions?.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recipe.instructions.map((step, i) => (
                   <div key={step.id} style={{
-                    display: 'flex', gap: '14px',
-                    padding: '14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)',
+                    display: 'flex', gap: '12px', alignItems: 'flex-start',
+                    padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px',
+                    border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                   }}>
                     <div style={{
-                      width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
+                      width: '32px', height: '32px', borderRadius: '9px', flexShrink: 0,
                       background: '#6ba356', color: '#fff',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '13px', fontWeight: '700',
+                      fontSize: '14px', fontWeight: '700',
                     }}>
                       {step.stepNumber || i + 1}
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{step.text}</p>
                       {step.duration && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', color: 'var(--color-text-secondary)', fontSize: '12px' }}>
