@@ -78,13 +78,13 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
 
 function Row({ icon, label, value, onPress, danger }: { icon: React.ReactNode; label: string; value?: string; onPress?: () => void; danger?: boolean }) {
   return (
-    <button onClick={onPress} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '14px', padding: '13px 16px', background: 'var(--color-card)', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: danger ? 'var(--color-error-bg)' : 'var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+    <button onClick={onPress} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+      <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: danger ? 'var(--color-error-bg)' : 'var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {icon}
       </div>
-      <span style={{ flex: 1, fontSize: '15px', color: danger ? '#ef4444' : 'var(--color-text)', fontWeight: '500' }}>{label}</span>
-      {value && <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginRight: '4px' }}>{value}</span>}
-      <ChevronRight size={17} color="#cbd5e1" />
+      <span style={{ flex: 1, minWidth: 0, fontSize: '15px', color: danger ? '#ef4444' : 'var(--color-text)', fontWeight: '600' }}>{label}</span>
+      {value && <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginRight: '2px' }}>{value}</span>}
+      <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
     </button>
   )
 }
@@ -439,18 +439,11 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
       <div style={{ flex: 1, overflowY: 'auto' }}>
 
-        <div style={{ marginTop: '20px', marginBottom: '24px' }}>
-          <div style={{ borderRadius: '14px', overflow: 'hidden', margin: '0 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', border: '1px solid var(--color-subtle)' }}>
-            <Row icon={<User size={18} color="var(--color-text-secondary)" />} label="Account" onPress={() => setSubPage('account')} />
-            <Divider />
-            <Row icon={<Crown size={18} color="#f4b860" />} label="My subscription" value="Free" onPress={() => setSubPage('subscription')} />
-            <Divider />
-            <Divider />
-            <Row icon={<SlidersHorizontal size={18} color="var(--color-text-secondary)" />} label="Preferences" onPress={() => setSubPage('preferences')} />
-            <Divider />
-            <Divider />
-            <Row icon={<HelpCircle size={18} color="var(--color-text-secondary)" />} label="Help" onPress={() => setSubPage('help')} />
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '20px 16px 24px' }}>
+          <Row icon={<User size={18} color="var(--color-text-secondary)" />} label="Account" onPress={() => setSubPage('account')} />
+          <Row icon={<Crown size={18} color="#f4b860" />} label="My subscription" value="Free" onPress={() => setSubPage('subscription')} />
+          <Row icon={<SlidersHorizontal size={18} color="var(--color-text-secondary)" />} label="Preferences" onPress={() => setSubPage('preferences')} />
+          <Row icon={<HelpCircle size={18} color="var(--color-text-secondary)" />} label="Help" onPress={() => setSubPage('help')} />
         </div>
 
         <div style={{ marginBottom: '20px' }}>
@@ -485,7 +478,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
         <div style={{ marginBottom: '20px' }}>
           <SectionHeader label="CONNECT" />
-          <div style={{ borderRadius: '14px', overflow: 'hidden', margin: '0 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', border: '1px solid var(--color-subtle)' }}>
+          <div style={{ margin: '0 16px' }}>
             <Row icon={<UserPlus size={18} color="#6ba356" />} label="Invite friends" onPress={() => setSubPage('invite')} />
           </div>
         </div>
@@ -497,7 +490,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
           </button>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: '13px', color: '#cbd5e1', marginBottom: '24px' }}>Version 1.0.0</p>
+        <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--color-text-muted)', marginBottom: '24px' }}>Version 1.0.0</p>
 
       </div>
     </div>
