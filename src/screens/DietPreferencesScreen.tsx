@@ -47,7 +47,7 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: 'var(--color-primary-bg)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--color-bg)', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ padding: '32px 24px 16px', textAlign: 'center', flexShrink: 0 }}>
         <div style={{ fontSize: '52px', marginBottom: '12px' }}>🥗</div>
@@ -72,8 +72,8 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
                   display: 'flex', alignItems: 'center', gap: '6px',
                   padding: '11px 18px',
                   background: active ? '#6ba356' : 'var(--color-card)',
-                  color: active ? '#fff' : '#334155',
-                  border: active ? '2px solid #6ba356' : '2px solid #d7e8cd',
+                  color: active ? '#fff' : 'var(--color-text-secondary)',
+                  border: active ? '2px solid #6ba356' : '2px solid var(--color-border)',
                   borderRadius: '999px',
                   fontSize: '14px',
                   fontWeight: '600',
