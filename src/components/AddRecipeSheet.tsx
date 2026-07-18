@@ -87,7 +87,7 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
             that opened this panel, so tapping it again should keep you put
             rather than snap the panel shut (which read as a jolt). Close is
             the header X, or tap another tab. */}
-        <BottomNavigation active="" onNavigate={(s) => go(s as Screen)} onAdd={() => {}} />
+        <BottomNavigation active="" onNavigate={(s) => go(s as Screen)} onAdd={() => {}} solid />
       </div>
 
       <style>{`

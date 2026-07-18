@@ -7,6 +7,11 @@ interface Props {
   /** Override the "+" — e.g. make it inert inside the add panel, which is
       already the "+" destination. Defaults to opening the panel. */
   onAdd?: () => void
+  /** Render an opaque bar with no backdrop blur. Used inside the add panel,
+      which is a full-screen opaque sheet: a second blurred nav stacked over
+      the home nav's blur composites two backdrop-filter layers at the same
+      spot, which shimmers/jolts on touch. Solid removes that. */
+  solid?: boolean
 }
 
 const tabs = [
@@ -17,7 +22,7 @@ const tabs = [
   { id: 'grocery', icon: ShoppingCart, label: 'Groceries', screen: 'grocery' },
 ]
 
-export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
+export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
   // The panel itself lives at the app level (App renders one AddRecipeSheet);
   // the "+" just asks to open it. That's what lets Back on an import screen
   // bring the panel back rather than only ever landing on Home.
@@ -29,9 +34,9 @@ export function BottomNavigation({ active, onNavigate, onAdd }: Props) {
       display: 'flex',
       alignItems: 'center',
       flexShrink: 0,
-      background: 'var(--color-nav-bg)',
-      backdropFilter: 'saturate(180%) blur(24px)',
-      WebkitBackdropFilter: 'saturate(180%) blur(24px)',
+      background: solid ? 'var(--color-card)' : 'var(--color-nav-bg)',
+      backdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
+      WebkitBackdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
       borderTop: '0.5px solid var(--color-nav-border)',
       boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.04)',
       paddingBottom: '6px',
