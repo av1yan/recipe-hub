@@ -385,23 +385,26 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '12px',
-                          padding: '12px',
+                          padding: '12px 14px',
                           background: 'var(--color-card)',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(15, 23, 42, 0.08)',
+                          borderRadius: '14px',
+                          border: '1px solid var(--color-subtle)',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                           opacity: item.checked ? 0.6 : 1,
                         }}
                       >
                         <button
                           onClick={() => toggleItem(item.id, item.checked || false)}
+                          aria-label={item.checked ? `Uncheck ${item.name}` : `Check ${item.name}`}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '4px',
-                            border: `2px solid ${item.checked ? '#6ba356' : '#cbd5e1'}`,
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '6px',
+                            flexShrink: 0,
+                            border: `2px solid ${item.checked ? '#6ba356' : 'var(--color-border)'}`,
                             background: item.checked ? '#6ba356' : 'transparent',
                             color: '#fff',
                             cursor: 'pointer',
@@ -410,20 +413,20 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                         >
                           {item.checked && <Check size={14} />}
                         </button>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '14px', fontWeight: '500', textDecoration: item.checked ? 'line-through' : 'none' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', textDecoration: item.checked ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.name}
                           </div>
-                          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
                             {item.quantity} {item.unit}
                           </div>
                         </div>
                         <button
                           onClick={() => deleteItem(item.id)}
-                          className="btn btn-icon"
-                          style={{ background: 'transparent', color: '#ef4444', padding: '4px' }}
+                          aria-label={`Delete ${item.name}`}
+                          style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '10px', background: 'var(--color-subtle)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={15} color="#ef4444" />
                         </button>
                       </div>
                     ))
