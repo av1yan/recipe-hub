@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { ArrowLeft, Clock, Users, Flame, ChefHat, Heart, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Clock, Users, Flame, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2 } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { recipeAPI } from '../utils/api'
+import { recipeAPI, groceryAPI, mealPlanAPI } from '../utils/api'
+import { Toast, useToast } from '../components/Toast'
+import { DAY_NAMES, MEALS, sameWeek, mondayOf, getMeals } from './MealPlanScreen'
 
 interface Props {
   recipe: Recipe | null
@@ -40,6 +42,10 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   const [isFavorited, setIsFavorited] = useState(recipe?.isFavorite || false)
   const [favBusy, setFavBusy] = useState(false)
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions'>('ingredients')
+  // The servings the person wants to cook for; ingredient amounts scale to it.
+  const [servings, setServings] = useState(recipe?.servings || 1)
+  const [actionBusy, setActionBusy] = useState('')
+  const { toast, show } = useToast()
 
   // Persist the favorite so it survives leaving the screen. Optimistic: flip
   // the heart first, roll back if the save fails.
@@ -84,6 +90,64 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
       else next.add(id)
       return next
     })
+  }
+
+  // Ingredient amounts are stored for the recipe's own serving count; scale
+  // them to whatever the person set.
+  const baseServings = recipe.servings || 1
+  const scale = servings / baseServings
+
+  async function addToGroceries() {
+    if (actionBusy) return
+    setActionBusy('groceries')
+    try {
+      const lists: any = await groceryAPI.list()
+      let list = Array.isArray(lists) ? lists[0] : lists
+      if (!list?.id) list = await groceryAPI.create('Groceries')
+      const items = recipe!.ingredients || []
+      await Promise.all(items.map((ing: any) =>
+        groceryAPI.addItem(list.id, { name: ing.name, quantity: round2((ing.quantity || 1) * scale), unit: ing.unit })
+      ))
+      show(`Added ${items.length} item${items.length === 1 ? '' : 's'} to groceries`)
+    } catch {
+      show('Could not add to groceries', 'error')
+    } finally {
+      setActionBusy('')
+    }
+  }
+
+  async function addToMealPlan() {
+    if (actionBusy) return
+    setActionBusy('mealplan')
+    try {
+      const today = new Date()
+      const dayName = DAY_NAMES[(today.getDay() + 6) % 7]
+      const plans: any = await mealPlanAPI.list()
+      let plan = (Array.isArray(plans) ? plans : []).find((p: any) => sameWeek(p.weekStart, today))
+      if (!plan) plan = await mealPlanAPI.create(mondayOf(today))
+      // A slot holds one recipe -- drop it in the first open one for today.
+      const slot = MEALS.find(m => getMeals(plan, dayName, m.key).length === 0)
+      if (!slot) { show("Today's meals are already full", 'error'); return }
+      await mealPlanAPI.addMeal(plan.id, recipe!.id, dayName, slot.key)
+      show(`Added to today's ${slot.label}`)
+    } catch {
+      show('Could not add to meal plan', 'error')
+    } finally {
+      setActionBusy('')
+    }
+  }
+
+  async function share() {
+    const text = recipe!.description ? `${recipe!.name} — ${recipe!.description}` : recipe!.name
+    const url = recipe!.sourceUrl || window.location.href
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: recipe!.name, text, url })
+      } else {
+        await navigator.clipboard.writeText(`${text}\n${url}`)
+        show('Copied to clipboard')
+      }
+    } catch { /* the person dismissed the share sheet */ }
   }
 
   const stats = [
@@ -219,6 +283,13 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               </div>
             ))}
           </div>
+
+          {/* Quick actions — one tap to shop, plan, or pass it on. */}
+          <div style={{ display: 'flex', gap: '10px', paddingBottom: '16px' }}>
+            <ActionButton icon={<ShoppingCart size={18} />} label="Groceries" onClick={addToGroceries} busy={actionBusy === 'groceries'} />
+            <ActionButton icon={<CalendarPlus size={18} />} label="Meal Plan" onClick={addToMealPlan} busy={actionBusy === 'mealplan'} />
+            <ActionButton icon={<Share2 size={18} />} label="Share" onClick={share} />
+          </div>
         </div>
 
         {/* Tabs */}
@@ -249,6 +320,21 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         <div style={{ padding: '16px' }}>
           {activeTab === 'ingredients' ? (
             recipe.ingredients?.length > 0 ? (
+              <>
+              {/* Servings scaler — amounts below follow this. */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e2e8f0', borderRadius: '999px' }}>
+                    <button onClick={() => setServings(s => Math.max(1, s - 1))} aria-label="Fewer servings" style={stepBtn}><Minus size={15} /></button>
+                    <span style={{ minWidth: '26px', textAlign: 'center', fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>{servings}</span>
+                    <button onClick={() => setServings(s => s + 1)} aria-label="More servings" style={stepBtn}><Plus size={15} /></button>
+                  </div>
+                  <span style={{ fontSize: '13px', color: '#64748b' }}>servings</span>
+                </div>
+                {servings !== baseServings && (
+                  <button onClick={() => setServings(baseServings)} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Reset</button>
+                )}
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {recipe.ingredients.map(ing => {
                   const checked = checkedIngredients.has(ing.id)
@@ -278,12 +364,13 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                         {ing.name}
                       </span>
                       <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', flexShrink: 0 }}>
-                        {ing.quantity} {ing.unit}
+                        {fmtQty((ing.quantity || 0) * scale)} {ing.unit}
                       </span>
                     </div>
                   )
                 })}
               </div>
+              </>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
                 <div style={{ fontSize: '36px', marginBottom: '8px' }}>🥄</div>
@@ -327,6 +414,26 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
           )}
         </div>
 
+        {/* Nutrition — per serving, so it doesn't move when servings do. */}
+        {recipe.nutrition && (
+          <div style={{ padding: '0 16px 8px' }}>
+            <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #f1f5f9', padding: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', margin: 0 }}>Nutrition</h3>
+                <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>Per serving</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                <MacroDonut protein={recipe.nutrition.protein} carbs={recipe.nutrition.carbs} fat={recipe.nutrition.fat} calories={recipe.nutrition.calories || recipe.calories || 0} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '11px', flex: 1 }}>
+                  <MacroRow color="#a78bfa" label="Protein" grams={recipe.nutrition.protein} />
+                  <MacroRow color="#fbbf24" label="Carbs" grams={recipe.nutrition.carbs} />
+                  <MacroRow color="#6ba356" label="Fat" grams={recipe.nutrition.fat} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Start Cooking CTA */}
         <div style={{ padding: '0 16px 16px' }}>
           <button
@@ -350,7 +457,85 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         </div>
 
       </div>
+      {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
       <BottomNavigation active={backTo === 'home' ? 'home' : 'browse'} onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
+  )
+}
+
+/** Rounds to 2 decimals and drops trailing zeros: 2.00 -> "2", 0.66 -> "0.66". */
+function round2(n: number): number {
+  return Math.round(n * 100) / 100
+}
+function fmtQty(n: number): string {
+  return String(round2(n))
+}
+
+const stepBtn: React.CSSProperties = {
+  width: '34px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'none', border: 'none', color: '#64748b', cursor: 'pointer',
+}
+
+/** One of the round quick-action buttons under the stats. */
+function ActionButton({ icon, label, onClick, busy }: { icon: React.ReactNode; label: string; onClick: () => void; busy?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={busy}
+      style={{
+        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+        background: 'none', border: 'none', cursor: busy ? 'default' : 'pointer', padding: 0,
+        opacity: busy ? 0.5 : 1, fontFamily: 'inherit',
+      }}
+    >
+      <span style={{
+        width: '46px', height: '46px', borderRadius: '23px', border: '1px solid #e2e8f0',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#334155',
+      }}>
+        {icon}
+      </span>
+      <span style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>{label}</span>
+    </button>
+  )
+}
+
+function MacroRow({ color, label, grams }: { color: string; label: string; grams: number }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: color, flexShrink: 0 }} />
+      <span style={{ fontSize: '13px', color: '#64748b', flex: 1 }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>{round2(grams)} g</span>
+    </div>
+  )
+}
+
+/** A ring split by each macro's share of the calories, kcal in the middle. */
+function MacroDonut({ protein, carbs, fat, calories }: { protein: number; carbs: number; fat: number; calories: number }) {
+  const segs = [
+    { v: protein * 4, color: '#a78bfa' },
+    { v: carbs * 4, color: '#fbbf24' },
+    { v: fat * 9, color: '#6ba356' },
+  ]
+  const total = segs.reduce((s, x) => s + x.v, 0) || 1
+  const r = 34, C = 2 * Math.PI * r
+  let offset = 0
+  return (
+    <svg width="86" height="86" viewBox="0 0 88 88" style={{ flexShrink: 0 }}>
+      <circle cx="44" cy="44" r={r} fill="none" stroke="#f1f5f9" strokeWidth="10" />
+      {segs.map((s, i) => {
+        const len = (s.v / total) * C
+        const el = (
+          <circle
+            key={i} cx="44" cy="44" r={r} fill="none" stroke={s.color} strokeWidth="10"
+            strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-offset}
+            transform="rotate(-90 44 44)"
+          />
+        )
+        offset += len
+        return el
+      })}
+      <text x="44" y="42" textAnchor="middle" fontSize="17" fontWeight="700" fill="#1e293b">{calories}</text>
+      <text x="44" y="56" textAnchor="middle" fontSize="9" fill="#94a3b8" letterSpacing="0.5">CAL</text>
+    </svg>
   )
 }
