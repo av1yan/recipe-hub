@@ -32,6 +32,9 @@
   --color-error: #ef4444;
   --color-error-bg: #fee2e2;
 
+  /* Disabled control fill */
+  --color-disabled: #cbd5e1;
+
   /* Typography */
   --font-heading: "Caprasimo", system-ui, -apple-system, sans-serif;
   --font-body: "Figtree", system-ui, -apple-system, sans-serif;
@@ -74,6 +77,7 @@
   --color-primary-bg: rgba(107, 163, 86, 0.20);
   --color-primary-border: rgba(107, 163, 86, 0.45);
   --color-error-bg: rgba(239, 68, 68, 0.20);
+  --color-disabled: #475569;
 
   --color-desk: #0a0e17;
   --color-nav-bg: rgba(15, 23, 42, 0.82);

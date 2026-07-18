@@ -145,6 +145,6 @@ const inputBase: React.CSSProperties = {
 
 const primaryBtn = (disabled: boolean): React.CSSProperties => ({
   width: '100%', padding: '14px', borderRadius: '12px', border: 'none',
-  background: disabled ? '#cbd5e1' : GREEN, color: '#fff', fontSize: '15px', fontWeight: '700',
+  background: disabled ? 'var(--color-disabled)' : GREEN, color: '#fff', fontSize: '15px', fontWeight: '700',
   cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
 })
