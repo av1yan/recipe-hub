@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { Search, SlidersHorizontal, X, ChevronRight } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
@@ -381,27 +381,36 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
     return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', padding: '24px 0', margin: 0 }}>No recipes yet.</p>
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {recipes.map((recipe, index) => (
-        <div
-          key={recipe.id}
-          onClick={() => onNavigate('recipe', { recipe })}
-          style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', cursor: 'pointer' }}
-        >
-          <div style={{ width: '62px', height: '62px', borderRadius: '12px', background: TILE_COLORS[index % TILE_COLORS.length], flexShrink: 0, overflow: 'hidden' }}>
-            {recipe.imageUrl && (
-              <img src={recipe.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-            )}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', marginBottom: '4px' }}>{recipe.name}</div>
-            <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-              {recipe.cuisine} · {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
-              {recipe.calories ? ` · ${recipe.calories} cal` : ''}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {recipes.map((recipe, index) => {
+        const tint = TILE_COLORS[index % TILE_COLORS.length]
+        const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+        const meta = [recipe.cuisine, `${time} min`, recipe.calories ? `${recipe.calories} cal` : '']
+          .filter(Boolean).join(' · ')
+        return (
+          <div
+            key={recipe.id}
+            onClick={() => onNavigate('recipe', { recipe })}
+            style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+          >
+            {/* Same tinted tile the Home cards use. */}
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
+              {recipe.imageUrl
+                ? <img src={recipe.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                : '🍽️'}
             </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {recipe.name}
+              </h4>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {meta}
+              </p>
+            </div>
+            <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

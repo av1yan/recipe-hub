@@ -12,6 +12,9 @@ interface Props {
 
 const RED = '#ef4444'
 
+/** Tile tints, matching the Home favorite/cookbook cards. */
+const TINTS = ['#d4a574', '#6ba356', '#c67139', '#5b9acd', '#9b7ec8']
+
 /** Everything the person has hearted, in one place. The heart used to lead
     nowhere; this is where it lands. */
 export default function FavoritesScreen({ onNavigate }: Props) {
@@ -84,44 +87,46 @@ export default function FavoritesScreen({ onNavigate }: Props) {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            {recipes.map((recipe: any) => (
-              // minWidth:0 or a long name grows the grid column and breaks the
-              // ellipsis -- same guard as the cookbook grid.
-              <div key={recipe.id} style={{ position: 'relative', minWidth: 0 }}>
-                <div onClick={() => onNavigate('recipe', { recipe: { ...recipe, isFavorite: true } })} style={{ cursor: 'pointer' }}>
-                  <div style={{
-                    width: '100%', height: '100px', borderRadius: '14px', background: 'var(--color-subtle)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '30px', marginBottom: '8px', overflow: 'hidden',
-                  }}>
-                    {recipe.imageUrl
-                      ? <img src={recipeImageSrc(recipe.imageUrl, 160, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                      : '🍽️'}
-                  </div>
-                  <h4 style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text)', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {recipe.name}
-                  </h4>
-                  <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: 0 }}>
-                    {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
-                  </p>
-                </div>
-                <button
-                  onClick={() => unfavorite(recipe.id, recipe.name)}
-                  aria-label={`Remove ${recipe.name} from favorites`}
-                  title="Remove from favorites"
-                  style={{
-                    position: 'absolute', top: '6px', right: '6px',
-                    width: '26px', height: '26px', borderRadius: '13px',
-                    background: 'rgba(255,255,255,0.92)', border: 'none',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer',
-                  }}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {recipes.map((recipe: any, i: number) => {
+              const tint = TINTS[i % TINTS.length]
+              const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+              return (
+                <div
+                  key={recipe.id}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
                 >
-                  <Heart size={13} fill={RED} color={RED} />
-                </button>
-              </div>
-            ))}
+                  {/* Photo tile + text open the recipe; the heart (a sibling, not
+                      nested) removes it, so the two taps never collide. */}
+                  <div
+                    onClick={() => onNavigate('recipe', { recipe: { ...recipe, isFavorite: true } })}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, cursor: 'pointer' }}
+                  >
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
+                      {recipe.imageUrl
+                        ? <img src={recipeImageSrc(recipe.imageUrl, 48, 48)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                        : '🍽️'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {recipe.name}
+                      </h4>
+                      <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                        {time} min
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => unfavorite(recipe.id, recipe.name)}
+                    aria-label={`Remove ${recipe.name} from favorites`}
+                    title="Remove from favorites"
+                    style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '10px', background: 'var(--color-subtle)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                  >
+                    <Heart size={15} fill={RED} color={RED} />
+                  </button>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
