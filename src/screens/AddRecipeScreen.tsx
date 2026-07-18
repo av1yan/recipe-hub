@@ -73,9 +73,9 @@ const addBtn: React.CSSProperties = {
 }
 
 const stepBadge: React.CSSProperties = {
-  flexShrink: 0, width: '28px', height: '28px', borderRadius: '8px', background: '#6ba356',
+  flexShrink: 0, width: '32px', height: '32px', borderRadius: '9px', background: '#6ba356',
   color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  fontSize: '13px', fontWeight: '700', marginTop: '5px',
+  fontSize: '14px', fontWeight: '700', marginTop: '5px',
 }
 
 export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', reopenPanelOnBack = false }: Props) {
@@ -216,7 +216,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
   return (
     <div className="screen" style={{ position: 'relative' }}>
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <header style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button onClick={() => onNavigate(backTo, reopenPanelOnBack ? { openAddSheet: true } : undefined)} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
         </button>
@@ -225,7 +225,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
         {error && (
-          <div style={{ background: 'var(--color-error-bg)', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#ef4444', fontSize: '14px' }}>
+          <div style={{ background: 'var(--color-error-bg)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#ef4444', fontSize: '14px' }}>
             {error}
           </div>
         )}
@@ -247,7 +247,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
         {draft && !draft.warnings?.length && (
           <div style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
-            <p style={{ margin: 0, fontSize: '12.5px', color: '#4d7a3c', lineHeight: 1.5 }}>
+            <p style={{ margin: 0, fontSize: '12.5px', color: '#6ba356', fontWeight: '600', lineHeight: 1.5 }}>
               Imported — look it over and change anything that isn’t right.
             </p>
           </div>
@@ -316,13 +316,13 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
             {imageUrl ? (
               <div style={{ marginTop: '6px' }}>
-                <div style={{ position: 'relative', height: '160px', borderRadius: '12px', overflow: 'hidden', background: 'var(--color-subtle)', border: '1px solid #eef2f6' }}>
+                <div style={{ position: 'relative', height: '160px', borderRadius: '12px', overflow: 'hidden', background: 'var(--color-subtle)', border: '1px solid var(--color-subtle)' }}>
                   <img src={imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   <button
                     type="button"
                     onClick={() => setImageUrl('')}
                     aria-label="Remove photo"
-                    style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '9px', background: 'rgba(255,255,255,0.94)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}
+                    style={{ position: 'absolute', top: '8px', right: '8px', width: '30px', height: '30px', borderRadius: '9px', background: 'var(--color-overlay)', border: '1px solid var(--color-overlay-border)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}
                   >
                     <X size={16} />
                   </button>
@@ -340,9 +340,9 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={photoBusy}
-                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
+                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed var(--color-primary-border)', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
               >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Camera size={18} color="#6ba356" />
                 </div>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)' }}>
@@ -414,7 +414,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                       display: 'flex', alignItems: 'center', gap: '5px',
                       padding: '8px 14px',
                       background: active ? '#6ba356' : 'var(--color-card)',
-                      color: active ? '#fff' : '#334155',
+                      color: active ? '#fff' : 'var(--color-text-secondary)',
                       border: active ? '2px solid #6ba356' : '2px solid var(--color-border)',
                       borderRadius: '999px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                     }}
@@ -430,7 +430,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
             </p>
           </div>
 
-          <SectionLabel>Save to a cookbook <span style={{ textTransform: 'none', fontWeight: 400, color: '#cbd5e1' }}>(optional)</span></SectionLabel>
+          <SectionLabel>Save to a cookbook <span style={{ textTransform: 'none', fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></SectionLabel>
           <div className="field">
             <select
               className="input"
