@@ -83,8 +83,8 @@ function Row({ icon, label, value, onPress, danger }: { icon: React.ReactNode; l
       <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: danger ? 'var(--color-error-bg)' : 'var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {icon}
       </div>
-      <span style={{ flex: 1, minWidth: 0, fontSize: '15px', color: danger ? '#ef4444' : 'var(--color-text)', fontWeight: '600' }}>{label}</span>
-      {value && <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginRight: '2px' }}>{value}</span>}
+      <span style={{ flex: 1, minWidth: 0, fontSize: '15px', color: danger ? '#ef4444' : 'var(--color-text)', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+      {value && <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginRight: '2px', flexShrink: 0 }}>{value}</span>}
       <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
     </button>
   )
@@ -487,7 +487,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             icon={<Crown size={18} color="#f4b860" />}
             label="My subscription"
             value={isPro
-              ? <span style={{ background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '11px', fontWeight: '800', padding: '3px 9px', borderRadius: '999px', letterSpacing: '0.04em' }}>PRO</span>
+              ? <span style={{ background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '10px', fontWeight: '800', padding: '2.5px 7px', borderRadius: '999px', letterSpacing: '0.05em' }}>PRO</span>
               : 'Free'}
             onPress={() => setSubPage('subscription')}
           />
