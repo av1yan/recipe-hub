@@ -306,27 +306,33 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }}>
-              {lists.map(list => (
-                <button
-                  key={list.id}
-                  onClick={() => setSelectedListId(list.id)}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: list.id === selectedListId ? '#6ba356' : 'var(--color-subtle)',
-                    color: list.id === selectedListId ? '#fff' : 'var(--color-text)',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {list.name}
-                </button>
-              ))}
-            </div>
+            {/* Only a switcher when there's something to switch to. It also
+                needs flex-shrink: 0 -- overflow-x makes it a scroll container,
+                which otherwise collapses to its padding inside the scrolling
+                column (it rendered as a thin green sliver). */}
+            {lists.length > 1 && (
+              <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', flexShrink: 0 }}>
+                {lists.map(list => (
+                  <button
+                    key={list.id}
+                    onClick={() => setSelectedListId(list.id)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: list.id === selectedListId ? '#6ba356' : 'var(--color-subtle)',
+                      color: list.id === selectedListId ? '#fff' : 'var(--color-text)',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {list.name}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {selectedList && (
               <>
