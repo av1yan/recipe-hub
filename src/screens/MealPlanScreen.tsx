@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, X, Trash2, CalendarDays, Check } from 'lucide-react'
+import { Plus, Trash2, CalendarDays, Check, ChevronDown } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { mealPlanAPI, recipeAPI } from '../utils/api'
@@ -57,7 +57,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [viewWeek, setViewWeek] = useState<Date>(() => mondayOf(new Date()))
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<string>(() => DAY_NAMES[(new Date().getDay() + 6) % 7])
-  const [pickerFor, setPickerFor] = useState<string | null>(null) // meal-type key whose inline picker is open
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showWeeks, setShowWeeks] = useState(false)
@@ -83,7 +82,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   function openWeek(weekStart: Date) {
     setViewWeek(weekStart)
     setShowWeeks(false)
-    setPickerFor(null)
     setConfirmDelete(false)
   }
 
@@ -93,7 +91,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     try {
       await mealPlanAPI.delete(currentPlan.id)
       setConfirmDelete(false)
-      setPickerFor(null)
       await loadData()
     } catch (error) {
       console.error('Failed to delete meal plan:', error)
@@ -114,7 +111,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       }
       await mealPlanAPI.addMeal(planId, recipeId, selectedDay, mealType)
       await loadData()
-      setPickerFor(null)
     } catch (error) {
       console.error('Failed to add meal to plan:', error)
     }
@@ -178,7 +174,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             return (
               <button
                 key={dayName}
-                onClick={() => { setSelectedDay(dayName); setPickerFor(null) }}
+                onClick={() => setSelectedDay(dayName)}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
               >
                 <span style={{ fontSize: '12px', fontWeight: '600', color: active ? '#f26d5b' : 'var(--color-text-muted)' }}>{short}</span>
@@ -244,29 +240,16 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
         {MEALS.map(m => {
           const meals = getMeals(currentPlan, selectedDay, m.key)
-          const pickerOpen = pickerFor === m.key
+          const filled = meals.length > 0
           return (
             <div key={m.key} style={{ marginBottom: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h3 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{m.label}</h3>
-                {/* A slot holds one recipe. Empty (or picking): offer Add/Close.
-                    Filled: no "add" -- offer Edit (swap the recipe) and Remove
-                    (clear the slot) instead. */}
-                {meals.length === 0 || pickerOpen ? (
-                  <button
-                    onClick={() => setPickerFor(pickerOpen ? null : m.key)}
-                    style={{ background: 'none', border: 'none', color: '#f26d5b', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-                  >
-                    {pickerOpen ? <><X size={15} /> Close</> : <><Plus size={15} /> Add</>}
-                  </button>
-                ) : (
+                {/* A slot holds one recipe. Filled: a compact dropdown swaps it
+                    in place, plus Remove to clear the slot. */}
+                {filled && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <button
-                      onClick={() => setPickerFor(m.key)}
-                      style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
-                    >
-                      Edit
-                    </button>
+                    <RecipeDropdown meal={m} recipes={recipes} onPick={(id) => addMealToPlan(id, m.key)} variant="swap" />
                     <button
                       onClick={() => meals[0]?.mealId && removeMeal(meals[0].mealId)}
                       style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
@@ -278,8 +261,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               </div>
 
               {/* Planned meal cards */}
-              {meals.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: pickerOpen ? '10px' : 0 }}>
+              {filled && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {meals.map((meal, i) => {
                     const servings = meal.servings || 1
                     return (
@@ -300,47 +283,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 </div>
               )}
 
-              {/* Inline recipe picker */}
-              {pickerOpen && (
-                <div style={{ border: '1.5px solid #f7d2ca', borderRadius: '16px', overflow: 'hidden', background: 'var(--color-card)' }}>
-                  <div style={{ padding: '9px 14px', fontSize: '11px', fontWeight: '800', color: '#f26d5b', letterSpacing: '0.05em', background: '#fdeeeb' }}>
-                    CHOOSE A RECIPE
-                  </div>
-                  <div style={{ maxHeight: '256px', overflowY: 'auto' }}>
-                    {recipes.length === 0 ? (
-                      <p style={{ padding: '18px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', margin: 0 }}>No recipes yet — add some first.</p>
-                    ) : (
-                      recipes.map((r, i) => (
-                        <button
-                          key={r.id}
-                          onClick={() => addMealToPlan(r.id, m.key)}
-                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', background: 'none', border: 'none', borderTop: i === 0 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left' }}
-                        >
-                          <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: m.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
-                            {(r as any).emoji || m.emoji}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)' }}>{r.name}</div>
-                            <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                              {r.cuisine} · {(r.prepTime || 0) + (r.cookTime || 0)} min
-                            </div>
-                          </div>
-                          <Plus size={16} color="#f26d5b" />
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Empty state (no meals, picker closed) */}
-              {meals.length === 0 && !pickerOpen && (
-                <button onClick={() => setPickerFor(m.key)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed #f0d8d2', borderRadius: '16px', cursor: 'pointer', textAlign: 'left' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Plus size={18} color="#f26d5b" />
-                  </div>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)' }}>Add a {m.label.toLowerCase()} recipe</span>
-                </button>
+              {/* Empty slot: pick a recipe straight from a dropdown -- one tap,
+                  no expanding list or extra screen. */}
+              {!filled && (
+                <RecipeDropdown meal={m} recipes={recipes} onPick={(id) => addMealToPlan(id, m.key)} variant="add" />
               )}
             </div>
           )
@@ -348,6 +294,93 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       </div>
 
       <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
+    </div>
+  )
+}
+
+/**
+ * Picking a recipe for a slot, as a plain dropdown instead of a screen or an
+ * expanding list -- one tap opens the native picker, choosing adds it.
+ *
+ * "add" is the full-width dashed control shown in an empty slot; "swap" is the
+ * compact control in a filled slot's header. Both stay on the placeholder
+ * (value="") so they re-arm after each pick.
+ */
+function RecipeDropdown({ meal, recipes, onPick, variant }: {
+  meal: typeof MEALS[number]
+  recipes: Recipe[]
+  onPick: (recipeId: string) => void
+  variant: 'add' | 'swap'
+}) {
+  const noRecipes = recipes.length === 0
+  // A filled slot with nothing to swap to gets no dropdown at all.
+  if (variant === 'swap' && noRecipes) return null
+
+  const options = (
+    <>
+      <option value="" disabled>
+        {variant === 'add'
+          ? (noRecipes ? 'No recipes yet — add some first' : `Add a ${meal.label.toLowerCase()} recipe`)
+          : 'Swap'}
+      </option>
+      {recipes.map(r => (
+        <option key={r.id} value={r.id}>
+          {(r as any).emoji || meal.emoji} {r.name} · {(r.prepTime || 0) + (r.cookTime || 0)} min
+        </option>
+      ))}
+    </>
+  )
+
+  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value) onPick(e.target.value)
+  }
+
+  if (variant === 'swap') {
+    return (
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <select
+          value=""
+          onChange={onChange}
+          aria-label={`Swap ${meal.label.toLowerCase()} recipe`}
+          style={{
+            appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+            background: 'none', border: 'none', color: 'var(--color-text-secondary)',
+            fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+            paddingRight: '16px', fontFamily: 'inherit',
+          }}
+        >
+          {options}
+        </select>
+        <ChevronDown size={13} color="var(--color-text-secondary)" style={{ position: 'absolute', right: 0, pointerEvents: 'none' }} />
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+        <Plus size={18} color="#f26d5b" />
+      </div>
+      <select
+        value=""
+        disabled={noRecipes}
+        onChange={onChange}
+        aria-label={`Add a ${meal.label.toLowerCase()} recipe`}
+        style={{
+          width: '100%', padding: '18px 40px 18px 60px',
+          background: 'var(--color-card)',
+          border: '1.5px dashed #f0d8d2', borderRadius: '16px',
+          cursor: noRecipes ? 'default' : 'pointer',
+          fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)',
+          appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+          fontFamily: 'inherit',
+        }}
+      >
+        {options}
+      </select>
+      {!noRecipes && (
+        <ChevronDown size={18} color="#f26d5b" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+      )}
     </div>
   )
 }
