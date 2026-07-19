@@ -242,7 +242,7 @@ function Subscription({ onBack }: { onBack: () => void }) {
             <span style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text)' }}>Free Plan</span>
             <span style={{ background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '12px', fontWeight: '700', padding: '4px 10px', borderRadius: '8px' }}>ACTIVE</span>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>You're on the free plan. Upgrade to unlock unlimited recipes, advanced meal planning, and more.</p>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>You're on the free plan — great for cooking from recipes you add yourself. Go Pro to import from anywhere, auto-build your grocery lists, and cook with a little AI help.</p>
         </div>
 
         <div style={{ background: 'linear-gradient(135deg, #6ba356, #5a9449)', borderRadius: '14px', padding: '20px' }}>
@@ -250,10 +250,19 @@ function Subscription({ onBack }: { onBack: () => void }) {
             <Crown size={20} color="#f4b860" />
             <span style={{ fontSize: '17px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
           </div>
-          {['Unlimited recipes', 'Advanced meal planning', 'Nutritional insights', 'Priority support', 'Export & backup'].map(f => (
-            <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Check size={14} color="rgba(255,255,255,0.6)" />
-              <span style={{ fontSize: '14px', color: '#fff' }}>{f}</span>
+          {[
+            { title: 'Unlimited AI imports', desc: 'Pull a recipe from any TikTok, Instagram, photo, or link — no monthly cap.' },
+            { title: 'Automatic grocery lists', desc: 'Turn a whole week’s meal plan into one aisle-sorted shopping list in a tap.' },
+            { title: 'AI cooking assistant', desc: 'Scale servings and swap ingredients — dairy-free, gluten-free — in a tap.' },
+            { title: 'Nutrition & goals', desc: 'Daily macros and calorie targets, tracked across your whole plan.' },
+            { title: 'Family sharing & sync', desc: 'Share cookbooks and a live grocery list across everyone’s phones.' },
+          ].map(f => (
+            <div key={f.title} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '12px' }}>
+              <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff' }}>{f.title}</div>
+                <div style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.85)', margin: '1px 0 0', lineHeight: 1.45 }}>{f.desc}</div>
+              </div>
             </div>
           ))}
           <button style={{ marginTop: '14px', width: '100%', padding: '13px', background: 'var(--color-card)', color: '#6ba356', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}>
