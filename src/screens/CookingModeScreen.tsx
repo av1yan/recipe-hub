@@ -51,8 +51,8 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
 
   if (totalSteps === 0) {
     return (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-card)' }}>
-        <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)' }}>
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
+        <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
           <button onClick={() => onNavigate('recipe', { recipe })} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}>
             <ChevronLeft size={22} color="var(--color-text-secondary)" />
           </button>
@@ -76,10 +76,10 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   const isLastStep = currentStep === totalSteps - 1
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-card)', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)', position: 'relative', overflow: 'hidden' }}>
 
       {/* Header */}
-      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
+      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)', flexShrink: 0 }}>
         <button onClick={() => onNavigate('recipe', { recipe })} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center' }}>
           <ChevronLeft size={20} color="var(--color-text-secondary)" />
         </button>
@@ -151,15 +151,15 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           </span>
         </div>
 
-        {/* Step label */}
-        <p style={{ fontSize: '11px', color: '#6ba356', fontWeight: '800', letterSpacing: '0.1em', margin: '0 0 10px' }}>
-          STEP {step?.stepNumber || currentStep + 1}
-        </p>
-
-        {/* Step text */}
-        <p style={{ fontSize: '19px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.65, margin: 0 }}>
-          {step?.text}
-        </p>
+        {/* Step card */}
+        <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', padding: '18px' }}>
+          <p style={{ fontSize: '11px', color: '#6ba356', fontWeight: '800', letterSpacing: '0.1em', margin: '0 0 10px' }}>
+            STEP {step?.stepNumber || currentStep + 1}
+          </p>
+          <p style={{ fontSize: '19px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.65, margin: 0 }}>
+            {step?.text}
+          </p>
+        </div>
 
         {/* Timer */}
         {timerSeconds !== null && (
@@ -200,7 +200,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
       </div>
 
       {/* Prev / Next */}
-      <div style={{ padding: '12px 16px 20px', display: 'flex', gap: '10px', borderTop: '1px solid var(--color-subtle)', flexShrink: 0 }}>
+      <div style={{ padding: '12px 16px 20px', display: 'flex', gap: '10px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-card)', flexShrink: 0 }}>
         <button
           onClick={goPrev}
           disabled={currentStep === 0}
