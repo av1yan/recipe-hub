@@ -270,21 +270,19 @@ export default function BrowseScreen({ onNavigate }: Props) {
           <>
             {/* Recipe of the day */}
             {rotd && (
-              <div style={{ margin: '18px 16px 0', background: '#f6f1e4', borderRadius: '18px', padding: '18px', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
+              <div style={{ margin: '18px 16px 0', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', borderRadius: '18px', padding: '18px', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
                 <p style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '19px', color: '#6ba356', margin: '0 0 10px' }}>
                   Recipe of the day
                 </p>
-                {/* Fixed dark text -- this card keeps its cream background in
-                    both themes, so themed (light-in-dark) text would vanish. */}
-                <h2 style={{ fontFamily: SERIF, fontSize: '25px', fontWeight: '400', color: '#1e293b', margin: '0 0 8px', lineHeight: 1.2 }}>
+                <h2 style={{ fontFamily: SERIF, fontSize: '25px', fontWeight: '400', color: 'var(--color-text)', margin: '0 0 8px', lineHeight: 1.2 }}>
                   {rotd.name}
                 </h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 10px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '0 0 10px' }}>
                   {rotd.cuisine} · {(rotd.prepTime || 0) + (rotd.cookTime || 0)} min
                   {rotd.calories ? ` · ${rotd.calories} cal` : ''}
                 </p>
                 {rotd.description && (
-                  <p style={{ fontSize: '14px', color: '#475569', margin: '0 0 14px', lineHeight: 1.5 }}>{rotd.description}</p>
+                  <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 14px', lineHeight: 1.5 }}>{rotd.description}</p>
                 )}
                 <div style={{ height: '170px', borderRadius: '14px', overflow: 'hidden', background: `linear-gradient(135deg, ${TILE_COLORS[0]}, ${TILE_COLORS[3]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '58px' }}>
                   {rotd.imageUrl ? (
