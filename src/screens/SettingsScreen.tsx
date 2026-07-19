@@ -102,7 +102,7 @@ function SectionHeader({ label }: { label: string }) {
 
 function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean }) {
   return (
-    <button onClick={onClick} style={{ width: '100%', padding: '14px', background: saved ? 'var(--color-primary-bg)' : 'linear-gradient(135deg, #7ec063, #5a9449)', color: saved ? '#6ba356' : '#fff', border: saved ? '1.5px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}>
+    <button onClick={onClick} style={{ width: '100%', padding: '12px', background: saved ? 'var(--color-primary-bg)' : 'linear-gradient(135deg, #7ec063, #5a9449)', color: saved ? '#6ba356' : '#fff', border: saved ? '1.5px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}>
       {saved ? <><Check size={16} /> Saved!</> : 'Save Changes'}
     </button>
   )
@@ -360,23 +360,25 @@ function Preferences({ onBack }: { onBack: () => void }) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '6px 16px 8px' }}>
         <SectionHeader label="MEASUREMENTS" />
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div>
-            <label style={fieldLabel}>UNITS</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setUnits('imperial')} style={toggleStyle(units === 'imperial')}>Imperial</button>
-              <button onClick={() => setUnits('metric')} style={toggleStyle(units === 'metric')}>Metric</button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={fieldLabel}>UNITS</label>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button onClick={() => setUnits('imperial')} style={toggleStyle(units === 'imperial')}>Imperial</button>
+                <button onClick={() => setUnits('metric')} style={toggleStyle(units === 'metric')}>Metric</button>
+              </div>
             </div>
-          </div>
-          <div>
-            <label style={fieldLabel}>TEMPERATURE</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setTemp('F')} style={toggleStyle(temp === 'F')}>°F</button>
-              <button onClick={() => setTemp('C')} style={toggleStyle(temp === 'C')}>°C</button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <label style={fieldLabel}>TEMP</label>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button onClick={() => setTemp('F')} style={toggleStyle(temp === 'F')}>°F</button>
+                <button onClick={() => setTemp('C')} style={toggleStyle(temp === 'C')}>°C</button>
+              </div>
             </div>
           </div>
           <div>
             <label style={fieldLabel}>DEFAULT SERVINGS</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '6px' }}>
               {[1, 2, 4, 6].map(s => (
                 <button key={s} onClick={() => setServings(s)} style={toggleStyle(servings === s)}>{s}</button>
               ))}
