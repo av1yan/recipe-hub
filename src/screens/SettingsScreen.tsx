@@ -325,7 +325,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
   const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2500) }
 
   const toggleStyle = (active: boolean): React.CSSProperties => ({
-    flex: 1, padding: '9px', borderRadius: '8px',
+    flex: 1, padding: '7px', borderRadius: '8px',
     border: `1.5px solid ${active ? '#6ba356' : 'var(--color-border)'}`,
     background: active ? 'var(--color-primary-bg)' : 'var(--color-card)',
     color: active ? '#6ba356' : 'var(--color-text-secondary)',
@@ -335,7 +335,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
   // Diet and allergy pills persist the moment they're tapped (like onboarding),
   // so Browse picks them up without needing Save.
   const pill = (active: boolean, accent: string): React.CSSProperties => ({
-    padding: '7px 13px', borderRadius: '999px',
+    padding: '6px 12px', borderRadius: '999px',
     border: `1.5px solid ${active ? accent : 'var(--color-border)'}`,
     background: active ? accent : 'var(--color-card)',
     color: active ? '#fff' : 'var(--color-text-secondary)',
@@ -352,14 +352,14 @@ function Preferences({ onBack }: { onBack: () => void }) {
     return next
   })
 
-  const fieldLabel: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '5px' }
+  const fieldLabel: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '3px' }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="Preferences" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 12px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '6px 16px 8px' }}>
         <SectionHeader label="MEASUREMENTS" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <div>
             <label style={fieldLabel}>UNITS</label>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -385,15 +385,15 @@ function Preferences({ onBack }: { onBack: () => void }) {
         </div>
 
         <SectionHeader label="DIET" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {DIET_OPTIONS.map(d => (
             <button key={d.id} onClick={() => toggleDiet(d.id)} style={pill(diet.includes(d.id), '#6ba356')}>{d.label}</button>
           ))}
         </div>
 
         <SectionHeader label="ALLERGIES" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
-          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 8px', lineHeight: 1.4 }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px' }}>
+          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 7px', lineHeight: 1.35 }}>
             Recipes with any of these are hidden across the app.
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
