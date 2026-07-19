@@ -77,7 +77,7 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
   )
 }
 
-function Row({ icon, label, value, onPress, danger }: { icon: React.ReactNode; label: string; value?: string; onPress?: () => void; danger?: boolean }) {
+function Row({ icon, label, value, onPress, danger }: { icon: React.ReactNode; label: string; value?: React.ReactNode; onPress?: () => void; danger?: boolean }) {
   return (
     <button onClick={onPress} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
       <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: danger ? 'var(--color-error-bg)' : 'var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -459,6 +459,7 @@ function InvitePage({ onBack }: { onBack: () => void }) {
 
 export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   const [subPage, setSubPage] = useState<SubPage>(null)
+  const [isPro] = useProPlan()
   const [theme, setThemeState] = useState<Theme>(activeTheme())
   const chooseTheme = (t: Theme) => { setTheme(t); setThemeState(t) }
 
@@ -482,7 +483,14 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '20px 16px 24px' }}>
           <Row icon={<User size={18} color="var(--color-text-secondary)" />} label="Account" onPress={() => setSubPage('account')} />
-          <Row icon={<Crown size={18} color="#f4b860" />} label="My subscription" value="Free" onPress={() => setSubPage('subscription')} />
+          <Row
+            icon={<Crown size={18} color="#f4b860" />}
+            label="My subscription"
+            value={isPro
+              ? <span style={{ background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '11px', fontWeight: '800', padding: '3px 9px', borderRadius: '999px', letterSpacing: '0.04em' }}>PRO</span>
+              : 'Free'}
+            onPress={() => setSubPage('subscription')}
+          />
           <Row icon={<SlidersHorizontal size={18} color="var(--color-text-secondary)" />} label="Preferences" onPress={() => setSubPage('preferences')} />
           <Row icon={<HelpCircle size={18} color="var(--color-text-secondary)" />} label="Help" onPress={() => setSubPage('help')} />
         </div>
