@@ -65,16 +65,19 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     loadData()
   }, [])
 
-  async function loadData() {
+  // showSpinner only on the first load. After a mutation we re-fetch silently
+  // and let the cards update in place -- flipping the whole screen to the
+  // loading state and back on every add/swap/remove is what read as a jitter.
+  async function loadData(showSpinner = true) {
     try {
-      setIsLoading(true)
+      if (showSpinner) setIsLoading(true)
       const [plansData, recipesData] = await Promise.all([mealPlanAPI.list(), recipeAPI.list()])
       setMealPlans(plansData)
       setRecipes(recipesData)
     } catch (error) {
       console.error('Failed to load meal plan data:', error)
     } finally {
-      setIsLoading(false)
+      if (showSpinner) setIsLoading(false)
     }
   }
 
@@ -91,7 +94,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     try {
       await mealPlanAPI.delete(currentPlan.id)
       setConfirmDelete(false)
-      await loadData()
+      await loadData(false)
     } catch (error) {
       console.error('Failed to delete meal plan:', error)
     } finally {
@@ -110,7 +113,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         planId = plan.id
       }
       await mealPlanAPI.addMeal(planId, recipeId, selectedDay, mealType)
-      await loadData()
+      await loadData(false)
     } catch (error) {
       console.error('Failed to add meal to plan:', error)
     }
@@ -119,7 +122,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   async function removeMeal(mealId: string) {
     try {
       await mealPlanAPI.removeMeal(mealId)
-      await loadData()
+      await loadData(false)
     } catch (error) {
       console.error('Failed to remove meal from plan:', error)
     }
