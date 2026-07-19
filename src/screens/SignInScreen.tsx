@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Mail, Lock, AtSign } from 'lucide-react'
+import { Mail, Lock, AtSign, ChefHat } from 'lucide-react'
 import type { Screen } from '../types'
 import { authAPI, oauthStartUrl } from '../utils/api'
 
@@ -63,12 +63,21 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
     <div className="screen" style={{ background: 'var(--color-card)', padding: '24px 16px', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <div style={{ fontSize: '36px', marginBottom: '12px' }}>📖</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <div style={{
+            width: '64px', height: '64px', borderRadius: '18px',
+            background: 'linear-gradient(135deg, #7ec063, #5a9449)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 20px rgba(107, 163, 86, 0.35)',
+          }}>
+            <ChefHat size={34} color="#fff" strokeWidth={2} />
+          </div>
+        </div>
         <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--color-text)', margin: 0, marginBottom: '6px', wordBreak: 'break-word' }}>
-          {isSignUp ? 'Create Account' : 'Welcome back'}
+          {isSignUp ? 'Create your account' : 'Welcome to recipHub'}
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, wordBreak: 'break-word' }}>
-          {isSignUp ? 'Join recipHub to start cooking smarter' : 'Sign in to your recipHub'}
+          {isSignUp ? 'Start cooking smarter in about a minute' : 'Sign in to continue'}
         </p>
       </div>
 
