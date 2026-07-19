@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Clock, CheckCircle, List } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
+import { getUnitPref, convertMeasurement } from '../utils/preferences'
 
 interface Props {
   recipe: Recipe | null
@@ -17,6 +18,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   const instructions = (recipe as any)?.instructions || []
   const totalSteps = instructions.length
   const step = instructions[currentStep]
+  const unitPref = getUnitPref()
 
   useEffect(() => {
     if (!timerActive || timerSeconds === null || timerSeconds <= 0) {
@@ -110,7 +112,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
                 {(recipe as any).ingredients.map((ing: any) => (
                   <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                     <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ing.name}</span>
-                    <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>{ing.quantity} {ing.unit}</span>
+                    <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>{(() => { const c = convertMeasurement(ing.quantity || 0, ing.unit, unitPref); return `${c.quantity} ${c.unit}` })()}</span>
                   </div>
                 ))}
               </div>

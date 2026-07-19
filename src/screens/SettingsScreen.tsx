@@ -11,6 +11,7 @@ import { activeTheme, setTheme, type Theme } from '../utils/theme'
 import { useProPlan } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
+import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings } from '../utils/preferences'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
@@ -315,12 +316,17 @@ function Subscription({ onBack }: { onBack: () => void }) {
 
 
 function Preferences({ onBack }: { onBack: () => void }) {
-  const [units, setUnits] = useState<'imperial' | 'metric'>('imperial')
+  const [units, setUnitsState] = useState<'imperial' | 'metric'>(() => getUnitPref())
   const [temp, setTemp] = useState<'F' | 'C'>('F')
-  const [servings, setServings] = useState(2)
+  const [servings, setServingsState] = useState(() => getDefaultServings())
   const [diet, setDiet] = useState<string[]>(() => getDietPrefs())
   const [allergies, setAllergiesState] = useState<string[]>(() => getAllergies())
   const [saved, setSaved] = useState(false)
+
+  // Units and default servings persist the moment they're picked, so recipes
+  // reflect them straight away.
+  const setUnits = (u: 'imperial' | 'metric') => { setUnitsState(u); setUnitPref(u) }
+  const setServings = (s: number) => { setServingsState(s); setDefaultServings(s) }
 
   const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2500) }
 

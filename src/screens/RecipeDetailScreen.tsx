@@ -5,6 +5,7 @@ import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, groceryAPI, mealPlanAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
 import { DAY_NAMES, MEALS, sameWeek, mondayOf, getMeals } from './MealPlanScreen'
+import { getDefaultServings, getUnitPref, convertMeasurement } from '../utils/preferences'
 
 interface Props {
   recipe: Recipe | null
@@ -42,8 +43,9 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   const [isFavorited, setIsFavorited] = useState(recipe?.isFavorite || false)
   const [favBusy, setFavBusy] = useState(false)
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions'>('ingredients')
-  // The servings the person wants to cook for; ingredient amounts scale to it.
-  const [servings, setServings] = useState(recipe?.servings || 1)
+  // Recipes open at the person's Default Servings preference; ingredient
+  // amounts scale to whatever they set here.
+  const [servings, setServings] = useState(() => getDefaultServings())
   const [actionBusy, setActionBusy] = useState('')
   const { toast, show } = useToast()
 
@@ -96,6 +98,8 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   // them to whatever the person set.
   const baseServings = recipe.servings || 1
   const scale = servings / baseServings
+  const defaultServ = getDefaultServings()
+  const unitPref = getUnitPref()
 
   async function addToGroceries() {
     if (actionBusy) return
@@ -324,8 +328,8 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                   </div>
                   <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>servings</span>
                 </div>
-                {servings !== baseServings && (
-                  <button onClick={() => setServings(baseServings)} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Reset</button>
+                {servings !== defaultServ && (
+                  <button onClick={() => setServings(defaultServ)} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Reset</button>
                 )}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -358,7 +362,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                         {ing.name}
                       </span>
                       <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>
-                        {fmtQty((ing.quantity || 0) * scale)} {ing.unit}
+                        {(() => { const c = convertMeasurement((ing.quantity || 0) * scale, ing.unit, unitPref); return `${fmtQty(c.quantity)} ${c.unit}` })()}
                       </span>
                     </div>
                   )
