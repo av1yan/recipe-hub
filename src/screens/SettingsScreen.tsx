@@ -352,14 +352,14 @@ function Preferences({ onBack }: { onBack: () => void }) {
     return next
   })
 
-  const fieldLabel: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '7px' }
+  const fieldLabel: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '5px' }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="Preferences" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 12px' }}>
         <SectionHeader label="MEASUREMENTS" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div>
             <label style={fieldLabel}>UNITS</label>
             <div style={{ display: 'flex', gap: '8px' }}>
