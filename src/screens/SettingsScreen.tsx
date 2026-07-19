@@ -385,20 +385,22 @@ function Preferences({ onBack }: { onBack: () => void }) {
         </div>
 
         <SectionHeader label="DIET" />
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px', border: '1px solid var(--color-subtle)', marginBottom: '14px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {DIET_OPTIONS.map(d => (
             <button key={d.id} onClick={() => toggleDiet(d.id)} style={pill(diet.includes(d.id), '#6ba356')}>{d.label}</button>
           ))}
         </div>
 
         <SectionHeader label="ALLERGIES" />
-        <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '-2px 0 8px', lineHeight: 1.4 }}>
-          Recipes with any of these are hidden across the app.
-        </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-          {ALLERGY_OPTIONS.map(a => (
-            <button key={a.id} onClick={() => toggleAllergy(a.id)} style={pill(allergies.includes(a.id), '#ef4444')}>{a.label}</button>
-          ))}
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px', border: '1px solid var(--color-subtle)', marginBottom: '16px' }}>
+          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 10px', lineHeight: 1.4 }}>
+            Recipes with any of these are hidden across the app.
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {ALLERGY_OPTIONS.map(a => (
+              <button key={a.id} onClick={() => toggleAllergy(a.id)} style={pill(allergies.includes(a.id), '#ef4444')}>{a.label}</button>
+            ))}
+          </div>
         </div>
 
         <SaveButton onClick={save} saved={saved} />
