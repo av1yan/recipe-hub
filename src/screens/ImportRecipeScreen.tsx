@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { ChevronLeft, Link2, Type, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { ChevronLeft, Link2, Type, Image as ImageIcon, Camera, Loader2 } from 'lucide-react'
 import type { Screen } from '../types'
 import { importAPI } from '../utils/api'
 
@@ -50,7 +50,8 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
   // returns the caption with its line breaks flattened, and only a person can
   // tell where they belonged.
   const [caption, setCaption] = useState<{ text: string; imageUrl: string | null; sourceUrl: string; author: string | null } | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const libraryRef = useRef<HTMLInputElement>(null)
   const copy = COPY[mode]
 
   /** Hands the parsed draft to the normal form so it can be checked and fixed. */
@@ -184,17 +185,38 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
           </>
         ) : mode === 'photo' ? (
           <>
+            {/* Camera: capture="environment" opens the rear camera on phones.
+                On desktop the attribute is ignored and it falls back to a picker. */}
             <input
-              ref={fileRef}
+              ref={cameraRef}
               type="file"
               accept="image/*"
               capture="environment"
-              onChange={e => { const f = e.target.files?.[0]; if (f) submitPhoto(f) }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) submitPhoto(f); e.target.value = '' }}
               style={{ display: 'none' }}
             />
-            <button onClick={() => fileRef.current?.click()} disabled={!!busy} style={primaryBtn(!!busy)}>
-              {busy ? <><Loader2 size={16} className="rh-spin" /> {busy}</> : 'Choose a photo'}
-            </button>
+            {/* Library: no capture attr, so this picks an existing photo/file. */}
+            <input
+              ref={libraryRef}
+              type="file"
+              accept="image/*"
+              onChange={e => { const f = e.target.files?.[0]; if (f) submitPhoto(f); e.target.value = '' }}
+              style={{ display: 'none' }}
+            />
+            {busy ? (
+              <button disabled style={primaryBtn(true)}>
+                <Loader2 size={16} className="rh-spin" /> {busy}
+              </button>
+            ) : (
+              <>
+                <button onClick={() => cameraRef.current?.click()} style={primaryBtn(false)}>
+                  <Camera size={17} /> Take a photo
+                </button>
+                <button onClick={() => libraryRef.current?.click()} style={{ ...secondaryBtn, marginTop: '10px' }}>
+                  <ImageIcon size={17} /> Choose from library
+                </button>
+              </>
+            )}
           </>
         ) : mode === 'text' ? (
           <>
@@ -280,3 +302,10 @@ const primaryBtn = (disabled: boolean): React.CSSProperties => ({
   cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
 })
+
+const secondaryBtn: React.CSSProperties = {
+  width: '100%', padding: '13px', borderRadius: '12px', border: '1.5px solid var(--color-border)',
+  background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '15px', fontWeight: '700',
+  cursor: 'pointer', fontFamily: 'inherit',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+}
