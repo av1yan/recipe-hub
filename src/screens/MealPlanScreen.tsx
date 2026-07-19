@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, CalendarDays, Check, ChevronDown, Repeat } from 'lucide-react'
+import { Plus, Trash2, CalendarDays, Check, ChevronDown } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { mealPlanAPI, recipeAPI } from '../utils/api'
@@ -257,34 +257,55 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 )}
               </div>
 
-              {/* Planned meal cards */}
+              {/* Planned meal card. The card itself is the swap control: an
+                  invisible <select> laid over it means tapping the card opens a
+                  dropdown to pick a different recipe, while the card keeps its
+                  emoji tile + details. The chevron hints it's tappable. */}
               {filled && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {meals.map((meal, i) => {
                     const servings = meal.servings || 1
+                    const canSwap = recipes.length > 0
                     return (
-                      <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                        {/* Small tinted tile, matching the Home/Browse cards. */}
-                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: m.tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
-                          {meal.emoji || m.emoji}
+                      <div key={i} style={{ position: 'relative' }}>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                          {/* Small tinted tile, matching the Home/Browse cards. */}
+                          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: m.tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
+                            {meal.emoji || m.emoji}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
+                            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                              {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
+                            </p>
+                          </div>
+                          {canSwap && <ChevronDown size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />}
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
-                          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                            {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
-                          </p>
-                        </div>
+                        {canSwap && (
+                          <select
+                            value=""
+                            onChange={(e) => { if (e.target.value) addMealToPlan(e.target.value, m.key) }}
+                            aria-label={`Swap ${m.label.toLowerCase()} recipe`}
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, border: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none' }}
+                          >
+                            <option value="" disabled>{meal.name}</option>
+                            {recipes.map(r => (
+                              <option key={r.id} value={r.id}>
+                                {(r as any).emoji || m.emoji} {r.name} · {(r.prepTime || 0) + (r.cookTime || 0)} min
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </div>
                     )
                   })}
                 </div>
               )}
 
-              {/* Choose (empty) or swap (filled) a recipe straight from a
-                  dropdown -- one tap, no expanding list or extra screen. */}
-              <div style={{ marginTop: filled ? '10px' : 0 }}>
-                <RecipeDropdown meal={m} recipes={recipes} onPick={(id) => addMealToPlan(id, m.key)} variant={filled ? 'swap' : 'add'} />
-              </div>
+              {/* Empty slot: pick a recipe straight from a dropdown. */}
+              {!filled && (
+                <RecipeDropdown meal={m} recipes={recipes} onPick={(id) => addMealToPlan(id, m.key)} />
+              )}
             </div>
           )
         })}
@@ -296,48 +317,36 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 }
 
 /**
- * Picking a recipe for a slot, as a plain full-width dropdown instead of a
- * screen or an expanding list -- one tap opens the native picker, choosing
- * adds it. Full width (rather than a header control) so the native listbox
- * shows the recipe names in full on every platform.
- *
- * "add" is the dashed control in an empty slot; "swap" is the solid control
- * below a filled slot's card. Both stay on the placeholder (value="") so they
- * re-arm after each pick.
+ * The empty-slot recipe picker: a full-width dashed dropdown. One tap opens the
+ * native picker listing every recipe; choosing adds it. Full width so the
+ * native listbox shows the recipe names in full on every platform. Stays on the
+ * placeholder (value="") so it re-arms after each pick. (Swapping a filled slot
+ * is handled by the meal card itself, which carries its own <select>.)
  */
-function RecipeDropdown({ meal, recipes, onPick, variant }: {
+function RecipeDropdown({ meal, recipes, onPick }: {
   meal: typeof MEALS[number]
   recipes: Recipe[]
   onPick: (recipeId: string) => void
-  variant: 'add' | 'swap'
 }) {
   const noRecipes = recipes.length === 0
-  // A filled slot with nothing else to swap to gets no dropdown at all.
-  if (variant === 'swap' && noRecipes) return null
-
-  const isAdd = variant === 'add'
-  const placeholder = isAdd
-    ? (noRecipes ? 'No recipes yet — add some first' : `Add a ${meal.label.toLowerCase()} recipe`)
-    : 'Swap for another recipe'
+  const placeholder = noRecipes ? 'No recipes yet — add some first' : `Add a ${meal.label.toLowerCase()} recipe`
 
   return (
     <div style={{ position: 'relative' }}>
-      <div style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '40px', height: '40px', borderRadius: '12px', background: isAdd ? '#fdeeeb' : meal.tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-        {isAdd ? <Plus size={18} color="#f26d5b" /> : <Repeat size={16} color="var(--color-text-secondary)" />}
+      <div style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+        <Plus size={18} color="#f26d5b" />
       </div>
       <select
         value=""
         disabled={noRecipes}
         onChange={(e) => { if (e.target.value) onPick(e.target.value) }}
-        aria-label={isAdd ? `Add a ${meal.label.toLowerCase()} recipe` : `Swap ${meal.label.toLowerCase()} recipe`}
+        aria-label={`Add a ${meal.label.toLowerCase()} recipe`}
         style={{
-          width: '100%', padding: isAdd ? '18px 40px 18px 60px' : '13px 40px 13px 60px',
+          width: '100%', padding: '18px 40px 18px 60px',
           background: 'var(--color-card)',
-          border: isAdd ? '1.5px dashed #f0d8d2' : '1px solid var(--color-subtle)',
-          borderRadius: isAdd ? '16px' : '14px',
+          border: '1.5px dashed #f0d8d2', borderRadius: '16px',
           cursor: noRecipes ? 'default' : 'pointer',
-          fontSize: '14px', fontWeight: '600',
-          color: isAdd ? 'var(--color-text-muted)' : 'var(--color-text-secondary)',
+          fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)',
           appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
           fontFamily: 'inherit',
         }}
@@ -350,7 +359,7 @@ function RecipeDropdown({ meal, recipes, onPick, variant }: {
         ))}
       </select>
       {!noRecipes && (
-        <ChevronDown size={18} color={isAdd ? '#f26d5b' : 'var(--color-text-muted)'} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+        <ChevronDown size={18} color="#f26d5b" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
       )}
     </div>
   )
