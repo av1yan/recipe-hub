@@ -126,8 +126,10 @@ export default function BrowseScreen({ onNavigate }: Props) {
     { key: 'cuisine', label: 'Cuisine', bg: '#e9d5ff', emoji: '🍜', values: cuisines },
   ]
 
-  // Deterministic daily pick from the user's own recipes
-  const rotd = recipes.length ? recipes[Math.floor(Date.now() / 86400000) % recipes.length] : null
+  // Deterministic daily pick -- from recipes free of any flagged allergen, so
+  // the featured dish is never something the person needs to avoid.
+  const safeRecipes = recipes.filter(r => !recipeHasAllergen(r, allergies))
+  const rotd = safeRecipes.length ? safeRecipes[Math.floor(Date.now() / 86400000) % safeRecipes.length] : null
   const browsing = !q && !activeFilter
 
   const applyFilter = (f: ActiveFilter) => {
