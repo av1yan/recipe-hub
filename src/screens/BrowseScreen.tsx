@@ -4,7 +4,7 @@ import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
 import { getDietPrefs } from './DietPreferencesScreen'
-import { getAllergies, recipeHasAllergen } from '../utils/allergies'
+import { ALLERGY_OPTIONS, getAllergies, recipeHasAllergen, saveAllergies } from '../utils/allergies'
 
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif"
 
@@ -12,6 +12,12 @@ const DIET_LABELS: Record<string, string> = {
   vegan: 'Vegan', vegetarian: 'Vegetarian', 'gluten-free': 'Gluten-Free',
   keto: 'Keto', paleo: 'Paleo', 'dairy-free': 'Dairy-Free',
   'nut-free': 'Nut-Free', 'low-carb': 'Low-Carb',
+}
+
+// Emoji per allergen for the Browse filter menu (allergies.ts stays presentation-free).
+const ALLERGY_EMOJI: Record<string, string> = {
+  peanuts: '🥜', 'tree-nuts': '🌰', dairy: '🥛', eggs: '🥚',
+  gluten: '🌾', soy: '🫘', shellfish: '🦐', fish: '🐟',
 }
 
 type FilterKind = 'tag' | 'cuisine' | 'mealType' | 'ingredient'
@@ -67,7 +73,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [dietPrefs, setDietPrefs] = useState<string[]>(() => getDietPrefs())
-  const [allergies] = useState<string[]>(() => getAllergies())
+  const [allergies, setAllergies] = useState<string[]>(() => getAllergies())
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null)
   const [exploreCat, setExploreCat] = useState<FilterKind | null>(null)
   const [filterOpen, setFilterOpen] = useState(false)
@@ -142,6 +148,22 @@ export default function BrowseScreen({ onNavigate }: Props) {
     setSearchTerm('')
   }
 
+  // Allergies are a persistent safety preference (shared with Settings), so
+  // toggling one here saves it and it applies across the app -- not just this
+  // session. Recipes containing a checked allergen are hidden from results.
+  const toggleAllergy = (id: string) => {
+    setAllergies(prev => {
+      const next = prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+      saveAllergies(next)
+      return next
+    })
+  }
+  // Offer an allergen only if some recipe actually contains it (or it's already
+  // selected), so we never show a toggle that can't change anything.
+  const allergyChoices = ALLERGY_OPTIONS.filter(
+    opt => allergies.includes(opt.id) || recipes.some(r => recipeHasAllergen(r, [opt.id]))
+  )
+
   const labelFor = (kind: FilterKind, value: string) =>
     kind === 'tag' ? DIET_LABELS[value] || value : value
 
@@ -176,7 +198,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
         </div>
 
         {/* Filters, merged in here from the old "Popular searches" row. */}
-        {popularChips.length > 0 && (
+        {(popularChips.length > 0 || allergyChoices.length > 0) && (
           <button
             onClick={() => setFilterOpen(o => !o)}
             aria-label="Filters"
@@ -231,6 +253,29 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 </div>
               )
             })}
+
+            {allergyChoices.length > 0 && (
+              <div>
+                <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 7px' }}>ALLERGY</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {allergyChoices.map(opt => {
+                    const on = allergies.includes(opt.id)
+                    return (
+                      <button
+                        key={opt.id}
+                        onClick={() => toggleAllergy(opt.id)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? '#d1584f' : 'var(--color-border)'), background: on ? 'rgba(209,88,79,0.12)' : 'var(--color-card)', color: on ? '#d1584f' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                      >
+                        <span>{ALLERGY_EMOJI[opt.id] || '⚠️'}</span> {opt.label}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: '8px 0 0', lineHeight: 1.4 }}>
+                  Hides recipes that contain these.
+                </p>
+              </div>
+            )}
           </div>
         </>
       )}
