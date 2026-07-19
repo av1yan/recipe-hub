@@ -238,8 +238,8 @@ function Subscription({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="My Subscription" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '18px 20px', border: '1px solid var(--color-subtle)', marginBottom: '16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px 18px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '3px' }}>Current plan</div>
@@ -260,23 +260,23 @@ function Subscription({ onBack }: { onBack: () => void }) {
           </p>
         </div>
 
-        <div style={{ background: 'linear-gradient(135deg, #6ba356, #5a9449)', borderRadius: '14px', padding: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+        <div style={{ background: 'linear-gradient(135deg, #6ba356, #5a9449)', borderRadius: '14px', padding: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '13px' }}>
             <Crown size={20} color="#f4b860" />
             <span style={{ fontSize: '17px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
           </div>
           {[
-            { title: 'Unlimited AI imports', desc: 'Pull a recipe from any TikTok, Instagram, photo, or link — no monthly cap.' },
-            { title: 'Automatic grocery lists', desc: 'Turn a whole week’s meal plan into one aisle-sorted shopping list in a tap.' },
-            { title: 'AI cooking assistant', desc: 'Scale servings and swap ingredients — dairy-free, gluten-free — in a tap.' },
-            { title: 'Nutrition & goals', desc: 'Daily macros and calorie targets, tracked across your whole plan.' },
-            { title: 'Family sharing & sync', desc: 'Share cookbooks and a live grocery list across everyone’s phones.' },
+            { title: 'Unlimited AI imports', desc: 'From any TikTok, Instagram, or link' },
+            { title: 'Automatic grocery lists', desc: 'A week’s plan → one shopping list' },
+            { title: 'AI cooking assistant', desc: 'Scale servings, swap ingredients' },
+            { title: 'Nutrition & goals', desc: 'Daily macros and calorie targets' },
+            { title: 'Family sharing & sync', desc: 'Cookbooks and lists across phones' },
           ].map(f => (
-            <div key={f.title} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '12px' }}>
-              <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+              <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0 }} />
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff' }}>{f.title}</div>
-                <div style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.85)', margin: '1px 0 0', lineHeight: 1.45 }}>{f.desc}</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>{f.title}</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.3 }}>{f.desc}</div>
               </div>
             </div>
           ))}
@@ -292,10 +292,15 @@ function Subscription({ onBack }: { onBack: () => void }) {
             </>
           ) : (
             <>
-              <button onClick={() => setPro(true)} style={{ marginTop: '14px', width: '100%', padding: '13px', background: 'var(--color-card)', color: '#6ba356', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}>
+              <button
+                onClick={() => setPro(true)}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.25)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)' }}
+                style={{ marginTop: '16px', width: '100%', padding: '13px', background: 'var(--color-card)', color: '#6ba356', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
+              >
                 Upgrade for $4.99/mo
               </button>
-              <p style={{ margin: '10px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+              <p style={{ margin: '9px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
                 Cancel anytime — no commitment.
               </p>
             </>
