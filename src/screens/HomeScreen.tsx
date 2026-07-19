@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight } from 'lucide-react'
+import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight, Crown } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
 import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
+import { useProPlan } from '../utils/proPlan'
 import { DAY_NAMES, MEALS, sameWeek, getMeals, mondayOf } from './MealPlanScreen'
 
 interface Props {
@@ -32,6 +33,7 @@ function getDateLabel() {
 
 export default function HomeScreen({ onNavigate }: Props) {
   const { user } = useApp()
+  const [isPro] = useProPlan()
   const [recipes, setRecipes] = useState<any[]>([])
   const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>([])
   const [plannedThisWeek, setPlannedThisWeek] = useState(0)
@@ -133,15 +135,28 @@ export default function HomeScreen({ onNavigate }: Props) {
               </p>
             </div>
             {/* The avatar is the only way into settings from here -- a gear
-                beside it went to the same place and just split the target. */}
-            <button
-              onClick={() => onNavigate('settings')}
-              aria-label="Settings"
-              title={user?.name || undefined}
-              style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}
-            >
-              {initial}
-            </button>
+                beside it went to the same place and just split the target.
+                On Pro, a gold badge rides alongside it so the plan is visible
+                the moment you open the app. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              {isPro && (
+                <button
+                  onClick={() => onNavigate('settings')}
+                  aria-label="Pro plan"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '11px', fontWeight: '800', padding: '5px 9px', borderRadius: '999px', letterSpacing: '0.04em', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  <Crown size={12} /> PRO
+                </button>
+              )}
+              <button
+                onClick={() => onNavigate('settings')}
+                aria-label="Settings"
+                title={user?.name || undefined}
+                style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}
+              >
+                {initial}
+              </button>
+            </div>
           </div>
 
         </div>
