@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Trash2, Plus, Check, Camera, Loader2, X } from 'lucide-react'
+import { Trash2, Plus, Check, Camera, Image as ImageIcon, Loader2, X } from 'lucide-react'
 import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI } from '../utils/api'
@@ -82,7 +82,9 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const [scanProgress, setScanProgress] = useState(0)
   const [scanned, setScanned] = useState<string[] | null>(null)
   const [savingScan, setSavingScan] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const libraryRef = useRef<HTMLInputElement>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const { toast, show } = useToast()
 
   useEffect(() => {
@@ -169,7 +171,10 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   }
 
   // ─── Photo scan ────────────────────────────────────────────────────────────
-  const openCamera = () => fileInputRef.current?.click()
+  // Both the header "Scan" and the empty-state button open a small chooser so
+  // the person can snap a fresh photo or pick an existing one, matching the
+  // recipe photo import.
+  const openCamera = () => setPickerOpen(true)
 
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -238,8 +243,13 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const checkedCount = selectedList?.items?.filter(i => i.checked).length || 0
   const totalCount = selectedList?.items?.length || 0
 
-  const hiddenFileInput = (
-    <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhoto} style={{ display: 'none' }} />
+  const hiddenFileInputs = (
+    <>
+      {/* Camera: capture="environment" opens the rear camera on phones. */}
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={handlePhoto} style={{ display: 'none' }} />
+      {/* Library: no capture attr, so this picks an existing photo/file. */}
+      <input ref={libraryRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: 'none' }} />
+    </>
   )
 
   if (isLoading) {
@@ -258,7 +268,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
   return (
     <div className="screen" style={{ position: 'relative' }}>
-      {hiddenFileInput}
+      {hiddenFileInputs}
 
       <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedList ? '12px' : 0 }}>
@@ -500,6 +510,36 @@ export default function GroceryListScreen({ onNavigate }: Props) {
               style={{ flex: 2, padding: '13px', borderRadius: '12px', background: '#6ba356', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1 }}
             >
               {savingScan ? 'Adding…' : `Add ${scanned.length} item${scanned.length === 1 ? '' : 's'}`}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Scan source chooser — camera or existing photo. */}
+      {pickerOpen && (
+        <div
+          onClick={() => setPickerOpen(false)}
+          style={{ position: 'absolute', inset: 0, zIndex: 40, background: 'rgba(15,23,42,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--color-card)', borderTopLeftRadius: '18px', borderTopRightRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)', textAlign: 'center' }}>Scan a grocery note</p>
+            <button
+              onClick={() => { setPickerOpen(false); cameraRef.current?.click() }}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#6ba356', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              <Camera size={17} /> Take a photo
+            </button>
+            <button
+              onClick={() => { setPickerOpen(false); libraryRef.current?.click() }}
+              style={{ width: '100%', padding: '13px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              <ImageIcon size={17} /> Choose from library
+            </button>
+            <button
+              onClick={() => setPickerOpen(false)}
+              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+            >
+              Cancel
             </button>
           </div>
         </div>
