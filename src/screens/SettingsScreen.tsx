@@ -485,7 +485,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
           <Row icon={<User size={18} color="var(--color-text-secondary)" />} label="Account" onPress={() => setSubPage('account')} />
           <Row
             icon={<Crown size={18} color="#f4b860" />}
-            label="My subscription"
+            label="Subscription"
             value={isPro
               ? <span style={{ background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '10px', fontWeight: '800', padding: '2.5px 7px', borderRadius: '999px', letterSpacing: '0.05em' }}>PRO</span>
               : 'Free'}
