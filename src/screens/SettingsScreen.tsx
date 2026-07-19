@@ -237,12 +237,18 @@ function Subscription({ onBack }: { onBack: () => void }) {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="My Subscription" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '20px', border: '1px solid var(--color-subtle)', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text)' }}>Free Plan</span>
-            <span style={{ background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '12px', fontWeight: '700', padding: '4px 10px', borderRadius: '8px' }}>ACTIVE</span>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '18px 20px', border: '1px solid var(--color-subtle)', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '3px' }}>Current plan</div>
+              <div style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-text)' }}>Free</div>
+            </div>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '12px', fontWeight: '700', padding: '5px 11px', borderRadius: '999px', flexShrink: 0 }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6ba356' }} />
+              Active
+            </span>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>You're on the free plan — great for cooking from recipes you add yourself. Go Pro to import from anywhere, auto-build your grocery lists, and cook with a little AI help.</p>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '10px 0 0', lineHeight: 1.5 }}>Everything you need to save and cook your own recipes.</p>
         </div>
 
         <div style={{ background: 'linear-gradient(135deg, #6ba356, #5a9449)', borderRadius: '14px', padding: '20px' }}>
