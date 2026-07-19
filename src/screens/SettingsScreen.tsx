@@ -8,6 +8,7 @@ import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
 import { authAPI } from '../utils/api'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
+import { useProPlan } from '../utils/proPlan'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
@@ -233,6 +234,7 @@ function AccountPage({ onBack }: { onBack: () => void }) {
 }
 
 function Subscription({ onBack }: { onBack: () => void }) {
+  const [isPro, setPro] = useProPlan()
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="My Subscription" onBack={onBack} />
@@ -241,14 +243,21 @@ function Subscription({ onBack }: { onBack: () => void }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '3px' }}>Current plan</div>
-              <div style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-text)' }}>Free</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '19px', fontWeight: '800', color: 'var(--color-text)' }}>
+                {isPro && <Crown size={18} color="#f4b860" />}
+                {isPro ? 'Pro' : 'Free'}
+              </div>
             </div>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '12px', fontWeight: '700', padding: '5px 11px', borderRadius: '999px', flexShrink: 0 }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6ba356' }} />
               Active
             </span>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '10px 0 0', lineHeight: 1.5 }}>Everything you need to save and cook your own recipes.</p>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '10px 0 0', lineHeight: 1.5 }}>
+            {isPro
+              ? 'Pro is on — everything below is unlocked, including auto-building your grocery list from a meal plan.'
+              : 'Everything you need to save and cook your own recipes.'}
+          </p>
         </div>
 
         <div style={{ background: 'linear-gradient(135deg, #6ba356, #5a9449)', borderRadius: '14px', padding: '20px' }}>
@@ -271,12 +280,26 @@ function Subscription({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           ))}
-          <button style={{ marginTop: '14px', width: '100%', padding: '13px', background: 'var(--color-card)', color: '#6ba356', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}>
-            Upgrade for $4.99/mo
-          </button>
-          <p style={{ margin: '10px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
-            Cancel anytime — no commitment.
-          </p>
+
+          {isPro ? (
+            <>
+              <div style={{ marginTop: '14px', width: '100%', padding: '13px', background: 'rgba(255,255,255,0.18)', color: '#fff', borderRadius: '10px', fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}>
+                <Check size={17} strokeWidth={3} /> You’re on Pro
+              </div>
+              <button onClick={() => setPro(false)} style={{ display: 'block', margin: '12px auto 0', background: 'none', border: 'none', color: 'rgba(255,255,255,0.85)', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '2px', fontFamily: 'inherit' }}>
+                Switch back to Free
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => setPro(true)} style={{ marginTop: '14px', width: '100%', padding: '13px', background: 'var(--color-card)', color: '#6ba356', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}>
+                Upgrade for $4.99/mo
+              </button>
+              <p style={{ margin: '10px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+                Cancel anytime — no commitment.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

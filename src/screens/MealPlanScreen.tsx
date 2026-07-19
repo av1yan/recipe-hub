@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Trash2, CalendarDays, Check, ChevronDown } from 'lucide-react'
+import { Plus, Trash2, CalendarDays, Check, ChevronDown, ShoppingCart, Crown } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { mealPlanAPI, recipeAPI } from '../utils/api'
+import { Toast, useToast } from '../components/Toast'
+import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
+import { useProPlan } from '../utils/proPlan'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -60,6 +62,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showWeeks, setShowWeeks] = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [isPro] = useProPlan()
+  const { toast, show } = useToast()
 
   useEffect(() => {
     loadData()
@@ -128,6 +133,40 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
+  // Pro feature: pull every ingredient from the week's planned meals into the
+  // grocery list. The list endpoint omits ingredients, so re-fetch the plan by
+  // id (that one includes them); the backend already merges repeats by name+unit.
+  async function addWeekToGroceries() {
+    if (generating) return
+    if (!isPro) { show('Auto grocery lists are a Pro feature — upgrade in Settings.', 'error'); return }
+    if (!currentPlan) { show('Plan some meals this week first.', 'error'); return }
+    setGenerating(true)
+    try {
+      const full: any = await mealPlanAPI.get(currentPlan.id)
+      const ingredients: any[] = []
+      DAY_NAMES.forEach(day => MEALS.forEach(m => {
+        getMeals(full, day, m.key).forEach((meal: any) => {
+          (meal.ingredients || []).forEach((ing: any) => ingredients.push(ing))
+        })
+      }))
+      if (ingredients.length === 0) { show('No ingredients in this week’s plan yet.', 'error'); return }
+
+      const lists: any = await groceryAPI.list()
+      let list = Array.isArray(lists) ? lists[0] : lists
+      if (!list?.id) list = await groceryAPI.create('Groceries')
+      await Promise.all(ingredients.map(ing =>
+        groceryAPI.addItem(list.id, { name: ing.name, quantity: ing.quantity || 1, unit: ing.unit, category: ing.category || 'general' })
+      ))
+
+      const unique = new Set(ingredients.map(i => `${(i.name || '').trim().toLowerCase()}|${(i.unit || '').trim().toLowerCase()}`)).size
+      show(`Added ${unique} ingredient${unique === 1 ? '' : 's'} to your grocery list`)
+    } catch {
+      show('Could not build your grocery list', 'error')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   function getDayNumber(index: number, weekStart: Date) {
     const date = new Date(weekStart)
     date.setDate(date.getDate() + index)
@@ -136,6 +175,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
   const currentPlan = mealPlans.find(p => sameWeek(p.weekStart, viewWeek))
   const weekStart = viewWeek
+  const hasMeals = !!currentPlan && DAY_NAMES.some(d => MEALS.some(m => getMeals(currentPlan, d, m.key).length > 0))
 
   if (isLoading) {
     return (
@@ -241,6 +281,31 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </div>
         )}
 
+        {/* Pro: build the week's grocery list from the plan in one tap.
+            Non-Pro sees the same button locked as an upsell. */}
+        {hasMeals && (
+          <button
+            onClick={addWeekToGroceries}
+            disabled={generating}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              padding: '13px', marginBottom: '18px', borderRadius: '12px',
+              background: isPro ? '#6ba356' : 'var(--color-card)',
+              color: isPro ? '#fff' : 'var(--color-text-secondary)',
+              border: isPro ? 'none' : '1px solid var(--color-subtle)',
+              boxShadow: isPro ? '0 4px 12px rgba(107,163,86,0.3)' : 'none',
+              fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer',
+              fontFamily: 'inherit', opacity: generating ? 0.7 : 1,
+            }}
+          >
+            {isPro ? (
+              <><ShoppingCart size={16} /> {generating ? 'Adding to groceries…' : 'Add this week to Groceries'}</>
+            ) : (
+              <><Crown size={15} color="#f4b860" /> Auto-build grocery list · Pro</>
+            )}
+          </button>
+        )}
+
         {MEALS.map(m => {
           const meals = getMeals(currentPlan, selectedDay, m.key)
           const filled = meals.length > 0
@@ -315,6 +380,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         })}
       </div>
 
+      {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
       <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
