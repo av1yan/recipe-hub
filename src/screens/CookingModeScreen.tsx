@@ -221,7 +221,9 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <button
             onClick={() => {
               setCompletedSteps(prev => new Set([...prev, currentStep]))
-              onNavigate('home')
+              // Finishing drops you back on the recipe you were cooking -- the
+              // same place the back arrow goes -- not all the way out to Home.
+              onNavigate('recipe', { recipe })
             }}
             style={{
               flex: 2, padding: '14px', borderRadius: '12px',
