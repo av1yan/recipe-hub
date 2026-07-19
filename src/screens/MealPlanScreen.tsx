@@ -20,6 +20,9 @@ export const MEALS = [
   { key: 'snack', label: 'Snack', tint: '#fce7f3', emoji: '🍎' },
 ]
 
+// A sensible default daily calorie target for the Pro nutrition goal bar.
+const GOAL_CAL = 2000
+
 // Monday (local midnight) of whatever week a date falls in.
 export function mondayOf(date: Date | string): Date {
   const d = new Date(date)
@@ -177,6 +180,21 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const weekStart = viewWeek
   const hasMeals = !!currentPlan && DAY_NAMES.some(d => MEALS.some(m => getMeals(currentPlan, d, m.key).length > 0))
 
+  // Nutrition for the selected day: sum one serving of each planned recipe.
+  // The list plan omits the nutrition relation, so read it off the recipes
+  // list (which includes it) matched by recipe id.
+  const dayHasMeals = !!currentPlan && MEALS.some(m => getMeals(currentPlan, selectedDay, m.key).length > 0)
+  const dayNutrition = (() => {
+    let cal = 0, protein = 0, carbs = 0, fat = 0
+    if (currentPlan) MEALS.forEach(m => getMeals(currentPlan, selectedDay, m.key).forEach((meal: any) => {
+      const r: any = recipes.find(x => x.id === meal.id) || meal
+      const n = r?.nutrition
+      if (n) { cal += n.calories || 0; protein += n.protein || 0; carbs += n.carbs || 0; fat += n.fat || 0 }
+      else cal += r?.calories || 0
+    }))
+    return { cal, protein, carbs, fat }
+  })()
+
   if (isLoading) {
     return (
       <div className="screen">
@@ -306,6 +324,41 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </button>
         )}
 
+        {/* Pro: the selected day's nutrition, summed from the planned recipes.
+            Non-Pro sees it locked as an upsell. */}
+        {dayHasMeals && (isPro ? (
+          <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', padding: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>Nutrition</span>
+              <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{selectedDay}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ flexShrink: 0, width: '116px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                  <span style={{ fontSize: '26px', fontWeight: '800', color: 'var(--color-text)', lineHeight: 1 }}>{dayNutrition.cal.toLocaleString()}</span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>cal</span>
+                </div>
+                <div style={{ height: '6px', borderRadius: '3px', background: 'var(--color-subtle)', overflow: 'hidden', marginTop: '9px' }}>
+                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / GOAL_CAL) * 100))}%`, background: '#6ba356', borderRadius: '3px', transition: 'width 0.3s ease' }} />
+                </div>
+                <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>of {GOAL_CAL.toLocaleString()} cal goal</span>
+              </div>
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <MacroStat color="#a78bfa" label="Protein" grams={dayNutrition.protein} />
+                <MacroStat color="#fbbf24" label="Carbs" grams={dayNutrition.carbs} />
+                <MacroStat color="#6ba356" label="Fat" grams={dayNutrition.fat} />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => show('Nutrition & goals is a Pro feature — upgrade in Settings.', 'error')}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', marginBottom: '18px', borderRadius: '12px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-subtle)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            <Crown size={15} color="#f4b860" /> See your day’s nutrition · Pro
+          </button>
+        ))}
+
         {MEALS.map(m => {
           const meals = getMeals(currentPlan, selectedDay, m.key)
           const filled = meals.length > 0
@@ -393,6 +446,17 @@ export default function MealPlanScreen({ onNavigate }: Props) {
  * native <select> list. Click-outside closes it; the current recipe (for a
  * swap) is ticked.
  */
+/** One macro line in the nutrition card: coloured dot, label, grams. */
+function MacroStat({ color, label, grams }: { color: string; label: string; grams: number }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+      <span style={{ flex: 1, fontSize: '13px', color: 'var(--color-text-secondary)' }}>{label}</span>
+      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>{grams}g</span>
+    </div>
+  )
+}
+
 function RecipePicker({ recipes, meal, current, onPick, children }: {
   recipes: Recipe[]
   meal: typeof MEALS[number]
