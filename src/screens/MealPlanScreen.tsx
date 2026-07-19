@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Plus, Trash2, CalendarDays, Check, ChevronDown } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
@@ -257,54 +257,55 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 )}
               </div>
 
-              {/* Planned meal card. The card itself is the swap control: an
-                  invisible <select> laid over it means tapping the card opens a
-                  dropdown to pick a different recipe, while the card keeps its
-                  emoji tile + details. The chevron hints it's tappable. */}
+              {/* Planned meal card. The card is the swap control: tapping it
+                  opens the recipe menu, and the card keeps its emoji tile +
+                  details. The chevron hints it's tappable. */}
               {filled && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {meals.map((meal, i) => {
                     const servings = meal.servings || 1
                     const canSwap = recipes.length > 0
-                    return (
-                      <div key={i} style={{ position: 'relative' }}>
-                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                          {/* Small tinted tile, matching the Home/Browse cards. */}
-                          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: m.tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
-                            {meal.emoji || m.emoji}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
-                            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                              {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
-                            </p>
-                          </div>
-                          {canSwap && <ChevronDown size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />}
+                    const card = (open: boolean) => (
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                        {/* Small tinted tile, matching the Home/Browse cards. */}
+                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: m.tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
+                          {meal.emoji || m.emoji}
                         </div>
-                        {canSwap && (
-                          <select
-                            value=""
-                            onChange={(e) => { if (e.target.value) addMealToPlan(e.target.value, m.key) }}
-                            aria-label={`Swap ${m.label.toLowerCase()} recipe`}
-                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, border: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none' }}
-                          >
-                            <option value="" disabled>{meal.name}</option>
-                            {recipes.map(r => (
-                              <option key={r.id} value={r.id}>
-                                {(r as any).emoji || m.emoji} {r.name} · {(r.prepTime || 0) + (r.cookTime || 0)} min
-                              </option>
-                            ))}
-                          </select>
-                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
+                          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                            {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
+                          </p>
+                        </div>
+                        {canSwap && <ChevronDown size={18} color="var(--color-text-muted)" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />}
                       </div>
+                    )
+                    return canSwap ? (
+                      <RecipePicker key={i} recipes={recipes} meal={m} current={(meal as any).recipeId} onPick={(id) => addMealToPlan(id, m.key)}>
+                        {card}
+                      </RecipePicker>
+                    ) : (
+                      <div key={i}>{card(false)}</div>
                     )
                   })}
                 </div>
               )}
 
-              {/* Empty slot: pick a recipe straight from a dropdown. */}
+              {/* Empty slot: pick a recipe from the same clean menu. */}
               {!filled && (
-                <RecipeDropdown meal={m} recipes={recipes} onPick={(id) => addMealToPlan(id, m.key)} />
+                <RecipePicker recipes={recipes} meal={m} onPick={(id) => addMealToPlan(id, m.key)}>
+                  {(open) => (
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed #f0d8d2', borderRadius: '16px', boxSizing: 'border-box' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Plus size={18} color="#f26d5b" />
+                      </div>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)' }}>
+                        {recipes.length === 0 ? 'No recipes yet — add some first' : `Add a ${m.label.toLowerCase()} recipe`}
+                      </span>
+                      {recipes.length > 0 && <ChevronDown size={18} color="#f26d5b" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />}
+                    </div>
+                  )}
+                </RecipePicker>
               )}
             </div>
           )
@@ -317,49 +318,71 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 }
 
 /**
- * The empty-slot recipe picker: a full-width dashed dropdown. One tap opens the
- * native picker listing every recipe; choosing adds it. Full width so the
- * native listbox shows the recipe names in full on every platform. Stays on the
- * placeholder (value="") so it re-arms after each pick. (Swapping a filled slot
- * is handled by the meal card itself, which carries its own <select>.)
+ * A clean, on-brand recipe dropdown. `children(open)` renders the trigger (the
+ * empty-slot box or the meal card); clicking it opens a styled menu of recipe
+ * rows -- emoji tile, name, cuisine + time -- instead of the browser's bland
+ * native <select> list. Click-outside closes it; the current recipe (for a
+ * swap) is ticked.
  */
-function RecipeDropdown({ meal, recipes, onPick }: {
-  meal: typeof MEALS[number]
+function RecipePicker({ recipes, meal, current, onPick, children }: {
   recipes: Recipe[]
+  meal: typeof MEALS[number]
+  current?: string
   onPick: (recipeId: string) => void
+  children: (open: boolean) => React.ReactNode
 }) {
-  const noRecipes = recipes.length === 0
-  const placeholder = noRecipes ? 'No recipes yet — add some first' : `Add a ${meal.label.toLowerCase()} recipe`
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const disabled = recipes.length === 0
+
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', width: '40px', height: '40px', borderRadius: '12px', background: '#fdeeeb', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-        <Plus size={18} color="#f26d5b" />
+    <div ref={ref} style={{ position: 'relative' }}>
+      <div onClick={() => { if (!disabled) setOpen(o => !o) }} style={{ cursor: disabled ? 'default' : 'pointer' }}>
+        {children(open)}
       </div>
-      <select
-        value=""
-        disabled={noRecipes}
-        onChange={(e) => { if (e.target.value) onPick(e.target.value) }}
-        aria-label={`Add a ${meal.label.toLowerCase()} recipe`}
-        style={{
-          width: '100%', padding: '18px 40px 18px 60px',
-          background: 'var(--color-card)',
-          border: '1.5px dashed #f0d8d2', borderRadius: '16px',
-          cursor: noRecipes ? 'default' : 'pointer',
-          fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)',
-          appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-          fontFamily: 'inherit',
-        }}
-      >
-        <option value="" disabled>{placeholder}</option>
-        {recipes.map(r => (
-          <option key={r.id} value={r.id}>
-            {(r as any).emoji || meal.emoji} {r.name} · {(r.prepTime || 0) + (r.cookTime || 0)} min
-          </option>
-        ))}
-      </select>
-      {!noRecipes && (
-        <ChevronDown size={18} color="#f26d5b" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+      {open && !disabled && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 20,
+          background: 'var(--color-card)', border: '1px solid var(--color-subtle)',
+          borderRadius: '14px', boxShadow: '0 12px 32px rgba(0, 0, 0, 0.18)',
+          overflow: 'hidden', maxHeight: '272px', overflowY: 'auto',
+        }}>
+          {recipes.map((r, i) => {
+            const selected = current === r.id
+            return (
+              <button
+                key={r.id}
+                onClick={() => { onPick(r.id); setOpen(false) }}
+                onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = 'var(--color-bg)' }}
+                onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = 'transparent' }}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '10px 12px', background: selected ? 'var(--color-bg)' : 'transparent',
+                  border: 'none', borderTop: i === 0 ? 'none' : '1px solid var(--color-subtle)',
+                  cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                }}
+              >
+                <div style={{ width: '38px', height: '38px', borderRadius: '11px', background: meal.tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
+                  {(r as any).emoji || meal.emoji}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '1px' }}>{r.cuisine} · {(r.prepTime || 0) + (r.cookTime || 0)} min</div>
+                </div>
+                {selected && <Check size={16} color="#f26d5b" style={{ flexShrink: 0 }} />}
+              </button>
+            )
+          })}
+        </div>
       )}
     </div>
   )
