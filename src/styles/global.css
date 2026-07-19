@@ -319,3 +319,28 @@ textarea.input {
 ::-webkit-scrollbar-thumb:hover {
   background: #c0b6a5;
 }
+
+/* --- Tactile feedback on anything clickable, app-wide ------------------------
+   Interactive elements here are <button>s or set `cursor: pointer` inline
+   (cards, list rows, tiles), so target both. A subtle lift on hover -- gated to
+   real pointers so it never sticks on a phone -- and a press-in on tap/click.
+   These are transforms, so they read the same in light and dark, and don't
+   reflow neighbours. Disabled/busy controls drop `cursor: pointer`, so they
+   opt out for free. Elements with their own inline transform (e.g. a rotating
+   chevron) keep it -- inline styles win over this sheet. */
+button:not(:disabled),
+[style*="cursor: pointer"] {
+  transition: transform 0.13s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover,
+  [style*="cursor: pointer"]:hover {
+    transform: translateY(-1px);
+  }
+}
+
+button:not(:disabled):active,
+[style*="cursor: pointer"]:active {
+  transform: scale(0.97);
+}
