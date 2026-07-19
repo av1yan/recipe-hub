@@ -9,6 +9,8 @@ import { Toast, useToast } from '../components/Toast'
 import { authAPI } from '../utils/api'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
 import { useProPlan } from '../utils/proPlan'
+import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
+import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
@@ -312,44 +314,68 @@ function Subscription({ onBack }: { onBack: () => void }) {
 }
 
 
-function Preferences({ onBack, onNavigate }: { onBack: () => void; onNavigate: (screen: Screen) => void }) {
+function Preferences({ onBack }: { onBack: () => void }) {
   const [units, setUnits] = useState<'imperial' | 'metric'>('imperial')
   const [temp, setTemp] = useState<'F' | 'C'>('F')
   const [servings, setServings] = useState(2)
+  const [diet, setDiet] = useState<string[]>(() => getDietPrefs())
+  const [allergies, setAllergiesState] = useState<string[]>(() => getAllergies())
   const [saved, setSaved] = useState(false)
 
   const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2500) }
 
   const toggleStyle = (active: boolean): React.CSSProperties => ({
-    flex: 1, padding: '10px', borderRadius: '8px',
+    flex: 1, padding: '9px', borderRadius: '8px',
     border: `1.5px solid ${active ? '#6ba356' : 'var(--color-border)'}`,
     background: active ? 'var(--color-primary-bg)' : 'var(--color-card)',
     color: active ? '#6ba356' : 'var(--color-text-secondary)',
     fontSize: '13px', fontWeight: '700', cursor: 'pointer',
   })
 
+  // Diet and allergy pills persist the moment they're tapped (like onboarding),
+  // so Browse picks them up without needing Save.
+  const pill = (active: boolean, accent: string): React.CSSProperties => ({
+    padding: '7px 13px', borderRadius: '999px',
+    border: `1.5px solid ${active ? accent : 'var(--color-border)'}`,
+    background: active ? accent : 'var(--color-card)',
+    color: active ? '#fff' : 'var(--color-text-secondary)',
+    fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit',
+  })
+  const toggleDiet = (id: string) => setDiet(prev => {
+    const next = prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+    localStorage.setItem(DIET_PREFS_KEY, JSON.stringify(next))
+    return next
+  })
+  const toggleAllergy = (id: string) => setAllergiesState(prev => {
+    const next = prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+    saveAllergies(next)
+    return next
+  })
+
+  const fieldLabel: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '7px' }
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="Preferences" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px' }}>
         <SectionHeader label="MEASUREMENTS" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px', border: '1px solid var(--color-subtle)', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div>
-            <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>UNITS</label>
+            <label style={fieldLabel}>UNITS</label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setUnits('imperial')} style={toggleStyle(units === 'imperial')}>Imperial</button>
               <button onClick={() => setUnits('metric')} style={toggleStyle(units === 'metric')}>Metric</button>
             </div>
           </div>
           <div>
-            <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>TEMPERATURE</label>
+            <label style={fieldLabel}>TEMPERATURE</label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setTemp('F')} style={toggleStyle(temp === 'F')}>°F</button>
               <button onClick={() => setTemp('C')} style={toggleStyle(temp === 'C')}>°C</button>
             </div>
           </div>
           <div>
-            <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }}>DEFAULT SERVINGS</label>
+            <label style={fieldLabel}>DEFAULT SERVINGS</label>
             <div style={{ display: 'flex', gap: '8px' }}>
               {[1, 2, 4, 6].map(s => (
                 <button key={s} onClick={() => setServings(s)} style={toggleStyle(servings === s)}>{s}</button>
@@ -359,14 +385,20 @@ function Preferences({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
         </div>
 
         <SectionHeader label="DIET" />
-        <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid var(--color-subtle)', marginBottom: '20px' }}>
-          <button onClick={() => onNavigate('diet-preferences')} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '14px', padding: '13px 16px', background: 'var(--color-card)', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Leaf size={18} color="#6ba356" />
-            </div>
-            <span style={{ flex: 1, fontSize: '15px', color: 'var(--color-text)', fontWeight: '500' }}>Diet preferences</span>
-            <ChevronRight size={17} color="#cbd5e1" />
-          </button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+          {DIET_OPTIONS.map(d => (
+            <button key={d.id} onClick={() => toggleDiet(d.id)} style={pill(diet.includes(d.id), '#6ba356')}>{d.label}</button>
+          ))}
+        </div>
+
+        <SectionHeader label="ALLERGIES" />
+        <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '-2px 0 8px', lineHeight: 1.4 }}>
+          Recipes with any of these are hidden across the app.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+          {ALLERGY_OPTIONS.map(a => (
+            <button key={a.id} onClick={() => toggleAllergy(a.id)} style={pill(allergies.includes(a.id), '#ef4444')}>{a.label}</button>
+          ))}
         </div>
 
         <SaveButton onClick={save} saved={saved} />
@@ -470,7 +502,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
   if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} />
   if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
-  if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} onNavigate={onNavigate} />
+  if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} />
   if (subPage === 'help') return <HelpPage onBack={() => setSubPage(null)} />
   if (subPage === 'invite') return <InvitePage onBack={() => setSubPage(null)} />
 

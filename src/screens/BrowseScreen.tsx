@@ -4,6 +4,7 @@ import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
 import { getDietPrefs } from './DietPreferencesScreen'
+import { getAllergies, recipeHasAllergen } from '../utils/allergies'
 
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif"
 
@@ -66,6 +67,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [dietPrefs, setDietPrefs] = useState<string[]>(() => getDietPrefs())
+  const [allergies] = useState<string[]>(() => getAllergies())
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null)
   const [exploreCat, setExploreCat] = useState<FilterKind | null>(null)
   const [filterOpen, setFilterOpen] = useState(false)
@@ -103,7 +105,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
     !q || r.name.toLowerCase().includes(q) || (r.cuisine || '').toLowerCase().includes(q)
 
   const displayed = recipes.filter(
-    r => matchesSearch(r) && matchesFilter(r, activeFilter) && matchesDiet(r, dietPrefs)
+    r => matchesSearch(r) && matchesFilter(r, activeFilter) && matchesDiet(r, dietPrefs) && !recipeHasAllergen(r, allergies)
   )
 
   // Real values pulled from the actual recipes
