@@ -268,6 +268,9 @@ function Subscription({ onBack }: { onBack: () => void }) {
           <button style={{ marginTop: '14px', width: '100%', padding: '13px', background: 'var(--color-card)', color: '#6ba356', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}>
             Upgrade for $4.99/mo
           </button>
+          <p style={{ margin: '10px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+            Cancel anytime — no commitment.
+          </p>
         </div>
       </div>
     </div>
