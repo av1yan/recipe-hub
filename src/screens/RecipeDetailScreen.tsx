@@ -142,14 +142,26 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   async function share() {
     const text = recipe!.description ? `${recipe!.name} — ${recipe!.description}` : recipe!.name
     const url = recipe!.sourceUrl || window.location.href
-    try {
-      if (navigator.share) {
+
+    // Prefer the native share sheet on real devices. It throws in embedded or
+    // permission-blocked contexts (and AbortError when the person dismisses
+    // it), so only a deliberate cancel should stop here -- any other failure
+    // falls through to copying, so Share never silently does nothing.
+    if (navigator.share) {
+      try {
         await navigator.share({ title: recipe!.name, text, url })
-      } else {
-        await navigator.clipboard.writeText(`${text}\n${url}`)
-        show('Copied to clipboard')
+        return
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return
       }
-    } catch { /* the person dismissed the share sheet */ }
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`)
+      show('Link copied to clipboard')
+    } catch {
+      show('Could not share this recipe', 'error')
+    }
   }
 
   return (
