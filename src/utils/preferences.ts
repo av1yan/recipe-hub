@@ -35,9 +35,8 @@ const VOLUME_TO_ML: Record<string, number> = {
 }
 
 function tidy(n: number): number {
-  if (n >= 100) return Math.round(n)
-  if (n >= 10) return Math.round(n * 10) / 10
-  return Math.round(n * 4) / 4 // nearest quarter for small amounts
+  if (n >= 10) return Math.round(n)       // whole g / ml for anything sizeable
+  return Math.round(n * 4) / 4            // nearest quarter for small amounts
 }
 
 export function convertMeasurement(quantity: number, unit: string, system: MeasurementSystem): { quantity: number; unit: string } {
