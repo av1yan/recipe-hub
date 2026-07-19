@@ -357,9 +357,9 @@ function Preferences({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="Preferences" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 12px' }}>
         <SectionHeader label="MEASUREMENTS" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px', border: '1px solid var(--color-subtle)', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div>
             <label style={fieldLabel}>UNITS</label>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -385,15 +385,15 @@ function Preferences({ onBack }: { onBack: () => void }) {
         </div>
 
         <SectionHeader label="DIET" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px', border: '1px solid var(--color-subtle)', marginBottom: '14px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {DIET_OPTIONS.map(d => (
             <button key={d.id} onClick={() => toggleDiet(d.id)} style={pill(diet.includes(d.id), '#6ba356')}>{d.label}</button>
           ))}
         </div>
 
         <SectionHeader label="ALLERGIES" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px', border: '1px solid var(--color-subtle)', marginBottom: '16px' }}>
-          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 10px', lineHeight: 1.4 }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
+          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 8px', lineHeight: 1.4 }}>
             Recipes with any of these are hidden across the app.
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
