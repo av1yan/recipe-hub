@@ -257,7 +257,7 @@ export default function PantryScreen({ onNavigate }: Props) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
         {/* Pantry manager */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 0 8px' }}>
-          <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: 0 }}>MY PANTRY</p>
+          <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: 0 }}>MY PANTRY{pantry.length > 0 ? ` · ${pantry.length}` : ''}</p>
           {pantry.length > 0 && (
             <button onClick={clearPantry} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '700', letterSpacing: '0.03em', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
               Clear
@@ -279,12 +279,12 @@ export default function PantryScreen({ onNavigate }: Props) {
 
         {/* Current pantry */}
         {pantry.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
             {pantry.map(item => (
-              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', padding: '6px 10px', fontSize: '13px', fontWeight: '600' }}>
+              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--color-primary-bg)', color: 'var(--color-text)', borderRadius: '9px', padding: '5px 8px 5px 11px', fontSize: '13px', fontWeight: '600' }}>
                 {item}
-                <button onClick={() => removeItem(item)} aria-label={`Remove ${item}`} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: 'var(--color-primary)' }}>
-                  <X size={13} />
+                <button onClick={() => removeItem(item)} aria-label={`Remove ${item}`} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: 'var(--color-text-muted)' }}>
+                  <X size={14} />
                 </button>
               </span>
             ))}
