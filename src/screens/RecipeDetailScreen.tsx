@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles } from 'lucide-react'
+import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles, BookmarkPlus, Check } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, groceryAPI, mealPlanAPI, insightsAPI } from '../utils/api'
@@ -59,21 +59,58 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   const [adaptText, setAdaptText] = useState('')
   const [adaptNote, setAdaptNote] = useState('')
   const [adaptGoal, setAdaptGoal] = useState('')
+  const [adaptedRecipe, setAdaptedRecipe] = useState<{ name: string; ingredients: string[]; instructions: string[] } | null>(null)
+  const [adaptSaving, setAdaptSaving] = useState(false)
+  const [adaptSaved, setAdaptSaved] = useState(false)
 
   async function runAdapt(goal: string) {
     if (!recipe) return
     setAdaptGoal(goal); setAdaptLoading(true); setAdaptText(''); setAdaptNote('')
+    setAdaptedRecipe(null); setAdaptSaved(false)
     try {
       const res: any = await insightsAPI.adapt(
         { name: recipe.name, ingredients: recipe.ingredients, instructions: recipe.instructions },
         goal.toLowerCase()
       )
       if (res?.configured === false) setAdaptNote(res.message || "The AI assistant isn't switched on yet.")
-      else setAdaptText(res?.text || '')
+      else {
+        setAdaptText(res?.text || '')
+        setAdaptedRecipe(res?.adapted || null)
+      }
     } catch {
       setAdaptNote('Could not reach the AI just now — try again in a moment.')
     } finally {
       setAdaptLoading(false)
+    }
+  }
+
+  // Save the AI's adapted version as its own recipe, keeping the original's
+  // meta (cuisine, timings, image) and using the adapted ingredients/steps.
+  async function saveAdapted() {
+    if (!recipe || !adaptedRecipe || adaptSaving || adaptSaved) return
+    setAdaptSaving(true)
+    try {
+      await recipeAPI.create({
+        name: adaptedRecipe.name,
+        cuisine: recipe.cuisine || 'Other',
+        mealType: recipe.mealType || 'dinner',
+        difficulty: recipe.difficulty || 'easy',
+        prepTime: recipe.prepTime || 10,
+        cookTime: recipe.cookTime || 20,
+        servings: recipe.servings || 2,
+        calories: null,
+        imageUrl: recipe.imageUrl || null,
+        sourceUrl: '',
+        tags: ['adapted', adaptGoal.toLowerCase()].filter(Boolean),
+        ingredients: adaptedRecipe.ingredients.map(s => ({ name: s, quantity: 1, unit: '' })),
+        instructions: adaptedRecipe.instructions.map((text, i) => ({ stepNumber: i + 1, text })),
+      })
+      setAdaptSaved(true)
+      show(`Saved “${adaptedRecipe.name}” to your recipes`)
+    } catch {
+      show('Could not save that recipe', 'error')
+    } finally {
+      setAdaptSaving(false)
     }
   }
 
@@ -355,6 +392,17 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                         <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>{adaptGoal.toUpperCase()}</span>
                       </div>
                       <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{adaptText}</p>
+                      {adaptedRecipe && (
+                        <button
+                          onClick={saveAdapted}
+                          disabled={adaptSaving || adaptSaved}
+                          style={{ marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 13px', borderRadius: '10px', border: '1px solid var(--color-primary-border)', background: adaptSaved ? 'var(--color-primary-bg)' : 'transparent', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '700', cursor: adaptSaving || adaptSaved ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                        >
+                          {adaptSaved
+                            ? <><Check size={14} /> Saved to recipes</>
+                            : <><BookmarkPlus size={14} /> {adaptSaving ? 'Saving…' : 'Save as a new recipe'}</>}
+                        </button>
+                      )}
                     </div>
                   )}
 
