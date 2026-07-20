@@ -28,14 +28,25 @@ function parseDishes(text: string): { name: string; steps: string; nutrition: st
     .filter(Boolean)
     .map(l => l.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, ''))
     .map(l => {
+      let name: string, steps: string, nutrition: string
       const parts = l.split('::').map(p => p.trim())
       if (parts.length >= 2) {
-        return { name: parts[0], steps: parts[1] || '', nutrition: parts.slice(2).join(' · ').trim() }
+        name = parts[0]; steps = parts[1] || ''; nutrition = parts.slice(2).join(' · ').trim()
+      } else {
+        let sep = l.indexOf(' — '); let width = 3
+        if (sep === -1) { sep = l.indexOf(' - '); width = 3 }
+        if (sep === -1) { name = l; steps = ''; nutrition = '' }
+        else { name = l.slice(0, sep).trim(); steps = l.slice(sep + width).trim(); nutrition = '' }
       }
-      let sep = l.indexOf(' — '); let width = 3
-      if (sep === -1) { sep = l.indexOf(' - '); width = 3 }
-      if (sep === -1) return { name: l, steps: '', nutrition: '' }
-      return { name: l.slice(0, sep).trim(), steps: l.slice(sep + width).trim(), nutrition: '' }
+      // Pull a trailing "…NNN kcal … protein" out of the steps if it got inlined.
+      if (!nutrition && steps) {
+        const m = steps.match(/[≈~]?\s*\d{2,4}\s*k?cal\b.*$/i)
+        if (m && m.index !== undefined && m.index > 0) {
+          nutrition = steps.slice(m.index).replace(/^[\s.,;:–—-]+/, '').trim()
+          steps = steps.slice(0, m.index).replace(/[\s.,;:–—-]+$/, '').trim()
+        }
+      }
+      return { name, steps, nutrition }
     })
     .filter(d => d.name)
 }
