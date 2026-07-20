@@ -327,7 +327,7 @@ export default function PantryScreen({ onNavigate }: Props) {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {cookDishes.map((d, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '11px', padding: '13px 15px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
+                    <div key={i} style={{ display: 'flex', gap: '11px', padding: '13px 15px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                       <div style={{ flexShrink: 0, width: '24px', height: '24px', borderRadius: '8px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '800' }}>
                         {i + 1}
                       </div>
