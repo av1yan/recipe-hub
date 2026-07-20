@@ -236,12 +236,22 @@ function AccountPage({ onBack }: { onBack: () => void }) {
   )
 }
 
+const PRO_FEATURES = [
+  { title: 'Unlimited recipes & cookbooks', desc: `Free stops at ${FREE_RECIPE_LIMIT} recipes / ${FREE_COOKBOOK_LIMIT} cookbook` },
+  { title: 'Automatic grocery lists', desc: 'A week’s plan → one shopping list' },
+  { title: 'Plan any week', desc: 'Free is this week only; Pro, any week' },
+  { title: 'Export & share', desc: 'Send your list or plan anywhere' },
+  { title: 'Nutrition & goals', desc: 'Daily macros and calorie targets' },
+]
+
 function Subscription({ onBack }: { onBack: () => void }) {
   const [isPro, setPro] = useProPlan()
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="My Subscription" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
+        {/* Current plan. On Pro the perks live here, since the upsell card below
+            is only shown to Free users -- selling Pro to a Pro user is noise. */}
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px 18px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ minWidth: 0 }}>
@@ -258,57 +268,68 @@ function Subscription({ onBack }: { onBack: () => void }) {
           </div>
           <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '10px 0 0', lineHeight: 1.5 }}>
             {isPro
-              ? 'Pro is on — everything below is unlocked, including auto-building your grocery list from a meal plan.'
+              ? 'Pro is on — every feature below is unlocked.'
               : 'Everything you need to save and cook your own recipes.'}
           </p>
-        </div>
 
-        <div style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '14px', padding: '18px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '13px' }}>
-            <Crown size={20} color="#f4b860" />
-            <span style={{ fontSize: '17px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
-          </div>
-          {[
-            { title: 'Unlimited recipes & cookbooks', desc: `Free stops at ${FREE_RECIPE_LIMIT} recipes / ${FREE_COOKBOOK_LIMIT} cookbook` },
-            { title: 'Automatic grocery lists', desc: 'A week’s plan → one shopping list' },
-            { title: 'Plan any week', desc: 'Free is this week only; Pro, any week' },
-            { title: 'Export & share', desc: 'Send your list or plan anywhere' },
-            { title: 'Nutrition & goals', desc: 'Daily macros and calorie targets' },
-          ].map(f => (
-            <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-              <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0 }} />
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>{f.title}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.3 }}>{f.desc}</div>
-              </div>
+          {isPro && (
+            <div style={{ marginTop: '14px', borderTop: '1px solid var(--color-subtle)', paddingTop: '14px' }}>
+              <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '11px' }}>Included</div>
+              {PRO_FEATURES.map(f => (
+                <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '11px' }}>
+                  <Check size={15} color="var(--color-primary)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', lineHeight: 1.2 }}>{f.title}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>{f.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-
-          {isPro ? (
-            <>
-              <div style={{ marginTop: '14px', width: '100%', padding: '13px', background: 'rgba(255,255,255,0.18)', color: '#fff', borderRadius: '10px', fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}>
-                <Check size={17} strokeWidth={3} /> You’re on Pro
-              </div>
-              <button onClick={() => setPro(false)} style={{ display: 'block', margin: '12px auto 0', background: 'none', border: 'none', color: 'rgba(255,255,255,0.85)', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '2px', fontFamily: 'inherit' }}>
-                Switch back to Free
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setPro(true)}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.25)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)' }}
-                style={{ marginTop: '16px', width: '100%', padding: '13px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
-              >
-                Upgrade for $4.99/mo
-              </button>
-              <p style={{ margin: '9px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
-                Cancel anytime — no commitment.
-              </p>
-            </>
           )}
         </div>
+
+        {/* On Pro: downgrade gets its own quiet tile, not buried in an upsell. */}
+        {isPro && (
+          <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px 18px', border: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>Switch back to Free</div>
+              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px', lineHeight: 1.4 }}>Keep your recipes; lose the Pro features.</div>
+            </div>
+            <button onClick={() => setPro(false)} style={{ flexShrink: 0, padding: '9px 15px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+              Switch
+            </button>
+          </div>
+        )}
+
+        {/* On Free: the full gold upsell card. */}
+        {!isPro && (
+          <div style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '14px', padding: '18px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '13px' }}>
+              <Crown size={20} color="#f4b860" />
+              <span style={{ fontSize: '17px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
+            </div>
+            {PRO_FEATURES.map(f => (
+              <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>{f.title}</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.3 }}>{f.desc}</div>
+                </div>
+              </div>
+            ))}
+            <button
+              onClick={() => setPro(true)}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.25)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)' }}
+              style={{ marginTop: '16px', width: '100%', padding: '13px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
+            >
+              Upgrade for $4.99/mo
+            </button>
+            <p style={{ margin: '9px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+              Cancel anytime — no commitment.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
