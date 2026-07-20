@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChevronLeft, Link2, Type, Image as ImageIcon, Camera, Loader2 } from 'lucide-react'
 import type { Screen } from '../types'
 import { importAPI } from '../utils/api'
@@ -11,6 +11,10 @@ interface Props {
   /** The screen the add panel was opened over; Back returns there and reopens
       the panel rather than dropping you on Home. */
   backTo?: Screen
+  /** When opened via the OS share sheet, the shared link/text lands here and is
+      imported immediately. */
+  initialValue?: string
+  autoStart?: boolean
 }
 
 const GREEN = 'var(--color-primary)'
@@ -42,8 +46,8 @@ const COPY: Record<Mode, { title: string; blurb: string; placeholder: string; ct
   },
 }
 
-export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }: Props) {
-  const [value, setValue] = useState('')
+export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home', initialValue = '', autoStart = false }: Props) {
+  const [value, setValue] = useState(initialValue)
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   // Social is two steps: fetch the caption, then let it be laid out. TikTok
@@ -132,6 +136,17 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home' }
       setBusy('')
     }
   }
+
+  // Opened from the OS share sheet: run the import on the shared value once.
+  const autoRan = useRef(false)
+  useEffect(() => {
+    if (!autoStart || autoRan.current) return
+    const v = initialValue.trim()
+    if (!v) return
+    autoRan.current = true
+    if (mode === 'text') submitText(v)
+    else submitLink()
+  }, [])
 
   const icon = mode === 'text' ? <Type size={20} color={GREEN} /> : mode === 'photo' ? <ImageIcon size={20} color={GREEN} /> : <Link2 size={20} color={GREEN} />
 
