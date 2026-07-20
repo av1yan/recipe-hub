@@ -20,6 +20,15 @@ const TONE: Record<Insight['tone'], { bg: string; fg: string }> = {
   info: { bg: 'rgba(100,116,139,0.14)', fg: 'var(--color-text-secondary)' },
 }
 
+// Fallback when the backend returns the read as one `text` blob (e.g. an older
+// deploy): break it into separate tips by line, then by sentence.
+function splitInsightPoints(text: string): string[] {
+  const byLine = text.split('\n').map(l => l.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, '').trim()).filter(Boolean)
+  if (byLine.length > 1) return byLine
+  const sentences = text.match(/[^.!?]+[.!?]+/g)
+  return sentences ? sentences.map(s => s.trim()).filter(Boolean) : (text.trim() ? [text.trim()] : [])
+}
+
 export default function InsightsScreen({ onNavigate }: Props) {
   const [isPro] = useProPlan()
   const [loading, setLoading] = useState(true)
@@ -27,7 +36,7 @@ export default function InsightsScreen({ onNavigate }: Props) {
   const [recipes, setRecipes] = useState<Recipe[]>([])
 
   const [aiLoading, setAiLoading] = useState(false)
-  const [aiText, setAiText] = useState('')
+  const [aiPoints, setAiPoints] = useState<string[]>([])
   const [aiNote, setAiNote] = useState('')
 
   useEffect(() => {
@@ -73,7 +82,7 @@ export default function InsightsScreen({ onNavigate }: Props) {
   const insights = computeInsights({ planned, allRecipes: recipes, pantry, goalCal: GOAL_CAL })
 
   const askAI = async () => {
-    setAiLoading(true); setAiText(''); setAiNote('')
+    setAiLoading(true); setAiPoints([]); setAiNote('')
     try {
       const summary = {
         goalCaloriesPerDay: GOAL_CAL,
@@ -86,7 +95,12 @@ export default function InsightsScreen({ onNavigate }: Props) {
       }
       const res: any = await insightsAPI.ai(summary)
       if (res?.configured === false) setAiNote(res.message || "AI insights aren't switched on yet.")
-      else setAiText(res?.text || '')
+      else {
+        const pts = Array.isArray(res?.points) && res.points.length
+          ? res.points.map((x: any) => String(x))
+          : splitInsightPoints(res?.text || '')
+        setAiPoints(pts)
+      }
     } catch {
       setAiNote('Could not reach the AI just now — try again in a moment.')
     } finally {
@@ -165,13 +179,20 @@ export default function InsightsScreen({ onNavigate }: Props) {
               {aiLoading ? <><Loader2 size={16} className="rh-spin" /> Thinking…</> : <><Sparkles size={16} /> Ask AI for a deeper read</>}
             </button>
 
-            {aiText && (
+            {aiPoints.length > 0 && (
               <div style={{ marginTop: '12px', padding: '14px 16px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
                   <Sparkles size={14} color="var(--color-primary)" />
                   <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>AI READ</span>
                 </div>
-                <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{aiText}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
+                  {aiPoints.map((pt, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                      <span style={{ flexShrink: 0, marginTop: '7px', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
+                      <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5, flex: 1 }}>{pt}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
