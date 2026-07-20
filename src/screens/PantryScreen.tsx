@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles, BookmarkPlus } from 'lucide-react'
+import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles, BookmarkPlus, Flame } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { recipeAPI, groceryAPI, insightsAPI } from '../utils/api'
 import { getPantry, savePantry, pantryMatch } from '../utils/pantry'
@@ -20,19 +20,22 @@ const STAPLES = [
 ]
 
 // Fallback for when the backend returns only a joined `text` string: split it
-// into { name, steps } tiles on "::", " — " or " - ".
-function parseDishes(text: string): { name: string; steps: string }[] {
+// into { name, steps, nutrition } tiles on "::", " — " or " - ".
+function parseDishes(text: string): { name: string; steps: string; nutrition: string }[] {
   return text
     .split('\n')
     .map(l => l.trim())
     .filter(Boolean)
     .map(l => l.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, ''))
     .map(l => {
-      let sep = l.indexOf('::'); let width = 2
-      if (sep === -1) { sep = l.indexOf(' — '); width = 3 }
+      const parts = l.split('::').map(p => p.trim())
+      if (parts.length >= 2) {
+        return { name: parts[0], steps: parts[1] || '', nutrition: parts.slice(2).join(' · ').trim() }
+      }
+      let sep = l.indexOf(' — '); let width = 3
       if (sep === -1) { sep = l.indexOf(' - '); width = 3 }
-      if (sep === -1) return { name: l, steps: '' }
-      return { name: l.slice(0, sep).trim(), steps: l.slice(sep + width).trim() }
+      if (sep === -1) return { name: l, steps: '', nutrition: '' }
+      return { name: l.slice(0, sep).trim(), steps: l.slice(sep + width).trim(), nutrition: '' }
     })
     .filter(d => d.name)
 }
@@ -45,7 +48,7 @@ export default function PantryScreen({ onNavigate }: Props) {
   const [loading, setLoading] = useState(true)
   const [addingList, setAddingList] = useState<string | null>(null)
   const [cookLoading, setCookLoading] = useState(false)
-  const [cookDishes, setCookDishes] = useState<{ name: string; steps: string }[]>([])
+  const [cookDishes, setCookDishes] = useState<{ name: string; steps: string; nutrition: string }[]>([])
   const [cookNote, setCookNote] = useState('')
   const [savingIdx, setSavingIdx] = useState<number | null>(null)
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set())
@@ -119,7 +122,7 @@ export default function PantryScreen({ onNavigate }: Props) {
 
   // Turn one AI dish idea into a saved recipe: pull in the pantry items it
   // mentions as ingredients, and split its how-to into steps.
-  async function saveDish(dish: { name: string; steps: string }, idx: number) {
+  async function saveDish(dish: { name: string; steps: string; nutrition: string }, idx: number) {
     if (savingIdx !== null || savedRecipes.has(dish.name)) return
     setSavingIdx(idx)
     try {
@@ -131,6 +134,8 @@ export default function PantryScreen({ onNavigate }: Props) {
       const sentences = (dish.steps || '').match(/[^.!?]+[.!?]+/g) || (dish.steps ? [dish.steps] : [])
       const steps = sentences.map(s => s.trim()).filter(Boolean)
       const instructions = (steps.length ? steps : [dish.name]).map((text, i) => ({ stepNumber: i + 1, text }))
+      // Carry the calorie estimate onto the saved recipe when we can read one.
+      const calMatch = (dish.nutrition || '').match(/(\d{2,4})\s*k?cal/i)
       await recipeAPI.create({
         name: dish.name,
         cuisine: 'Other',
@@ -139,7 +144,7 @@ export default function PantryScreen({ onNavigate }: Props) {
         prepTime: 10,
         cookTime: 20,
         servings: 2,
-        calories: null,
+        calories: calMatch ? parseInt(calMatch[1], 10) : null,
         imageUrl: null,
         sourceUrl: '',
         tags: ['pantry'],
@@ -294,6 +299,13 @@ export default function PantryScreen({ onNavigate }: Props) {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{d.name}</h4>
                         {d.steps && <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>{d.steps}</p>}
+                        {d.nutrition && (
+                          <div style={{ marginTop: '7px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', background: 'var(--color-primary-bg)', padding: '3px 9px', borderRadius: '999px' }}>
+                              <Flame size={12} /> {d.nutrition}
+                            </span>
+                          </div>
+                        )}
                         <button
                           onClick={() => saveDish(d, i)}
                           disabled={savingIdx === i || savedRecipes.has(d.name)}
