@@ -13,7 +13,7 @@ interface Props {
   backTo?: Screen
 }
 
-const GREEN = '#6ba356'
+const GREEN = 'var(--color-primary)'
 
 const COPY: Record<Mode, { title: string; blurb: string; placeholder: string; cta: string }> = {
   web: {

@@ -13,9 +13,9 @@ interface Props {
 }
 
 /** Warm tones, matching the covers on the Cookbooks screen. */
-const COOKBOOK_COLORS = ['#c67139', '#6ba356', '#d4a574', '#b8956a', '#a48a6e']
+const COOKBOOK_COLORS = ['#c67139', 'var(--color-primary)', '#d4a574', '#b8956a', '#a48a6e']
 
-const RECIPE_COLORS = ['#d4a574', '#6ba356', '#c67139', '#5b9acd', '#9b7ec8']
+const RECIPE_COLORS = ['#d4a574', 'var(--color-primary)', '#c67139', '#5b9acd', '#9b7ec8']
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -152,7 +152,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 onClick={() => onNavigate('settings')}
                 aria-label="Settings"
                 title={user?.name || undefined}
-                style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}
+                style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}
               >
                 {initial}
               </button>
@@ -167,7 +167,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: 0, letterSpacing: '-0.01em' }}>
               Today's Meals
             </h2>
-            <button onClick={() => onNavigate('meal-plan')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+            <button onClick={() => onNavigate('meal-plan')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
               Plan →
             </button>
           </div>
@@ -218,7 +218,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
               >
                 <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CalendarDays size={18} color="#6ba356" />
+                  <CalendarDays size={18} color="var(--color-primary)" />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>Nothing planned today</p>
@@ -233,7 +233,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               MEALS.some(cfg => !filledSlots.has(cfg.key)) && (
                 <button
                   onClick={() => setAddingSlot(MEALS.find(cfg => !filledSlots.has(cfg.key))!.key)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: '#6ba356', border: '1.5px dashed var(--color-primary-border)', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1.5px dashed var(--color-primary-border)', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   <Plus size={14} /> Add a meal
                 </button>
@@ -245,7 +245,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <button
                       key={cfg.key}
                       onClick={() => setAddingSlot(cfg.key)}
-                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? '#6ba356' : 'var(--color-border)'), background: addingSlot === cfg.key ? '#6ba356' : 'var(--color-card)', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-border)'), background: addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-card)', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       {cfg.label}
                     </button>
@@ -288,7 +288,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 Favorites
               </h2>
               {favorites.length > 0 && (
-                <button onClick={() => onNavigate('favorites')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                <button onClick={() => onNavigate('favorites')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
                   See all →
                 </button>
               )}
@@ -348,7 +348,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 Cookbooks
               </h2>
               {cookbooks.length > 0 && (
-                <button onClick={() => onNavigate('cookbooks')} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
+                <button onClick={() => onNavigate('cookbooks')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
                   See all →
                 </button>
               )}
@@ -389,7 +389,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
               >
                 <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <BookOpen size={18} color="#6ba356" />
+                  <BookOpen size={18} color="var(--color-primary)" />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>No cookbooks yet</p>

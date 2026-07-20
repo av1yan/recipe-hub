@@ -66,7 +66,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
           <div style={{
             width: '64px', height: '64px', borderRadius: '18px',
-            background: 'linear-gradient(135deg, #7ec063, #5a9449)',
+            background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 8px 20px rgba(107, 163, 86, 0.35)',
           }}>
@@ -176,7 +176,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#6ba356',
+                color: 'var(--color-primary)',
                 fontSize: '13px',
                 fontWeight: '500',
                 cursor: 'pointer'
@@ -192,7 +192,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
           disabled={loading}
           style={{
             padding: '14px 16px',
-            background: '#6ba356',
+            background: 'var(--color-primary)',
             color: '#fff',
             border: 'none',
             borderRadius: '12px',
@@ -204,7 +204,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
             marginTop: '8px'
           }}
           onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#5a9549')}
-          onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#6ba356')}
+          onMouseLeave={(e) => !loading && (e.currentTarget.style.background = 'var(--color-primary)')}
         >
           {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
         </button>
@@ -216,7 +216,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
         style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--color-text-secondary)', padding: '4px 0 18px', fontFamily: 'inherit', width: '100%' }}
       >
         {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-        <strong style={{ color: '#6ba356' }}>{isSignUp ? 'Sign in' : 'Sign up'}</strong>
+        <strong style={{ color: 'var(--color-primary)' }}>{isSignUp ? 'Sign in' : 'Sign up'}</strong>
       </button>
 
       {/* A provider with no credentials configured would be a button that

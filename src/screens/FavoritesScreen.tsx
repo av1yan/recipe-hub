@@ -13,7 +13,7 @@ interface Props {
 const RED = '#ef4444'
 
 /** Tile tints, matching the Home favorite/cookbook cards. */
-const TINTS = ['#d4a574', '#6ba356', '#c67139', '#5b9acd', '#9b7ec8']
+const TINTS = ['#d4a574', 'var(--color-primary)', '#c67139', '#5b9acd', '#9b7ec8']
 
 /** Everything the person has hearted, in one place. The heart used to lead
     nowhere; this is where it lands. */
@@ -81,7 +81,7 @@ export default function FavoritesScreen({ onNavigate }: Props) {
             </p>
             <button
               onClick={() => onNavigate('home')}
-              style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: '#6ba356', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Find recipes
             </button>

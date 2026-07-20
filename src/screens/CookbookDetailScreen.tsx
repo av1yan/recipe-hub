@@ -11,7 +11,7 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
 }
 
-const GREEN = '#6ba356'
+const GREEN = 'var(--color-primary)'
 
 /** What's inside one cookbook. Until now nothing could open one. */
 export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) {

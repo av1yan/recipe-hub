@@ -29,14 +29,14 @@ export default function OnboardingScreen({ onNavigate }: Props) {
       title: 'Plan Your Week',
       description: 'Drag recipes into your meal planner. Stay organized and discover new meals.',
       bgColor: 'var(--color-bg)',
-      accentColor: '#6ba356',
+      accentColor: 'var(--color-primary)',
     },
     {
       icon: '🛒',
       title: 'Auto Grocery List',
       description: 'One tap generates your full shopping list from the meal plan.',
       bgColor: 'var(--color-bg)',
-      accentColor: '#6ba356',
+      accentColor: 'var(--color-primary)',
     },
     {
       icon: '👨‍🍳',

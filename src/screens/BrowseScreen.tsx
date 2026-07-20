@@ -204,14 +204,14 @@ export default function BrowseScreen({ onNavigate }: Props) {
             aria-label="Filters"
             style={{
               position: 'relative', flexShrink: 0, width: '46px', height: '46px', borderRadius: '999px',
-              border: '1.5px solid ' + (activeFilter || filterOpen ? '#6ba356' : 'var(--color-border)'),
-              background: activeFilter || filterOpen ? '#6ba356' : 'var(--color-card)',
+              border: '1.5px solid ' + (activeFilter || filterOpen ? 'var(--color-primary)' : 'var(--color-border)'),
+              background: activeFilter || filterOpen ? 'var(--color-primary)' : 'var(--color-card)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             }}
           >
             <SlidersHorizontal size={18} color={activeFilter || filterOpen ? '#fff' : 'var(--color-text-secondary)'} />
             {activeFilter && !filterOpen && (
-              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: 'var(--color-card)', border: '1.5px solid #6ba356' }} />
+              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: 'var(--color-card)', border: '1.5px solid var(--color-primary)' }} />
             )}
           </button>
         )}
@@ -225,7 +225,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>Filter by</span>
               {activeFilter && (
-                <button onClick={() => { setActiveFilter(null); setFilterOpen(false) }} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12px', fontWeight: '700', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                <button onClick={() => { setActiveFilter(null); setFilterOpen(false) }} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                   Clear
                 </button>
               )}
@@ -243,7 +243,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                         <button
                           key={c.value}
                           onClick={() => { applyFilter({ kind: c.kind, value: c.value, label: c.label }); setFilterOpen(false) }}
-                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? '#6ba356' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? '#4d7a3c' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? 'var(--color-primary-dark)' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                         >
                           <span>{c.emoji}</span> {c.label}
                         </button>
@@ -300,10 +300,10 @@ export default function BrowseScreen({ onNavigate }: Props) {
 
       {dietPrefs.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'var(--color-primary-bg)', borderBottom: '1px solid var(--color-border)', overflowX: 'auto', flexShrink: 0 }}>
-          <SlidersHorizontal size={15} color="#6ba356" style={{ flexShrink: 0 }} />
+          <SlidersHorizontal size={15} color="var(--color-primary)" style={{ flexShrink: 0 }} />
           <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
             {dietPrefs.map(pref => (
-              <span key={pref} style={{ flexShrink: 0, background: '#6ba356', color: '#fff', fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '999px' }}>
+              <span key={pref} style={{ flexShrink: 0, background: 'var(--color-primary)', color: '#fff', fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '999px' }}>
                 {DIET_LABELS[pref] || pref}
               </span>
             ))}
@@ -320,7 +320,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
             {/* Recipe of the day */}
             {rotd && (
               <div style={{ margin: '18px 16px 0', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', borderRadius: '18px', padding: '18px', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
-                <p style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '19px', color: '#6ba356', margin: '0 0 10px' }}>
+                <p style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '19px', color: 'var(--color-primary)', margin: '0 0 10px' }}>
                   Recipe of the day
                 </p>
                 <h2 style={{ fontFamily: SERIF, fontSize: '25px', fontWeight: '400', color: 'var(--color-text)', margin: '0 0 8px', lineHeight: 1.2 }}>
@@ -357,7 +357,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                       style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px',
                         background: 'var(--color-card)',
-                        border: `2px solid ${selected ? '#6ba356' : 'var(--color-subtle)'}`,
+                        border: `2px solid ${selected ? 'var(--color-primary)' : 'var(--color-subtle)'}`,
                         borderRadius: '14px', padding: '14px',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                         textAlign: 'left', cursor: cat.values.length ? 'pointer' : 'default',
@@ -420,7 +420,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
               <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--color-text-muted)' }}>
                 <div style={{ fontSize: '38px', marginBottom: '10px' }}>🔍</div>
                 <p style={{ fontSize: '14px', margin: '0 0 16px' }}>Nothing matches that yet.</p>
-                <button onClick={clearAll} style={{ padding: '9px 18px', background: '#6ba356', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '700' }}>
+                <button onClick={clearAll} style={{ padding: '9px 18px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '700' }}>
                   Clear
                 </button>
               </div>

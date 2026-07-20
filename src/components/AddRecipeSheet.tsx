@@ -9,7 +9,7 @@ interface Props {
 }
 
 const TINT = 'var(--color-primary-bg)'
-const GREEN = '#6ba356'
+const GREEN = 'var(--color-primary)'
 
 /**
  * The chooser behind the "+" — every route into a new recipe in one place.

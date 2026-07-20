@@ -66,7 +66,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <p style={{ fontSize: '16px', margin: 0 }}>No instructions for this recipe</p>
           <button
             onClick={() => onNavigate('recipe', { recipe })}
-            style={{ background: '#6ba356', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', marginTop: '8px' }}
+            style={{ background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', marginTop: '8px' }}
           >
             Back to Recipe
           </button>
@@ -93,13 +93,13 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           onClick={() => setShowIngredients(v => !v)}
           style={{ background: showIngredients ? 'var(--color-primary-bg)' : 'var(--color-subtle)', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <List size={18} color={showIngredients ? '#6ba356' : 'var(--color-text-secondary)'} />
+          <List size={18} color={showIngredients ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />
         </button>
       </div>
 
       {/* Progress bar */}
       <div style={{ height: '3px', background: 'var(--color-subtle)', flexShrink: 0 }}>
-        <div style={{ height: '100%', background: '#6ba356', width: `${((currentStep + 1) / totalSteps) * 100}%`, transition: 'width 0.4s ease' }} />
+        <div style={{ height: '100%', background: 'var(--color-primary)', width: `${((currentStep + 1) / totalSteps) * 100}%`, transition: 'width 0.4s ease' }} />
       </div>
 
       {/* Ingredients overlay */}
@@ -123,7 +123,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <div style={{ padding: '12px 16px 20px', borderTop: '1px solid var(--color-subtle)' }}>
             <button
               onClick={() => setShowIngredients(false)}
-              style={{ width: '100%', padding: '13px', background: '#6ba356', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+              style={{ width: '100%', padding: '13px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
             >
               Back to Steps
             </button>
@@ -142,7 +142,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
                 height: '6px',
                 borderRadius: '3px',
                 width: i === currentStep ? '20px' : '6px',
-                background: completedSteps.has(i) ? '#6ba356' : i === currentStep ? '#6ba356' : 'var(--color-border)',
+                background: completedSteps.has(i) ? 'var(--color-primary)' : i === currentStep ? 'var(--color-primary)' : 'var(--color-border)',
                 transition: 'all 0.25s ease',
                 flexShrink: 0,
               }} />
@@ -155,7 +155,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
 
         {/* Step card */}
         <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', padding: '18px' }}>
-          <p style={{ fontSize: '11px', color: '#6ba356', fontWeight: '800', letterSpacing: '0.1em', margin: '0 0 10px' }}>
+          <p style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: '800', letterSpacing: '0.1em', margin: '0 0 10px' }}>
             STEP {step?.stepNumber || currentStep + 1}
           </p>
           <p style={{ fontSize: '19px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.65, margin: 0 }}>
@@ -168,14 +168,14 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <div style={{ marginTop: '36px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '130px', height: '130px', borderRadius: '65px',
-              border: `4px solid ${timerSeconds === 0 ? '#6ba356' : timerActive ? '#6ba356' : 'var(--color-border)'}`,
+              border: `4px solid ${timerSeconds === 0 ? 'var(--color-primary)' : timerActive ? 'var(--color-primary)' : 'var(--color-border)'}`,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               background: timerSeconds === 0 ? 'var(--color-primary-bg)' : 'var(--color-card)',
               transition: 'all 0.3s',
               boxShadow: timerActive ? '0 0 0 6px rgba(107,163,86,0.12)' : 'none',
             }}>
-              <Clock size={16} color={timerActive ? '#6ba356' : 'var(--color-text-muted)'} style={{ marginBottom: '4px' }} />
-              <span style={{ fontSize: '30px', fontWeight: '800', color: timerSeconds === 0 ? '#6ba356' : timerActive ? 'var(--color-text)' : 'var(--color-text-secondary)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+              <Clock size={16} color={timerActive ? 'var(--color-primary)' : 'var(--color-text-muted)'} style={{ marginBottom: '4px' }} />
+              <span style={{ fontSize: '30px', fontWeight: '800', color: timerSeconds === 0 ? 'var(--color-primary)' : timerActive ? 'var(--color-text)' : 'var(--color-text-secondary)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
                 {formatTime(timerSeconds)}
               </span>
             </div>
@@ -190,7 +190,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
               }}
               style={{
                 background: timerSeconds === 0 ? 'var(--color-primary-bg)' : timerActive ? 'var(--color-error-bg)' : 'var(--color-primary-bg)',
-                color: timerSeconds === 0 ? '#6ba356' : timerActive ? '#ef4444' : '#6ba356',
+                color: timerSeconds === 0 ? 'var(--color-primary)' : timerActive ? '#ef4444' : 'var(--color-primary)',
                 border: 'none', borderRadius: '10px', padding: '9px 24px',
                 fontSize: '13px', fontWeight: '700', cursor: 'pointer',
               }}
@@ -209,7 +209,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           style={{
             flex: 1, padding: '14px', borderRadius: '12px',
             background: currentStep === 0 ? 'var(--color-bg)' : 'var(--color-primary-bg)',
-            color: currentStep === 0 ? '#cbd5e1' : '#6ba356',
+            color: currentStep === 0 ? '#cbd5e1' : 'var(--color-primary)',
             border: 'none', cursor: currentStep === 0 ? 'default' : 'pointer',
             fontSize: '14px', fontWeight: '700',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
@@ -229,7 +229,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             }}
             style={{
               flex: 2, padding: '14px', borderRadius: '12px',
-              background: 'linear-gradient(135deg, #7ec063, #5a9449)',
+              background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
               color: '#fff', border: 'none', cursor: 'pointer',
               fontSize: '14px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -244,7 +244,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             onClick={goNext}
             style={{
               flex: 2, padding: '14px', borderRadius: '12px',
-              background: '#6ba356', color: '#fff',
+              background: 'var(--color-primary)', color: '#fff',
               border: 'none', cursor: 'pointer',
               fontSize: '14px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',

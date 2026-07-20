@@ -59,7 +59,7 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
             >
               <div style={{
                 width: '42px', height: '42px', borderRadius: '14px',
-                background: 'linear-gradient(135deg, #7ec063, #5a9449)',
+                background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(107, 163, 86, 0.4)',
               }}>
@@ -78,7 +78,7 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
               padding: '8px 0 4px',
               border: 'none', background: 'none', cursor: 'pointer',
               gap: '3px',
-              color: isActive ? '#6ba356' : 'var(--color-text-muted)',
+              color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
               transition: 'color 0.2s ease',
               position: 'relative',
             }}
@@ -90,13 +90,13 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
                 width: '20px',
                 height: '2.5px',
                 borderRadius: '0 0 3px 3px',
-                background: '#6ba356',
+                background: 'var(--color-primary)',
               }} />
             )}
             <tab.icon
               size={22}
               strokeWidth={isActive ? 2.2 : 1.8}
-              color={isActive ? '#6ba356' : 'var(--color-text-muted)'}
+              color={isActive ? 'var(--color-primary)' : 'var(--color-text-muted)'}
             />
             <span style={{
               fontSize: '10px',

@@ -15,7 +15,7 @@ interface Props {
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: '#6ba356',
+  easy: 'var(--color-primary)',
   medium: '#f4b860',
   hard: '#ef4444',
 }
@@ -27,7 +27,7 @@ const MEAL_EMOJIS: Record<string, string> = {
   snack: '🍎',
 }
 
-const HERO_COLORS = ['#d4a574', '#6ba356', '#c67139', '#9b7ec8', '#f4b860', '#5b9acd']
+const HERO_COLORS = ['#d4a574', 'var(--color-primary)', '#c67139', '#9b7ec8', '#f4b860', '#5b9acd']
 
 /** "View on bbcgoodfood.com" — the host is the useful part, not the full URL. */
 function sourceLabel(url: string): string {
@@ -234,7 +234,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         <div style={{ background: 'var(--color-card)', padding: '16px 16px 0', borderBottom: '1px solid var(--color-subtle)' }}>
           <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
             {recipe.cuisine && (
-              <span style={{ background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '6px', letterSpacing: '0.04em' }}>
+              <span style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '6px', letterSpacing: '0.04em' }}>
                 {recipe.cuisine.toUpperCase()}
               </span>
             )}
@@ -245,8 +245,8 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             )}
             {recipe.difficulty && (
               <span style={{
-                background: (DIFFICULTY_COLORS[recipe.difficulty] ?? '#6ba356') + '18',
-                color: DIFFICULTY_COLORS[recipe.difficulty] ?? '#6ba356',
+                background: (DIFFICULTY_COLORS[recipe.difficulty] ?? 'var(--color-primary)') + '18',
+                color: DIFFICULTY_COLORS[recipe.difficulty] ?? 'var(--color-primary)',
                 fontSize: '11px', fontWeight: '600', padding: '3px 9px', borderRadius: '6px', textTransform: 'capitalize',
               }}>
                 {recipe.difficulty}
@@ -272,7 +272,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               rel="noopener noreferrer"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
-                fontSize: '12.5px', color: '#6ba356', fontWeight: '600',
+                fontSize: '12.5px', color: 'var(--color-primary)', fontWeight: '600',
                 textDecoration: 'none', marginBottom: '14px',
               }}
             >
@@ -297,10 +297,10 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               onClick={() => setActiveTab(tab)}
               style={{
                 flex: 1, padding: '12px 8px',
-                background: 'none', border: 'none', borderBottom: `2px solid ${activeTab === tab ? '#6ba356' : 'transparent'}`,
+                background: 'none', border: 'none', borderBottom: `2px solid ${activeTab === tab ? 'var(--color-primary)' : 'transparent'}`,
                 cursor: 'pointer',
                 fontSize: '13px', fontWeight: activeTab === tab ? '700' : '500',
-                color: activeTab === tab ? '#6ba356' : 'var(--color-text-muted)',
+                color: activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-muted)',
                 transition: 'all 0.2s',
                 textTransform: 'capitalize',
               }}
@@ -329,7 +329,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                   <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>servings</span>
                 </div>
                 {servings !== defaultServ && (
-                  <button onClick={() => setServings(defaultServ)} style={{ background: 'none', border: 'none', color: '#6ba356', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Reset</button>
+                  <button onClick={() => setServings(defaultServ)} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Reset</button>
                 )}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -351,8 +351,8 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                     >
                       <div style={{
                         width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0,
-                        border: `2px solid ${checked ? '#6ba356' : 'var(--color-border)'}`,
-                        background: checked ? '#6ba356' : 'transparent',
+                        border: `2px solid ${checked ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                        background: checked ? 'var(--color-primary)' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'all 0.15s',
                       }}>
@@ -386,7 +386,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                   }}>
                     <div style={{
                       width: '32px', height: '32px', borderRadius: '9px', flexShrink: 0,
-                      background: '#6ba356', color: '#fff',
+                      background: 'var(--color-primary)', color: '#fff',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '14px', fontWeight: '700',
                     }}>
@@ -426,7 +426,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '11px', flex: 1 }}>
                   <MacroRow color="#a78bfa" label="Protein" grams={recipe.nutrition.protein} />
                   <MacroRow color="#fbbf24" label="Carbs" grams={recipe.nutrition.carbs} />
-                  <MacroRow color="#6ba356" label="Fat" grams={recipe.nutrition.fat} />
+                  <MacroRow color="var(--color-primary)" label="Fat" grams={recipe.nutrition.fat} />
                 </div>
               </div>
             </div>
@@ -439,7 +439,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             onClick={() => onNavigate('cooking-mode', { recipe })}
             style={{
               width: '100%', padding: '15px',
-              background: 'linear-gradient(135deg, #7ec063, #5a9449)',
+              background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
               color: '#fff', border: 'none', borderRadius: '14px',
               fontSize: '15px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -513,7 +513,7 @@ function MacroDonut({ protein, carbs, fat, calories }: { protein: number; carbs:
   const segs = [
     { v: protein * 4, color: '#a78bfa' },
     { v: carbs * 4, color: '#fbbf24' },
-    { v: fat * 9, color: '#6ba356' },
+    { v: fat * 9, color: 'var(--color-primary)' },
   ]
   const total = segs.reduce((s, x) => s + x.v, 0) || 1
   const r = 34, C = 2 * Math.PI * r

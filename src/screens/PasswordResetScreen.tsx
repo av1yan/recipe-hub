@@ -3,7 +3,7 @@ import { ChevronLeft, MailCheck, Lock } from 'lucide-react'
 import type { Screen } from '../types'
 import { authAPI } from '../utils/api'
 
-const GREEN = '#6ba356'
+const GREEN = 'var(--color-primary)'
 
 interface Props {
   /** 'request' asks for the email; 'reset' is where the emailed link lands. */
