@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2 } from 'lucide-react'
+import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { recipeAPI, groceryAPI, mealPlanAPI } from '../utils/api'
+import { recipeAPI, groceryAPI, mealPlanAPI, insightsAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
 import { DAY_NAMES, MEALS, sameWeek, mondayOf, getMeals } from './MealPlanScreen'
 import { getDefaultServings, getUnitPref, convertMeasurement } from '../utils/preferences'
+import { useProPlan } from '../utils/proPlan'
+
+// Quick adaptations the AI cooking assistant offers.
+const ADAPT_GOALS = ['Dairy-free', 'Gluten-free', 'Lower calorie', 'Vegetarian', 'Quicker']
 
 interface Props {
   recipe: Recipe | null
@@ -48,6 +52,30 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   const [servings, setServings] = useState(() => getDefaultServings())
   const [actionBusy, setActionBusy] = useState('')
   const { toast, show } = useToast()
+  const [isPro] = useProPlan()
+  // AI cooking assistant
+  const [adaptOpen, setAdaptOpen] = useState(false)
+  const [adaptLoading, setAdaptLoading] = useState(false)
+  const [adaptText, setAdaptText] = useState('')
+  const [adaptNote, setAdaptNote] = useState('')
+  const [adaptGoal, setAdaptGoal] = useState('')
+
+  async function runAdapt(goal: string) {
+    if (!recipe) return
+    setAdaptGoal(goal); setAdaptLoading(true); setAdaptText(''); setAdaptNote('')
+    try {
+      const res: any = await insightsAPI.adapt(
+        { name: recipe.name, ingredients: recipe.ingredients, instructions: recipe.instructions },
+        goal.toLowerCase()
+      )
+      if (res?.configured === false) setAdaptNote(res.message || "The AI assistant isn't switched on yet.")
+      else setAdaptText(res?.text || '')
+    } catch {
+      setAdaptNote('Could not reach the AI just now — try again in a moment.')
+    } finally {
+      setAdaptLoading(false)
+    }
+  }
 
   // Persist the favorite so it survives leaving the screen. Optimistic: flip
   // the heart first, roll back if the save fails.
@@ -287,6 +315,58 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             <ActionButton icon={<CalendarPlus size={18} />} label="Meal Plan" onClick={addToMealPlan} busy={actionBusy === 'mealplan'} />
             <ActionButton icon={<Share2 size={18} />} label="Share" onClick={share} />
           </div>
+
+          {/* AI cooking assistant — Pro only. Adapt the recipe to a goal. */}
+          {isPro && recipe.ingredients?.length > 0 && (
+            <div style={{ borderTop: '1px solid var(--color-subtle)', paddingTop: '16px', paddingBottom: '4px' }}>
+              <button
+                onClick={() => setAdaptOpen(o => !o)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '12px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                <Sparkles size={16} /> Adapt this recipe
+              </button>
+
+              {adaptOpen && (
+                <div style={{ marginTop: '12px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                    {ADAPT_GOALS.map(g => {
+                      const on = adaptGoal === g
+                      return (
+                        <button
+                          key={g}
+                          onClick={() => runAdapt(g)}
+                          disabled={adaptLoading}
+                          style={{ padding: '7px 12px', borderRadius: '999px', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? 'var(--color-primary)' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: adaptLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                        >
+                          {g}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {adaptLoading && (
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '14px 0 0' }}>Adapting to {adaptGoal.toLowerCase()}…</p>
+                  )}
+
+                  {adaptText && !adaptLoading && (
+                    <div style={{ marginTop: '12px', padding: '14px 16px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                        <Sparkles size={14} color="var(--color-primary)" />
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>{adaptGoal.toUpperCase()}</span>
+                      </div>
+                      <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{adaptText}</p>
+                    </div>
+                  )}
+
+                  {adaptNote && !adaptLoading && (
+                    <div style={{ marginTop: '12px', padding: '12px 14px', background: 'var(--color-subtle)', borderRadius: '12px' }}>
+                      <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>{adaptNote}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Tabs */}

@@ -16,6 +16,7 @@ import CookbooksScreen from './screens/CookbooksScreen'
 import FavoritesScreen from './screens/FavoritesScreen'
 import PantryScreen from './screens/PantryScreen'
 import InsightsScreen from './screens/InsightsScreen'
+import HouseholdScreen from './screens/HouseholdScreen'
 import RecipeDetailScreen from './screens/RecipeDetailScreen'
 import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
@@ -271,6 +272,8 @@ export default function App() {
         return <PantryScreen onNavigate={handleNavigation} />
       case 'insights':
         return <InsightsScreen onNavigate={handleNavigation} />
+      case 'household':
+        return <HouseholdScreen onNavigate={handleNavigation} />
       case 'cooking-mode':
         return <CookingModeScreen recipe={currentRecipe} onNavigate={handleNavigation} />
       case 'settings':

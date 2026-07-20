@@ -22,6 +22,7 @@ export type Screen =
   | 'favorites'
   | 'pantry'
   | 'insights'
+  | 'household'
   | 'settings'
 
 export interface User {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart } from 'lucide-react'
+import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
-import { recipeAPI, groceryAPI } from '../utils/api'
+import { recipeAPI, groceryAPI, insightsAPI } from '../utils/api'
 import { getPantry, savePantry, pantryMatch } from '../utils/pantry'
 import { useProPlan } from '../utils/proPlan'
 import { Toast, useToast } from '../components/Toast'
@@ -26,6 +26,9 @@ export default function PantryScreen({ onNavigate }: Props) {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [addingList, setAddingList] = useState<string | null>(null)
+  const [cookLoading, setCookLoading] = useState(false)
+  const [cookText, setCookText] = useState('')
+  const [cookNote, setCookNote] = useState('')
   const { toast, show } = useToast()
 
   useEffect(() => {
@@ -67,6 +70,26 @@ export default function PantryScreen({ onNavigate }: Props) {
   const removeItem = (item: string) => {
     const next = pantry.filter(p => p !== item)
     setPantry(next); savePantry(next)
+  }
+  const clearPantry = () => {
+    setPantry([]); savePantry([])
+    setCookText(''); setCookNote('')
+  }
+
+  // Ask the AI cook for dish ideas from whatever's in the pantry. Falls back to a
+  // friendly note when the backend has no API key (rather than a hard error).
+  async function runCook() {
+    if (!pantry.length || cookLoading) return
+    setCookLoading(true); setCookText(''); setCookNote('')
+    try {
+      const res: any = await insightsAPI.cook(pantry)
+      if (res?.configured === false) setCookNote(res.message || "The AI cook isn't switched on yet.")
+      else setCookText(res?.text || '')
+    } catch {
+      setCookNote('Could not reach the AI just now — try again in a moment.')
+    } finally {
+      setCookLoading(false)
+    }
   }
 
   const ranked = recipes
@@ -125,55 +148,19 @@ export default function PantryScreen({ onNavigate }: Props) {
     )
   }
 
-  const RecipeRow = ({ r, m }: { r: any; m: any }) => {
-    const ready = m.missing.length === 0
-    const busy = addingList === r.id
-    return (
-      <div
-        onClick={() => onNavigate('recipe', { recipe: r })}
-        style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid ' + (ready ? 'var(--color-primary-border)' : 'var(--color-subtle)'), boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
-      >
-        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: TILE_COLORS[0] + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
-          {r.imageUrl
-            ? <img src={r.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-            : '🍽️'}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
-          {ready ? (
-            <p style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-primary)', fontWeight: '600', margin: '3px 0 0' }}>
-              <Check size={13} /> You have everything
-            </p>
-          ) : (
-            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Missing {m.missing.length}: {m.missing.join(', ')}
-            </p>
-          )}
-        </div>
-        {ready ? (
-          <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
-        ) : (
-          <button
-            onClick={(e) => { e.stopPropagation(); addMissingToGrocery(r, m.missing) }}
-            disabled={busy}
-            aria-label="Add missing to grocery list"
-            title="Add missing to grocery list"
-            style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 10px', borderRadius: '10px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit' }}
-          >
-            {busy ? <Check size={14} /> : <ShoppingCart size={14} />}
-            <span>List</span>
-          </button>
-        )}
-      </div>
-    )
-  }
-
   return (
     <div className="screen" style={{ background: 'var(--color-bg)', position: 'relative' }}>
       {header}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
         {/* Pantry manager */}
-        <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 8px' }}>MY PANTRY</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 0 8px' }}>
+          <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: 0 }}>MY PANTRY</p>
+          {pantry.length > 0 && (
+            <button onClick={clearPantry} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '700', letterSpacing: '0.03em', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
+              Clear
+            </button>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
           <input
             value={input}
@@ -219,6 +206,33 @@ export default function PantryScreen({ onNavigate }: Props) {
           </div>
         )}
 
+        {/* AI cook — dish ideas from whatever's on hand */}
+        {pantry.length > 0 && (
+          <div style={{ marginBottom: '22px' }}>
+            <button
+              onClick={runCook}
+              disabled={cookLoading}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '12px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '700', cursor: cookLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+            >
+              <Sparkles size={16} /> {cookLoading ? 'Thinking…' : 'Ask AI what to cook'}
+            </button>
+            {cookText && !cookLoading && (
+              <div style={{ marginTop: '12px', padding: '14px 16px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <Sparkles size={14} color="var(--color-primary)" />
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.04em' }}>IDEAS FROM YOUR PANTRY</span>
+                </div>
+                <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{cookText}</p>
+              </div>
+            )}
+            {cookNote && !cookLoading && (
+              <div style={{ marginTop: '12px', padding: '12px 14px', background: 'var(--color-subtle)', borderRadius: '12px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>{cookNote}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Results */}
         {pantry.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--color-text-muted)' }}>
@@ -241,7 +255,7 @@ export default function PantryScreen({ onNavigate }: Props) {
                   <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)' }}>{ready.length}</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {ready.map(({ r, m }) => <RecipeRow key={r.id} r={r} m={m} />)}
+                  {ready.map(({ r, m }) => <RecipeRow key={r.id} r={r} m={m} busy={addingList === r.id} onOpen={() => onNavigate('recipe', { recipe: r })} onAddList={() => addMissingToGrocery(r, m.missing)} />)}
                 </div>
               </div>
             )}
@@ -252,7 +266,7 @@ export default function PantryScreen({ onNavigate }: Props) {
                 </div>
                 <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '0 0 10px' }}>A few items short — tap <ShoppingCart size={11} style={{ verticalAlign: '-1px' }} /> to add them to your list.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {almost.map(({ r, m }) => <RecipeRow key={r.id} r={r} m={m} />)}
+                  {almost.map(({ r, m }) => <RecipeRow key={r.id} r={r} m={m} busy={addingList === r.id} onOpen={() => onNavigate('recipe', { recipe: r })} onAddList={() => addMissingToGrocery(r, m.missing)} />)}
                 </div>
               </div>
             )}
@@ -261,6 +275,53 @@ export default function PantryScreen({ onNavigate }: Props) {
       </div>
 
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="24px" />}
+    </div>
+  )
+}
+
+// Hoisted to module scope: defining it inside PantryScreen gave it a new
+// identity every render, so React remounted every row (and reloaded its image)
+// on each keystroke in the pantry input.
+function RecipeRow({ r, m, busy, onOpen, onAddList }: {
+  r: any; m: any; busy: boolean; onOpen: () => void; onAddList: () => void
+}) {
+  const ready = m.missing.length === 0
+  return (
+    <div
+      onClick={onOpen}
+      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid ' + (ready ? 'var(--color-primary-border)' : 'var(--color-subtle)'), boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+    >
+      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: TILE_COLORS[0] + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
+        {r.imageUrl
+          ? <img src={r.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+          : '🍽️'}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
+        {ready ? (
+          <p style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-primary)', fontWeight: '600', margin: '3px 0 0' }}>
+            <Check size={13} /> You have everything
+          </p>
+        ) : (
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            Missing {m.missing.length}: {m.missing.join(', ')}
+          </p>
+        )}
+      </div>
+      {ready ? (
+        <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
+      ) : (
+        <button
+          onClick={(e) => { e.stopPropagation(); onAddList() }}
+          disabled={busy}
+          aria-label="Add missing to grocery list"
+          title="Add missing to grocery list"
+          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 10px', borderRadius: '10px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit' }}
+        >
+          {busy ? <Check size={14} /> : <ShoppingCart size={14} />}
+          <span>List</span>
+        </button>
+      )}
     </div>
   )
 }

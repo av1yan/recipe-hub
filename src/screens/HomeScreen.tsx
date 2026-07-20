@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight, Crown, ChefHat, Lightbulb } from 'lucide-react'
+import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight, Crown, ChefHat, Lightbulb, Users } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
@@ -189,7 +189,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           {/* Insights — Pro "your week, read for you" */}
           <button
             onClick={() => onNavigate('insights')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '22px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '10px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
           >
             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Lightbulb size={22} color="var(--color-primary)" />
@@ -204,6 +204,21 @@ export default function HomeScreen({ onNavigate }: Props) {
                 )}
               </div>
               <div style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Your week, read for you</div>
+            </div>
+            <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
+          </button>
+
+          {/* Family share & sync — one live grocery list for the household */}
+          <button
+            onClick={() => onNavigate('household')}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '22px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+          >
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Users size={22} color="var(--color-primary)" />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>Family share &amp; sync</span>
+              <div style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>One grocery list, live across the household</div>
             </div>
             <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
           </button>

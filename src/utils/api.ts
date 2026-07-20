@@ -258,4 +258,31 @@ export const insightsAPI = {
   /** Natural-language insights over the week. Returns { configured:false } until
       an API key is set on the backend. */
   ai: (summary: any) => apiRequest('/insights/ai', { method: 'POST', body: { summary } }),
+
+  /** AI cooking assistant: adapt a recipe to a goal (e.g. 'dairy-free'). Returns
+      { configured:false } until a key is set. */
+  adapt: (recipe: any, goal: string) => apiRequest('/insights/adapt', { method: 'POST', body: { recipe, goal } }),
+
+  /** AI cook: suggest dishes from the pantry. Returns { configured:false } until
+      a key is set. */
+  cook: (pantry: string[]) => apiRequest('/insights/cook', { method: 'POST', body: { pantry } }),
+}
+
+// Family share & sync: a household with a shared, live grocery list.
+export const householdAPI = {
+  /** The caller's household, or { household: null }. */
+  get: () => apiRequest('/household'),
+  create: (name?: string) => apiRequest('/household', { method: 'POST', body: { name } }),
+  join: (code: string) => apiRequest('/household/join', { method: 'POST', body: { code } }),
+  leave: () => apiRequest('/household/leave', { method: 'POST' }),
+  regenerateCode: () => apiRequest('/household/regenerate-code', { method: 'POST' }),
+
+  // Shared grocery list.
+  grocery: () => apiRequest('/household/grocery'),
+  addItem: (item: { name: string; quantity?: number; unit?: string; category?: string }) =>
+    apiRequest('/household/grocery', { method: 'POST', body: item }),
+  updateItem: (itemId: string, data: { checked?: boolean; name?: string }) =>
+    apiRequest(`/household/grocery/${itemId}`, { method: 'PUT', body: data }),
+  removeItem: (itemId: string) => apiRequest(`/household/grocery/${itemId}`, { method: 'DELETE' }),
+  clearChecked: () => apiRequest('/household/grocery/clear-checked', { method: 'POST' }),
 }
