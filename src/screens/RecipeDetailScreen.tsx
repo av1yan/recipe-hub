@@ -60,13 +60,14 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   const [adaptNote, setAdaptNote] = useState('')
   const [adaptGoal, setAdaptGoal] = useState('')
   const [adaptedRecipe, setAdaptedRecipe] = useState<{ name: string; ingredients: string[]; instructions: string[] } | null>(null)
+  const [adaptChanged, setAdaptChanged] = useState(true)
   const [adaptSaving, setAdaptSaving] = useState(false)
   const [adaptSaved, setAdaptSaved] = useState(false)
 
   async function runAdapt(goal: string) {
     if (!recipe) return
     setAdaptGoal(goal); setAdaptLoading(true); setAdaptText(''); setAdaptNote('')
-    setAdaptedRecipe(null); setAdaptSaved(false)
+    setAdaptedRecipe(null); setAdaptSaved(false); setAdaptChanged(true)
     try {
       const res: any = await insightsAPI.adapt(
         { name: recipe.name, ingredients: recipe.ingredients, instructions: recipe.instructions },
@@ -76,6 +77,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
       else {
         setAdaptText(res?.text || '')
         setAdaptedRecipe(res?.adapted || null)
+        setAdaptChanged(res?.changed !== false)
       }
     } catch {
       setAdaptNote('Could not reach the AI just now — try again in a moment.')
@@ -392,7 +394,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                         <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>{adaptGoal.toUpperCase()}</span>
                       </div>
                       <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{adaptText}</p>
-                      {adaptedRecipe && (
+                      {adaptedRecipe && adaptChanged && (
                         <button
                           onClick={saveAdapted}
                           disabled={adaptSaving || adaptSaved}
@@ -402,6 +404,11 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                             ? <><Check size={14} /> Saved to recipes</>
                             : <><BookmarkPlus size={14} /> {adaptSaving ? 'Saving…' : 'Save as a new recipe'}</>}
                         </button>
+                      )}
+                      {!adaptChanged && (
+                        <div style={{ marginTop: '10px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                          <Check size={13} /> Already {adaptGoal.toLowerCase()} — nothing to save
+                        </div>
                       )}
                     </div>
                   )}
