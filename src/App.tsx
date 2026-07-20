@@ -14,6 +14,7 @@ import MealPlanScreen from './screens/MealPlanScreen'
 import GroceryListScreen from './screens/GroceryListScreen'
 import CookbooksScreen from './screens/CookbooksScreen'
 import FavoritesScreen from './screens/FavoritesScreen'
+import PantryScreen from './screens/PantryScreen'
 import RecipeDetailScreen from './screens/RecipeDetailScreen'
 import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
@@ -21,6 +22,24 @@ import { AddRecipeSheet } from './components/AddRecipeSheet'
 import { setAuthToken, clearAuthToken, getAuthToken, authAPI } from './utils/api'
 import { useProPlan } from './utils/proPlan'
 import type { Screen, User, Recipe } from './types'
+
+// A shared link/text from the OS share sheet arrives as ?title=&text=&url= on
+// the start URL (the manifest's share_target). Work out what to import and which
+// import screen to open. A URL wins; social hosts route to the social importer.
+function parseSharedImport(search: string): { screen: Screen; value: string } | null {
+  const q = new URLSearchParams(search)
+  const url = (q.get('url') || '').trim()
+  const text = (q.get('text') || '').trim()
+  const title = (q.get('title') || '').trim()
+  const urlInText = text.match(/https?:\/\/[^\s]+/)?.[0] || ''
+  const link = url || urlInText
+  if (link) {
+    const social = /(^|\.)(tiktok|instagram|facebook)\.com/i.test(link)
+    return { screen: social ? 'import-social' : 'import-web', value: link }
+  }
+  const body = [title, text].filter(Boolean).join('\n').trim()
+  return body.length >= 12 ? { screen: 'import-text', value: body } : null
+}
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('splash')
@@ -40,6 +59,9 @@ export default function App() {
   // Whether the blank form was launched from the add panel, so Back reopens the
   // panel rather than dropping onto the screen behind it.
   const [addRecipeFromPanel, setAddRecipeFromPanel] = useState(false)
+  // A cookbook to pre-select when Add Recipe is opened from inside a cookbook,
+  // so the new recipe files straight into it.
+  const [addRecipeCookbook, setAddRecipeCookbook] = useState<string | null>(null)
   // The "Add a recipe" panel, held here so it can be reopened from anywhere --
   // Back on an import sub-screen brings it back instead of dumping you on Home.
   const [addSheetOpen, setAddSheetOpen] = useState(false)
@@ -47,6 +69,8 @@ export default function App() {
   const [addSheetOrigin, setAddSheetOrigin] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
   const [isProActive] = useProPlan()
+  // A recipe shared into the app via the OS share sheet, waiting to be imported.
+  const [sharedImport, setSharedImport] = useState<{ screen: Screen; value: string } | null>(null)
 
   // Mirror the Pro state onto the root element so the gold accent theme applies
   // app-wide -- parallel to how data-theme drives light/dark.
@@ -57,6 +81,11 @@ export default function App() {
   // Check for existing auth token on load
   useEffect(() => {
     const checkAuth = async () => {
+      // A recipe shared into the app lands as ?title/text/url on the start URL.
+      // Capture it and strip the query so a reload doesn't re-import.
+      const shared = parseSharedImport(window.location.search)
+      if (shared) history.replaceState(null, '', window.location.pathname)
+
       // An OAuth callback hands the token back in the fragment. Consume it
       // before anything else, and strip it so a copied URL isn't a live
       // credential.
@@ -91,12 +120,15 @@ export default function App() {
         try {
           const profile = await authAPI.getProfile()
           setUser(profile)
-          setScreen(onboardingCompleted ? 'home' : 'onboarding')
+          if (shared) { setSharedImport(shared); setScreen(shared.screen) }
+          else setScreen(onboardingCompleted ? 'home' : 'onboarding')
         } catch (error) {
           clearAuthToken()
+          if (shared) sessionStorage.setItem('pendingShare', JSON.stringify(shared))
           setScreen('signin')
         }
       } else {
+        if (shared) sessionStorage.setItem('pendingShare', JSON.stringify(shared))
         setScreen('signin')
       }
       setLoading(false)
@@ -106,6 +138,9 @@ export default function App() {
   }, [])
 
   const handleNavigation = (nextScreen: Screen, data?: any) => {
+    // A pending shared import is consumed by the import screen it opens; clear it
+    // once we move anywhere else so it can't re-trigger.
+    if (sharedImport && nextScreen !== sharedImport.screen) setSharedImport(null)
     if (nextScreen === 'recipe' && data?.recipe) {
       setCurrentRecipe(data.recipe)
       // 'recipe' -> 'recipe' would strand you; cooking-mode returns here itself.
@@ -118,6 +153,7 @@ export default function App() {
       // Remember where we came from; 'add-recipe' -> 'add-recipe' would strand you.
       if (screen !== 'add-recipe') setAddRecipeOrigin(screen)
       setAddRecipeFromPanel(Boolean(data?.fromAddPanel))
+      setAddRecipeCookbook(data?.cookbookId ?? null)
     }
     if (nextScreen === 'cookbook' && data?.cookbookId) {
       setCookbookId(data.cookbookId)
@@ -141,18 +177,34 @@ export default function App() {
   // mid-request and it remounted with its error state wiped -- which is why a
   // failed login could only ever be reported through a native alert.
   // SignInScreen tracks its own submitting state for the button.
+  // After a fresh sign-in/up, pick up a recipe that was shared into the app
+  // before the person was logged in.
+  const resumePendingShare = (): boolean => {
+    const raw = sessionStorage.getItem('pendingShare')
+    if (!raw) return false
+    sessionStorage.removeItem('pendingShare')
+    try {
+      const s = JSON.parse(raw) as { screen: Screen; value: string }
+      setSharedImport(s)
+      setScreen(s.screen)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   const handleSignIn = async (identifier: string, password: string) => {
     const response = await authAPI.login(identifier, password)
     setAuthToken(response.token)
     setUser(response.user)
-    setScreen('home')
+    if (!resumePendingShare()) setScreen('home')
   }
 
   const handleSignUp = async (email: string, name: string, password: string) => {
     const response = await authAPI.register(email, name, password)
     setAuthToken(response.token)
     setUser(response.user)
-    setScreen('onboarding')
+    if (!resumePendingShare()) setScreen('onboarding')
   }
 
   const handleSignOut = () => {
@@ -195,15 +247,15 @@ export default function App() {
       case 'recipe':
         return <RecipeDetailScreen recipe={currentRecipe} backTo={recipeOrigin} onNavigate={handleNavigation} />
       case 'add-recipe':
-        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} reopenPanelOnBack={addRecipeFromPanel} />
+        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} reopenPanelOnBack={addRecipeFromPanel} presetCookbookId={addRecipeCookbook} />
       case 'import-web':
-        return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} backTo={addSheetOrigin} />
+        return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} backTo={addSheetOrigin} initialValue={sharedImport?.screen === 'import-web' ? sharedImport.value : ''} autoStart={sharedImport?.screen === 'import-web'} />
       case 'import-text':
-        return <ImportRecipeScreen mode="text" onNavigate={handleNavigation} backTo={addSheetOrigin} />
+        return <ImportRecipeScreen mode="text" onNavigate={handleNavigation} backTo={addSheetOrigin} initialValue={sharedImport?.screen === 'import-text' ? sharedImport.value : ''} autoStart={sharedImport?.screen === 'import-text'} />
       case 'import-photo':
         return <ImportRecipeScreen mode="photo" onNavigate={handleNavigation} backTo={addSheetOrigin} />
       case 'import-social':
-        return <ImportRecipeScreen mode="social" onNavigate={handleNavigation} backTo={addSheetOrigin} />
+        return <ImportRecipeScreen mode="social" onNavigate={handleNavigation} backTo={addSheetOrigin} initialValue={sharedImport?.screen === 'import-social' ? sharedImport.value : ''} autoStart={sharedImport?.screen === 'import-social'} />
       case 'meal-plan':
         return <MealPlanScreen onNavigate={handleNavigation} />
       case 'grocery':
@@ -214,6 +266,8 @@ export default function App() {
         return <CookbooksScreen onNavigate={handleNavigation} />
       case 'favorites':
         return <FavoritesScreen onNavigate={handleNavigation} />
+      case 'pantry':
+        return <PantryScreen onNavigate={handleNavigation} />
       case 'cooking-mode':
         return <CookingModeScreen recipe={currentRecipe} onNavigate={handleNavigation} />
       case 'settings':

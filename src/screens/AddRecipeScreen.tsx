@@ -17,6 +17,9 @@ interface Props {
   /** When the blank form was opened from the add panel, Back reopens that panel
       over `backTo` instead of just landing on the screen behind it. */
   reopenPanelOnBack?: boolean
+  /** When Add Recipe is opened from inside a cookbook, that cookbook is
+      pre-selected so the new recipe files into it. */
+  presetCookbookId?: string | null
 }
 
 /** A small section heading, so the long form reads as groups not one list. */
@@ -79,7 +82,7 @@ const stepBadge: React.CSSProperties = {
   fontSize: '14px', fontWeight: '700', marginTop: '5px',
 }
 
-export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', reopenPanelOnBack = false }: Props) {
+export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', reopenPanelOnBack = false, presetCookbookId = null }: Props) {
   // An import arrives here as a draft to be checked over. Seeding useState
   // rather than assigning in an effect means the fields are already filled on
   // first paint, and stay editable like any other.
@@ -107,7 +110,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
   )
   // Cookbooks to file this under. '' means don't, NEW_COOKBOOK means make one.
   const [cookbooks, setCookbooks] = useState<{ id: string; name: string }[]>([])
-  const [cookbookId, setCookbookId] = useState('')
+  const [cookbookId, setCookbookId] = useState(presetCookbookId ?? '')
   const [newCookbookName, setNewCookbookName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -212,14 +215,16 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
       // Filing it is a second step, so a cookbook problem must not lose the
       // recipe that already saved -- say so and carry on.
       let filedInto = ''
+      let filedCookbookId: string | null = null
       try {
         if (cookbookId === NEW_COOKBOOK && newCookbookName.trim()) {
           const book: any = await cookbookAPI.create(newCookbookName.trim())
           await cookbookAPI.addRecipe(book.id, created.id)
-          filedInto = book.name
+          filedInto = book.name; filedCookbookId = book.id
         } else if (cookbookId && cookbookId !== NEW_COOKBOOK) {
           await cookbookAPI.addRecipe(cookbookId, created.id)
           filedInto = cookbooks.find(c => c.id === cookbookId)?.name || ''
+          filedCookbookId = cookbookId
         }
       } catch {
         show('Recipe saved, but adding it to the cookbook failed', 'error')
@@ -228,7 +233,12 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
       }
 
       show(filedInto ? `Saved to ${filedInto}` : 'Recipe created!')
-      setTimeout(() => onNavigate('home'), 1800)
+      // Land where the recipe went: open the cookbook it was filed into so it's
+      // visibly there, otherwise Home.
+      setTimeout(() => {
+        if (filedCookbookId) onNavigate('cookbook', { cookbookId: filedCookbookId })
+        else onNavigate('home')
+      }, 1600)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create recipe')
     } finally {
