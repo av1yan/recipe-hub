@@ -162,6 +162,8 @@ export default function HomeScreen({ onNavigate }: Props) {
         </div>
 
         <div style={{ padding: '20px 16px 0' }}>
+          {/* Pro feature shortcuts only appear once Pro is active. */}
+          {isPro && (<>
           {/* Cook with what I have — Pro pantry / "what can I make" feature. */}
           <button
             onClick={() => onNavigate('pantry')}
@@ -205,6 +207,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             </div>
             <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
           </button>
+          </>)}
 
           {/* Today's meals — real plan data */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>

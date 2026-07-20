@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Trash2, CalendarDays, Check, ChevronDown, ShoppingCart, Crown, Share2 } from 'lucide-react'
+import { Plus, Trash2, CalendarDays, Check, ChevronDown, ShoppingCart, Share2 } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
@@ -233,10 +233,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: 'var(--color-text)' }}>Meal Plan</h1>
           <div style={{ display: 'flex', gap: '8px' }}>
-            {hasMeals && (
-              <button onClick={sharePlan} aria-label="Share this week's plan" style={{ position: 'relative', width: '34px', height: '34px', borderRadius: '11px', background: 'var(--color-card)', color: 'var(--color-text-muted)', border: '1.5px solid var(--color-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {hasMeals && isPro && (
+              <button onClick={sharePlan} aria-label="Share this week's plan" style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'var(--color-card)', color: 'var(--color-text-muted)', border: '1.5px solid var(--color-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Share2 size={15} />
-                {!isPro && <Crown size={11} color="#f4b860" style={{ position: 'absolute', top: '-5px', right: '-5px' }} />}
               </button>
             )}
             {currentPlan && (
@@ -278,7 +277,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <div style={{ padding: '9px 14px', fontSize: '11px', fontWeight: '800', color: '#f26d5b', letterSpacing: '0.05em', background: '#fdeeeb' }}>
               JUMP TO A WEEK
             </div>
-            {[-1, 0, 1, 2, 3].map(offset => {
+            {(isPro ? [-1, 0, 1, 2, 3] : [0]).map(offset => {
               const ws = mondayOf(new Date())
               ws.setDate(ws.getDate() + offset * 7)
               const plan = mealPlans.find(p => sameWeek(p.weekStart, ws))
@@ -286,12 +285,11 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               const planned = plan
                 ? DAY_NAMES.reduce((n, d) => n + MEALS.reduce((m, mt) => m + getMeals(plan, d, mt.key).length, 0), 0)
                 : 0
-              const locked = !isPro && offset !== 0
               return (
                 <button
                   key={offset}
-                  onClick={() => locked ? show('Planning other weeks is a Pro feature — upgrade in Settings.', 'error') : openWeek(ws)}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', background: isCurrent ? '#fff7f5' : 'none', border: 'none', borderTop: offset === -1 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left', opacity: locked ? 0.6 : 1 }}
+                  onClick={() => openWeek(ws)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', background: isCurrent ? '#fff7f5' : 'none', border: 'none', borderTop: offset === -1 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left' }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>
@@ -302,15 +300,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                       {plan ? `${planned} meal${planned === 1 ? '' : 's'} planned` : 'Nothing planned'}
                     </div>
                   </div>
-                  {locked ? <Crown size={15} color="#f4b860" /> : isCurrent && <Check size={16} color="#f26d5b" />}
+                  {isCurrent && <Check size={16} color="#f26d5b" />}
                 </button>
               )
             })}
-            {!isPro && (
-              <div style={{ padding: '10px 14px', fontSize: '11.5px', color: 'var(--color-text-muted)', borderTop: '1px solid #f6efed', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Crown size={12} color="#f4b860" /> Planning other weeks is a Pro feature.
-              </div>
-            )}
           </div>
         )}
 
@@ -329,34 +322,26 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </div>
         )}
 
-        {/* Pro: build the week's grocery list from the plan in one tap.
-            Non-Pro sees the same button locked as an upsell. */}
-        {hasMeals && (
+        {/* Pro only: build the week's grocery list from the plan in one tap. */}
+        {hasMeals && isPro && (
           <button
             onClick={addWeekToGroceries}
             disabled={generating}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               padding: '13px', marginBottom: '18px', borderRadius: '12px',
-              background: isPro ? 'var(--color-primary)' : 'var(--color-card)',
-              color: isPro ? '#fff' : 'var(--color-text-secondary)',
-              border: isPro ? 'none' : '1px solid var(--color-subtle)',
-              boxShadow: isPro ? '0 4px 12px rgba(107,163,86,0.3)' : 'none',
+              background: 'var(--color-primary)', color: '#fff', border: 'none',
+              boxShadow: '0 4px 12px rgba(107,163,86,0.3)',
               fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer',
               fontFamily: 'inherit', opacity: generating ? 0.7 : 1,
             }}
           >
-            {isPro ? (
-              <><ShoppingCart size={16} /> {generating ? 'Adding to groceries…' : 'Add this week to Groceries'}</>
-            ) : (
-              <><Crown size={15} color="#f4b860" /> Auto-build grocery list · Pro</>
-            )}
+            <ShoppingCart size={16} /> {generating ? 'Adding to groceries…' : 'Add this week to Groceries'}
           </button>
         )}
 
-        {/* Pro: the selected day's nutrition, summed from the planned recipes.
-            Non-Pro sees it locked as an upsell. */}
-        {dayHasMeals && (isPro ? (
+        {/* Pro only: the selected day's nutrition, summed from the planned recipes. */}
+        {dayHasMeals && isPro && (
           <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', padding: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: '18px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>Nutrition</span>
@@ -380,14 +365,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               </div>
             </div>
           </div>
-        ) : (
-          <button
-            onClick={() => show('Nutrition & goals is a Pro feature — upgrade in Settings.', 'error')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', marginBottom: '18px', borderRadius: '12px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-subtle)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
-          >
-            <Crown size={15} color="#f4b860" /> See your day’s nutrition · Pro
-          </button>
-        ))}
+        )}
 
         {MEALS.map(m => {
           const meals = getMeals(currentPlan, selectedDay, m.key)

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Crown, Loader2, X } from 'lucide-react'
+import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Loader2, X } from 'lucide-react'
 import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI } from '../utils/api'
@@ -294,14 +294,13 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedList ? '12px' : 0 }}>
           <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
           <div style={{ display: 'flex', gap: '8px' }}>
-            {selectedList && (selectedList.items?.length || 0) > 0 && (
+            {isPro && selectedList && (selectedList.items?.length || 0) > 0 && (
               <button
                 onClick={shareList}
                 aria-label="Share grocery list"
-                style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
               >
                 <Share2 size={15} /> Share
-                {!isPro && <Crown size={11} color="#f4b860" style={{ position: 'absolute', top: '-5px', right: '-5px' }} />}
               </button>
             )}
             <button
