@@ -19,6 +19,24 @@ const STAPLES = [
   'butter', 'milk', 'cheese', 'flour', 'potato', 'bell pepper', 'carrot', 'spinach',
 ]
 
+// Fallback for when the backend returns only a joined `text` string: split it
+// into { name, steps } tiles on "::", " — " or " - ".
+function parseDishes(text: string): { name: string; steps: string }[] {
+  return text
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean)
+    .map(l => l.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, ''))
+    .map(l => {
+      let sep = l.indexOf('::'); let width = 2
+      if (sep === -1) { sep = l.indexOf(' — '); width = 3 }
+      if (sep === -1) { sep = l.indexOf(' - '); width = 3 }
+      if (sep === -1) return { name: l, steps: '' }
+      return { name: l.slice(0, sep).trim(), steps: l.slice(sep + width).trim() }
+    })
+    .filter(d => d.name)
+}
+
 export default function PantryScreen({ onNavigate }: Props) {
   const [isPro] = useProPlan()
   const [pantry, setPantry] = useState<string[]>(() => getPantry())
@@ -27,7 +45,7 @@ export default function PantryScreen({ onNavigate }: Props) {
   const [loading, setLoading] = useState(true)
   const [addingList, setAddingList] = useState<string | null>(null)
   const [cookLoading, setCookLoading] = useState(false)
-  const [cookText, setCookText] = useState('')
+  const [cookDishes, setCookDishes] = useState<{ name: string; steps: string }[]>([])
   const [cookNote, setCookNote] = useState('')
   const { toast, show } = useToast()
 
@@ -73,18 +91,23 @@ export default function PantryScreen({ onNavigate }: Props) {
   }
   const clearPantry = () => {
     setPantry([]); savePantry([])
-    setCookText(''); setCookNote('')
+    setCookDishes([]); setCookNote('')
   }
 
   // Ask the AI cook for dish ideas from whatever's in the pantry. Falls back to a
   // friendly note when the backend has no API key (rather than a hard error).
   async function runCook() {
     if (!pantry.length || cookLoading) return
-    setCookLoading(true); setCookText(''); setCookNote('')
+    setCookLoading(true); setCookDishes([]); setCookNote('')
     try {
       const res: any = await insightsAPI.cook(pantry)
       if (res?.configured === false) setCookNote(res.message || "The AI cook isn't switched on yet.")
-      else setCookText(res?.text || '')
+      else {
+        const dishes = Array.isArray(res?.dishes) && res.dishes.length
+          ? res.dishes
+          : parseDishes(res?.text || '')
+        setCookDishes(dishes)
+      }
     } catch {
       setCookNote('Could not reach the AI just now — try again in a moment.')
     } finally {
@@ -216,13 +239,25 @@ export default function PantryScreen({ onNavigate }: Props) {
             >
               <Sparkles size={16} /> {cookLoading ? 'Thinking…' : 'Ask AI what to cook'}
             </button>
-            {cookText && !cookLoading && (
-              <div style={{ marginTop: '12px', padding: '14px 16px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            {cookDishes.length > 0 && !cookLoading && (
+              <div style={{ marginTop: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
                   <Sparkles size={14} color="var(--color-primary)" />
                   <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.04em' }}>IDEAS FROM YOUR PANTRY</span>
                 </div>
-                <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{cookText}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {cookDishes.map((d, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '11px', padding: '13px 15px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
+                      <div style={{ flexShrink: 0, width: '24px', height: '24px', borderRadius: '8px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '800' }}>
+                        {i + 1}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{d.name}</h4>
+                        {d.steps && <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>{d.steps}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             {cookNote && !cookLoading && (
