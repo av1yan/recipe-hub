@@ -203,7 +203,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
             transition: 'all 0.3s ease',
             marginTop: '8px'
           }}
-          onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#5a9549')}
+          onMouseEnter={(e) => !loading && (e.currentTarget.style.background = 'var(--color-primary-dark)')}
           onMouseLeave={(e) => !loading && (e.currentTarget.style.background = 'var(--color-primary)')}
         >
           {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
@@ -268,7 +268,7 @@ function OAuthButton({ provider, label, icon }: { provider: string; label: strin
         fontFamily: 'inherit',
       }}
       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg)'}
-      onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-card)'}
     >
       {icon}
       {label}
