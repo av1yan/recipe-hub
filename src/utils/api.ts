@@ -253,3 +253,9 @@ export const cookbookAPI = {
       method: 'DELETE',
     }),
 }
+
+export const insightsAPI = {
+  /** Natural-language insights over the week. Returns { configured:false } until
+      an API key is set on the backend. */
+  ai: (summary: any) => apiRequest('/insights/ai', { method: 'POST', body: { summary } }),
+}

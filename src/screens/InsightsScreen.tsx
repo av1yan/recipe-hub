@@ -1,0 +1,190 @@
+import { useState, useEffect } from 'react'
+import { ArrowLeft, Crown, Sparkles, Loader2, Lightbulb } from 'lucide-react'
+import type { Screen, Recipe } from '../types'
+import { mealPlanAPI, recipeAPI, insightsAPI } from '../utils/api'
+import { getPantry } from '../utils/pantry'
+import { getDietPrefs } from './DietPreferencesScreen'
+import { computeInsights, type Insight, type PlannedMeal } from '../utils/insights'
+import { useProPlan } from '../utils/proPlan'
+import { mondayOf, sameWeek, getMeals, DAY_NAMES, MEALS } from './MealPlanScreen'
+
+interface Props {
+  onNavigate: (screen: Screen, data?: any) => void
+}
+
+const GOAL_CAL = 2000
+
+const TONE: Record<Insight['tone'], { bg: string; fg: string }> = {
+  good: { bg: 'var(--color-primary-bg)', fg: 'var(--color-primary)' },
+  warn: { bg: 'rgba(224,160,32,0.14)', fg: '#c98a10' },
+  info: { bg: 'rgba(100,116,139,0.14)', fg: 'var(--color-text-secondary)' },
+}
+
+export default function InsightsScreen({ onNavigate }: Props) {
+  const [isPro] = useProPlan()
+  const [loading, setLoading] = useState(true)
+  const [planned, setPlanned] = useState<PlannedMeal[]>([])
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiText, setAiText] = useState('')
+  const [aiNote, setAiNote] = useState('')
+
+  useEffect(() => {
+    if (isPro) load()
+  }, [])
+
+  async function load() {
+    try {
+      setLoading(true)
+      const [plans, list] = await Promise.all([mealPlanAPI.list(), recipeAPI.list()])
+      // Hydrate ingredients + tags from each recipe's detail (the list omits them).
+      const hydrated: Recipe[] = await Promise.all(
+        (list as any[]).map(async (r: any) => {
+          try {
+            const d = await recipeAPI.get(r.id)
+            return { ...r, ingredients: d.ingredients || [], tags: d.tags || r.tags || [] }
+          } catch {
+            return r
+          }
+        })
+      )
+      setRecipes(hydrated)
+
+      const week = (plans as any[]).find(p => sameWeek(p.weekStart, mondayOf(new Date())))
+      const rows: PlannedMeal[] = []
+      if (week) {
+        DAY_NAMES.forEach(day => MEALS.forEach(m => {
+          getMeals(week, day, m.key).forEach((meal: any) => {
+            const full = hydrated.find(r => r.id === meal.id) || meal
+            rows.push({ day, slot: m.label, recipe: full })
+          })
+        }))
+      }
+      setPlanned(rows)
+    } catch (e) {
+      console.error('insights load failed', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const pantry = getPantry()
+  const insights = computeInsights({ planned, allRecipes: recipes, pantry, goalCal: GOAL_CAL })
+
+  const askAI = async () => {
+    setAiLoading(true); setAiText(''); setAiNote('')
+    try {
+      const summary = {
+        goalCaloriesPerDay: GOAL_CAL,
+        plannedMeals: planned.map(p => ({
+          day: p.day, slot: p.slot, name: p.recipe?.name, cuisine: p.recipe?.cuisine,
+          calories: p.recipe?.nutrition?.calories ?? p.recipe?.calories ?? null,
+        })),
+        pantry,
+        diet: getDietPrefs(),
+      }
+      const res: any = await insightsAPI.ai(summary)
+      if (res?.configured === false) setAiNote(res.message || "AI insights aren't switched on yet.")
+      else setAiText(res?.text || '')
+    } catch {
+      setAiNote('Could not reach the AI just now — try again in a moment.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  const header = (
+    <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', background: 'var(--color-card)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
+      <button onClick={() => onNavigate('home')} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+        <ArrowLeft size={22} color="var(--color-text)" />
+      </button>
+      <h1 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>Insights</h1>
+    </header>
+  )
+
+  if (!isPro) {
+    return (
+      <div className="screen">
+        {header}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Lightbulb size={32} color="#fff" />
+          </div>
+          <h2 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-text)', margin: 0 }}>A Pro feature</h2>
+          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5, maxWidth: '280px' }}>
+            recipHub reads your week — calories, variety, veg, your pantry — and tells you what's working and what to tweak.
+          </p>
+          <button onClick={() => onNavigate('settings')} style={{ marginTop: '6px', padding: '13px 22px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+            <Crown size={16} color="#f4b860" /> Upgrade to Pro
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="screen" style={{ background: 'var(--color-bg)' }}>
+      {header}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+        <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '0 0 14px', lineHeight: 1.5 }}>
+          Your planned week, read for you.
+        </p>
+
+        {loading ? (
+          <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', padding: '24px 0' }}>Reading your week…</p>
+        ) : insights.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--color-text-muted)' }}>
+            <div style={{ fontSize: '34px', marginBottom: '8px' }}>🗓️</div>
+            <p style={{ fontSize: '14px', margin: '0 0 16px' }}>Plan a few meals this week and I'll have something to say.</p>
+            <button onClick={() => onNavigate('meal-plan')} style={{ padding: '11px 18px', borderRadius: '10px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+              Plan your week
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+            {insights.map((ins, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '13px 14px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: TONE[ins.tone].bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                  {ins.emoji}
+                </div>
+                <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.45, flex: 1 }}>{ins.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Ask AI — a deeper, natural-language read (lights up when a key is set) */}
+        {!loading && insights.length > 0 && (
+          <div style={{ marginTop: '20px' }}>
+            <button
+              onClick={askAI}
+              disabled={aiLoading}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '12px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '700', cursor: aiLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+            >
+              {aiLoading ? <><Loader2 size={16} className="rh-spin" /> Thinking…</> : <><Sparkles size={16} /> Ask AI for a deeper read</>}
+            </button>
+
+            {aiText && (
+              <div style={{ marginTop: '12px', padding: '14px 16px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <Sparkles size={14} color="var(--color-primary)" />
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>AI READ</span>
+                </div>
+                <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{aiText}</p>
+              </div>
+            )}
+
+            {aiNote && (
+              <div style={{ marginTop: '12px', padding: '12px 14px', background: 'var(--color-subtle)', borderRadius: '12px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>{aiNote}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <style>{`.rh-spin { animation: rh-rot 1s linear infinite } @keyframes rh-rot { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
+}

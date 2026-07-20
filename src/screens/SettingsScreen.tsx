@@ -238,6 +238,7 @@ function AccountPage({ onBack }: { onBack: () => void }) {
 
 const PRO_FEATURES = [
   { title: 'Cook with what I have', desc: 'Recipes you can make from your pantry' },
+  { title: 'Insights', desc: 'Your week, read for you — balance, variety, tips' },
   { title: 'Unlimited recipes & cookbooks', desc: `Free stops at ${FREE_RECIPE_LIMIT} recipes / ${FREE_COOKBOOK_LIMIT} cookbook` },
   { title: 'Automatic grocery lists', desc: 'A week’s plan → one shopping list' },
   { title: 'Plan any week', desc: 'Free is this week only; Pro, any week' },

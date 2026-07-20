@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight, Crown, ChefHat } from 'lucide-react'
+import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight, Crown, ChefHat, Lightbulb } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
@@ -165,7 +165,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           {/* Cook with what I have — Pro pantry / "what can I make" feature. */}
           <button
             onClick={() => onNavigate('pantry')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '22px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
           >
             <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ChefHat size={22} color="#fff" />
@@ -182,6 +182,28 @@ export default function HomeScreen({ onNavigate }: Props) {
               <div style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Recipes you can make from your pantry</div>
             </div>
             <ChevronRight size={18} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+          </button>
+
+          {/* Insights — Pro "your week, read for you" */}
+          <button
+            onClick={() => onNavigate('insights')}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '22px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+          >
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Lightbulb size={22} color="var(--color-primary)" />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>Insights</span>
+                {!isPro && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'var(--color-primary)', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '999px' }}>
+                    <Crown size={10} color="#f4b860" /> PRO
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Your week, read for you</div>
+            </div>
+            <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
           </button>
 
           {/* Today's meals — real plan data */}
