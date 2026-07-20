@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles } from 'lucide-react'
+import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles, BookmarkPlus } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { recipeAPI, groceryAPI, insightsAPI } from '../utils/api'
 import { getPantry, savePantry, pantryMatch } from '../utils/pantry'
@@ -47,6 +47,8 @@ export default function PantryScreen({ onNavigate }: Props) {
   const [cookLoading, setCookLoading] = useState(false)
   const [cookDishes, setCookDishes] = useState<{ name: string; steps: string }[]>([])
   const [cookNote, setCookNote] = useState('')
+  const [savingIdx, setSavingIdx] = useState<number | null>(null)
+  const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set())
   const { toast, show } = useToast()
 
   useEffect(() => {
@@ -91,14 +93,14 @@ export default function PantryScreen({ onNavigate }: Props) {
   }
   const clearPantry = () => {
     setPantry([]); savePantry([])
-    setCookDishes([]); setCookNote('')
+    setCookDishes([]); setCookNote(''); setSavedRecipes(new Set())
   }
 
   // Ask the AI cook for dish ideas from whatever's in the pantry. Falls back to a
   // friendly note when the backend has no API key (rather than a hard error).
   async function runCook() {
     if (!pantry.length || cookLoading) return
-    setCookLoading(true); setCookDishes([]); setCookNote('')
+    setCookLoading(true); setCookDishes([]); setCookNote(''); setSavedRecipes(new Set())
     try {
       const res: any = await insightsAPI.cook(pantry)
       if (res?.configured === false) setCookNote(res.message || "The AI cook isn't switched on yet.")
@@ -112,6 +114,44 @@ export default function PantryScreen({ onNavigate }: Props) {
       setCookNote('Could not reach the AI just now — try again in a moment.')
     } finally {
       setCookLoading(false)
+    }
+  }
+
+  // Turn one AI dish idea into a saved recipe: pull in the pantry items it
+  // mentions as ingredients, and split its how-to into steps.
+  async function saveDish(dish: { name: string; steps: string }, idx: number) {
+    if (savingIdx !== null || savedRecipes.has(dish.name)) return
+    setSavingIdx(idx)
+    try {
+      const hay = (dish.name + ' ' + dish.steps).toLowerCase()
+      const ingredients = pantry
+        .filter(p => hay.includes(p.toLowerCase()))
+        .map(p => ({ name: p, quantity: 1, unit: '' }))
+      // Sentence split without lookbehind, so it works on older mobile Safari.
+      const sentences = (dish.steps || '').match(/[^.!?]+[.!?]+/g) || (dish.steps ? [dish.steps] : [])
+      const steps = sentences.map(s => s.trim()).filter(Boolean)
+      const instructions = (steps.length ? steps : [dish.name]).map((text, i) => ({ stepNumber: i + 1, text }))
+      await recipeAPI.create({
+        name: dish.name,
+        cuisine: 'Other',
+        mealType: 'dinner',
+        difficulty: 'easy',
+        prepTime: 10,
+        cookTime: 20,
+        servings: 2,
+        calories: null,
+        imageUrl: null,
+        sourceUrl: '',
+        tags: ['pantry'],
+        ingredients,
+        instructions,
+      })
+      setSavedRecipes(prev => new Set(prev).add(dish.name))
+      show(`Saved “${dish.name}” to your recipes`)
+    } catch {
+      show('Could not save that recipe', 'error')
+    } finally {
+      setSavingIdx(null)
     }
   }
 
@@ -254,6 +294,15 @@ export default function PantryScreen({ onNavigate }: Props) {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{d.name}</h4>
                         {d.steps && <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>{d.steps}</p>}
+                        <button
+                          onClick={() => saveDish(d, i)}
+                          disabled={savingIdx === i || savedRecipes.has(d.name)}
+                          style={{ marginTop: '9px', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '9px', border: '1px solid var(--color-primary-border)', background: savedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'transparent', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: savingIdx === i || savedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                        >
+                          {savedRecipes.has(d.name)
+                            ? <><Check size={13} /> Saved</>
+                            : <><BookmarkPlus size={13} /> {savingIdx === i ? 'Saving…' : 'Save to recipes'}</>}
+                        </button>
                       </div>
                     </div>
                   ))}
