@@ -8,7 +8,7 @@ import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
 import { authAPI } from '../utils/api'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
-import { useProPlan } from '../utils/proPlan'
+import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings } from '../utils/preferences'
@@ -103,7 +103,7 @@ function SectionHeader({ label }: { label: string }) {
 
 function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean }) {
   return (
-    <button onClick={onClick} style={{ width: '100%', padding: '12px', background: saved ? 'var(--color-primary-bg)' : 'linear-gradient(135deg, #7ec063, #5a9449)', color: saved ? '#6ba356' : '#fff', border: saved ? '1.5px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}>
+    <button onClick={onClick} style={{ width: '100%', padding: '12px', background: saved ? 'var(--color-primary-bg)' : 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: saved ? 'var(--color-primary)' : '#fff', border: saved ? '1.5px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}>
       {saved ? <><Check size={16} /> Saved!</> : 'Save Changes'}
     </button>
   )
@@ -162,7 +162,7 @@ function AccountPage({ onBack }: { onBack: () => void }) {
       <SubHeader title="Account" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '22px' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '40px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: '700', color: '#fff' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '40px', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: '700', color: '#fff' }}>
             {name.charAt(0).toUpperCase()}
           </div>
         </div>
@@ -251,8 +251,8 @@ function Subscription({ onBack }: { onBack: () => void }) {
                 {isPro ? 'Pro' : 'Free'}
               </div>
             </div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: '#6ba356', fontSize: '12px', fontWeight: '700', padding: '5px 11px', borderRadius: '999px', flexShrink: 0 }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6ba356' }} />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', padding: '5px 11px', borderRadius: '999px', flexShrink: 0 }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
               Active
             </span>
           </div>
@@ -263,17 +263,17 @@ function Subscription({ onBack }: { onBack: () => void }) {
           </p>
         </div>
 
-        <div style={{ background: 'linear-gradient(135deg, #6ba356, #5a9449)', borderRadius: '14px', padding: '18px' }}>
+        <div style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '14px', padding: '18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '13px' }}>
             <Crown size={20} color="#f4b860" />
             <span style={{ fontSize: '17px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
           </div>
           {[
-            { title: 'Unlimited AI imports', desc: 'From any TikTok, Instagram, or link' },
+            { title: 'Unlimited recipes & cookbooks', desc: `Free stops at ${FREE_RECIPE_LIMIT} recipes / ${FREE_COOKBOOK_LIMIT} cookbook` },
             { title: 'Automatic grocery lists', desc: 'A week’s plan → one shopping list' },
-            { title: 'AI cooking assistant', desc: 'Scale servings, swap ingredients' },
+            { title: 'Plan any week', desc: 'Free is this week only; Pro, any week' },
+            { title: 'Export & share', desc: 'Send your list or plan anywhere' },
             { title: 'Nutrition & goals', desc: 'Daily macros and calorie targets' },
-            { title: 'Family sharing & sync', desc: 'Cookbooks and lists across phones' },
           ].map(f => (
             <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
               <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0 }} />
@@ -299,7 +299,7 @@ function Subscription({ onBack }: { onBack: () => void }) {
                 onClick={() => setPro(true)}
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.25)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)' }}
-                style={{ marginTop: '16px', width: '100%', padding: '13px', background: 'var(--color-card)', color: '#6ba356', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
+                style={{ marginTop: '16px', width: '100%', padding: '13px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
               >
                 Upgrade for $4.99/mo
               </button>
@@ -332,9 +332,9 @@ function Preferences({ onBack }: { onBack: () => void }) {
 
   const toggleStyle = (active: boolean): React.CSSProperties => ({
     flex: 1, padding: '7px', borderRadius: '8px',
-    border: `1.5px solid ${active ? '#6ba356' : 'var(--color-border)'}`,
+    border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--color-border)'}`,
     background: active ? 'var(--color-primary-bg)' : 'var(--color-card)',
-    color: active ? '#6ba356' : 'var(--color-text-secondary)',
+    color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
     fontSize: '13px', fontWeight: '700', cursor: 'pointer',
   })
 
@@ -395,7 +395,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
         <SectionHeader label="DIET" />
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {DIET_OPTIONS.map(d => (
-            <button key={d.id} onClick={() => toggleDiet(d.id)} style={pill(diet.includes(d.id), '#6ba356')}>{d.label}</button>
+            <button key={d.id} onClick={() => toggleDiet(d.id)} style={pill(diet.includes(d.id), 'var(--color-primary)')}>{d.label}</button>
           ))}
         </div>
 
@@ -487,13 +487,13 @@ function InvitePage({ onBack }: { onBack: () => void }) {
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
           <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>SHARE LINK</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <p ref={linkRef} style={{ flex: 1, fontSize: '14px', color: '#6ba356', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{link}</p>
+            <p ref={linkRef} style={{ flex: 1, fontSize: '14px', color: 'var(--color-primary)', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{link}</p>
             <button onClick={copyLink} aria-label="Copy link" title="Copy link" style={{ flexShrink: 0, width: '36px', height: '36px', borderRadius: '10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Copy size={16} color="#6ba356" />
+              <Copy size={16} color="var(--color-primary)" />
             </button>
           </div>
         </div>
-        <button onClick={share} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+        <button onClick={share} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <Share2 size={16} /> Share recipHub
         </button>
       </div>
@@ -575,12 +575,12 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
         <div style={{ marginBottom: '20px' }}>
           <SectionHeader label="CONNECT" />
           <div style={{ margin: '0 16px' }}>
-            <Row icon={<UserPlus size={18} color="#6ba356" />} label="Invite friends" onPress={() => setSubPage('invite')} />
+            <Row icon={<UserPlus size={18} color="var(--color-primary)" />} label="Invite friends" onPress={() => setSubPage('invite')} />
           </div>
         </div>
 
         <div style={{ margin: '0 16px 24px' }}>
-          <button onClick={onSignOut} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, #7ec063, #5a9449)', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)' }}>
+          <button onClick={onSignOut} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)' }}>
             <LogOut size={17} />
             Log out
           </button>

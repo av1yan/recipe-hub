@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import type { Screen, Cookbook } from '../types'
 import { cookbookAPI } from '../utils/api'
+import { useProPlan, FREE_COOKBOOK_LIMIT } from '../utils/proPlan'
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -17,6 +18,7 @@ export default function CookbooksScreen({ onNavigate }: Props) {
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
+  const [isPro] = useProPlan()
 
   useEffect(() => {
     loadCookbooks()
@@ -36,6 +38,10 @@ export default function CookbooksScreen({ onNavigate }: Props) {
 
   async function createCookbook() {
     if (!newCookbookName.trim()) return
+    if (!isPro && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
+      setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
+      return
+    }
     try {
       const cookbook = await cookbookAPI.create(newCookbookName, newCookbookDesc || undefined)
       setCookbooks([...cookbooks, cookbook])
@@ -62,7 +68,7 @@ export default function CookbooksScreen({ onNavigate }: Props) {
   }
 
   const getColorForCookbook = (index: number): string => {
-    const colors = ['#c67139', '#6ba356', '#d4a574', '#b8956a', '#a48a6e']
+    const colors = ['#c67139', 'var(--color-primary)', '#d4a574', '#b8956a', '#a48a6e']
     return colors[index % colors.length]
   }
 
@@ -90,7 +96,14 @@ export default function CookbooksScreen({ onNavigate }: Props) {
         </button>
         <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>My Cookbooks</h2>
         <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
+          onClick={() => {
+            if (!isPro && !showCreateForm && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
+              setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
+              return
+            }
+            setError('')
+            setShowCreateForm(!showCreateForm)
+          }}
           className="btn btn-icon"
           style={{ background: 'transparent', color: '#c67139' }}
         >

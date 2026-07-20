@@ -19,6 +19,7 @@ import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import { AddRecipeSheet } from './components/AddRecipeSheet'
 import { setAuthToken, clearAuthToken, getAuthToken, authAPI } from './utils/api'
+import { useProPlan } from './utils/proPlan'
 import type { Screen, User, Recipe } from './types'
 
 export default function App() {
@@ -45,6 +46,13 @@ export default function App() {
   // The screen the panel was opened over, so an import Back returns there.
   const [addSheetOrigin, setAddSheetOrigin] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
+  const [isProActive] = useProPlan()
+
+  // Mirror the Pro state onto the root element so the gold accent theme applies
+  // app-wide -- parallel to how data-theme drives light/dark.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-pro', isProActive ? 'true' : 'false')
+  }, [isProActive])
 
   // Check for existing auth token on load
   useEffect(() => {

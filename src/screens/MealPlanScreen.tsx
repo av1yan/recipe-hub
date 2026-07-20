@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Trash2, CalendarDays, Check, ChevronDown, ShoppingCart, Crown } from 'lucide-react'
+import { Plus, Trash2, CalendarDays, Check, ChevronDown, ShoppingCart, Crown, Share2 } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { useProPlan } from '../utils/proPlan'
+import { shareText } from '../utils/share'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -170,6 +171,23 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
+  // Pro feature: share the week's plan as text — native share sheet on a phone,
+  // clipboard on desktop.
+  async function sharePlan() {
+    if (!isPro) { show('Sharing your plan is a Pro feature — upgrade in Settings.', 'error'); return }
+    if (!currentPlan) { show('Plan some meals this week first.', 'error'); return }
+    const lines: string[] = [`🗓 Meal plan · ${weekLabel(viewWeek)}`, '']
+    DAY_NAMES.forEach(day => {
+      const dayLines = MEALS.flatMap(m =>
+        getMeals(currentPlan, day, m.key).map((meal: any) => `  ${m.emoji} ${m.label}: ${meal.name}`)
+      )
+      if (dayLines.length) lines.push(day, ...dayLines, '')
+    })
+    const res = await shareText('My meal plan', lines.join('\n').trim())
+    if (res === 'failed') show('Could not share the plan', 'error')
+    else show(res === 'copied' ? 'Plan copied to clipboard' : 'Plan shared')
+  }
+
   function getDayNumber(index: number, weekStart: Date) {
     const date = new Date(weekStart)
     date.setDate(date.getDate() + index)
@@ -215,6 +233,12 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <h1 style={{ fontSize: '26px', fontWeight: '800', margin: 0, color: 'var(--color-text)' }}>Meal Plan</h1>
           <div style={{ display: 'flex', gap: '8px' }}>
+            {hasMeals && (
+              <button onClick={sharePlan} aria-label="Share this week's plan" style={{ position: 'relative', width: '34px', height: '34px', borderRadius: '11px', background: 'var(--color-card)', color: 'var(--color-text-muted)', border: '1.5px solid var(--color-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Share2 size={15} />
+                {!isPro && <Crown size={11} color="#f4b860" style={{ position: 'absolute', top: '-5px', right: '-5px' }} />}
+              </button>
+            )}
             {currentPlan && (
               <button onClick={() => { setConfirmDelete(v => !v); setShowWeeks(false) }} aria-label="Delete week" style={{ width: '34px', height: '34px', borderRadius: '11px', background: 'var(--color-card)', color: 'var(--color-text-muted)', border: '1.5px solid var(--color-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Trash2 size={16} />
@@ -262,11 +286,12 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               const planned = plan
                 ? DAY_NAMES.reduce((n, d) => n + MEALS.reduce((m, mt) => m + getMeals(plan, d, mt.key).length, 0), 0)
                 : 0
+              const locked = !isPro && offset !== 0
               return (
                 <button
                   key={offset}
-                  onClick={() => openWeek(ws)}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', background: isCurrent ? '#fff7f5' : 'none', border: 'none', borderTop: offset === -1 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left' }}
+                  onClick={() => locked ? show('Planning other weeks is a Pro feature — upgrade in Settings.', 'error') : openWeek(ws)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 14px', background: isCurrent ? '#fff7f5' : 'none', border: 'none', borderTop: offset === -1 ? 'none' : '1px solid #f6efed', cursor: 'pointer', textAlign: 'left', opacity: locked ? 0.6 : 1 }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>
@@ -277,10 +302,15 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                       {plan ? `${planned} meal${planned === 1 ? '' : 's'} planned` : 'Nothing planned'}
                     </div>
                   </div>
-                  {isCurrent && <Check size={16} color="#f26d5b" />}
+                  {locked ? <Crown size={15} color="#f4b860" /> : isCurrent && <Check size={16} color="#f26d5b" />}
                 </button>
               )
             })}
+            {!isPro && (
+              <div style={{ padding: '10px 14px', fontSize: '11.5px', color: 'var(--color-text-muted)', borderTop: '1px solid #f6efed', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Crown size={12} color="#f4b860" /> Planning other weeks is a Pro feature.
+              </div>
+            )}
           </div>
         )}
 
@@ -308,7 +338,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               padding: '13px', marginBottom: '18px', borderRadius: '12px',
-              background: isPro ? '#6ba356' : 'var(--color-card)',
+              background: isPro ? 'var(--color-primary)' : 'var(--color-card)',
               color: isPro ? '#fff' : 'var(--color-text-secondary)',
               border: isPro ? 'none' : '1px solid var(--color-subtle)',
               boxShadow: isPro ? '0 4px 12px rgba(107,163,86,0.3)' : 'none',
@@ -339,14 +369,14 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>cal</span>
                 </div>
                 <div style={{ height: '6px', borderRadius: '3px', background: 'var(--color-subtle)', overflow: 'hidden', marginTop: '9px' }}>
-                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / GOAL_CAL) * 100))}%`, background: '#6ba356', borderRadius: '3px', transition: 'width 0.3s ease' }} />
+                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / GOAL_CAL) * 100))}%`, background: 'var(--color-primary)', borderRadius: '3px', transition: 'width 0.3s ease' }} />
                 </div>
                 <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>of {GOAL_CAL.toLocaleString()} cal goal</span>
               </div>
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <MacroStat color="#a78bfa" label="Protein" grams={dayNutrition.protein} />
                 <MacroStat color="#fbbf24" label="Carbs" grams={dayNutrition.carbs} />
-                <MacroStat color="#6ba356" label="Fat" grams={dayNutrition.fat} />
+                <MacroStat color="var(--color-primary)" label="Fat" grams={dayNutrition.fat} />
               </div>
             </div>
           </div>

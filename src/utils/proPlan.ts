@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react'
 const KEY = 'proPlan'
 const EVENT = 'rh-proplan-change'
 
+// Free-plan caps. Pro removes them entirely.
+export const FREE_RECIPE_LIMIT = 10
+export const FREE_COOKBOOK_LIMIT = 1
+
 /** Whether the account is on Pro. Persisted locally so it survives reloads. */
 export function isPro(): boolean {
   return localStorage.getItem(KEY) === 'true'

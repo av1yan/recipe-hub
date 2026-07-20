@@ -2,6 +2,7 @@
   /* Brand */
   --color-primary: #6ba356;
   --color-primary-dark: #5a9449;
+  --color-primary-light: #7ec063;
   --color-primary-bg: #f0f7ed;
   --color-primary-border: #c8e0bc;
 
@@ -90,6 +91,25 @@
   --color-nav-border: rgba(255, 255, 255, 0.10);
 
   color-scheme: dark;
+}
+
+/* Pro plan repaints the brand accent gold. data-pro="true" is set on the root
+   from the Pro state (App.tsx), the same mechanism as data-theme. Every element
+   that uses the accent variables flips at once -- buttons, nav, pills, links. */
+:root[data-pro="true"] {
+  --color-primary: #bf8f2c;
+  --color-primary-dark: #9c7420;
+  --color-primary-light: #d9b356;
+  --color-primary-bg: #fbf3df;
+  --color-primary-border: #e8d5a0;
+  --color-accent: #bf8f2c;
+}
+/* Dark + Pro: keep the gold accent but restore the translucent tints so they
+   read on the dark surfaces. More specific than either single-attr rule, so it
+   wins for the overlap. */
+:root[data-theme="dark"][data-pro="true"] {
+  --color-primary-bg: rgba(191, 143, 44, 0.22);
+  --color-primary-border: rgba(191, 143, 44, 0.48);
 }
 
 * {

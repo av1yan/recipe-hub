@@ -6,6 +6,7 @@ import { recipeAPI, cookbookAPI } from '../utils/api'
 import { DIET_OPTIONS } from './DietPreferencesScreen'
 import { Toast, useToast } from '../components/Toast'
 import { fileToCompressedDataUrl } from '../utils/image'
+import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT } from '../utils/proPlan'
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -67,13 +68,13 @@ const removeBtn: React.CSSProperties = {
 
 const addBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-  width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: '#6ba356',
+  width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
   border: '1.5px dashed var(--color-primary-border)', borderRadius: '10px', fontSize: '13px',
   fontWeight: '700', cursor: 'pointer',
 }
 
 const stepBadge: React.CSSProperties = {
-  flexShrink: 0, width: '32px', height: '32px', borderRadius: '9px', background: '#6ba356',
+  flexShrink: 0, width: '32px', height: '32px', borderRadius: '9px', background: 'var(--color-primary)',
   color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
   fontSize: '14px', fontWeight: '700', marginTop: '5px',
 }
@@ -114,6 +115,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
   const [photoError, setPhotoError] = useState('')
   const photoInputRef = useRef<HTMLInputElement>(null)
   const { toast, show } = useToast()
+  const [isPro] = useProPlan()
 
   useEffect(() => {
     // Not being able to list cookbooks just means the picker offers "none" and
@@ -155,6 +157,26 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // Free-plan caps (Pro removes them). Check before doing any work so nothing
+    // half-saves.
+    const makingNewCookbook = cookbookId === NEW_COOKBOOK && !!newCookbookName.trim()
+    if (!isPro && makingNewCookbook && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
+      setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
+      return
+    }
+    if (!isPro) {
+      try {
+        const existing = await recipeAPI.list()
+        if (Array.isArray(existing) && existing.length >= FREE_RECIPE_LIMIT) {
+          setError(`The Free plan is capped at ${FREE_RECIPE_LIMIT} recipes. Upgrade to Pro in Settings for unlimited.`)
+          return
+        }
+      } catch {
+        // If the count can't be fetched, don't block the save.
+      }
+    }
+
     setLoading(true)
 
     const cleanIngredients = ingredients
@@ -247,7 +269,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
         {draft && !draft.warnings?.length && (
           <div style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
-            <p style={{ margin: 0, fontSize: '12.5px', color: '#6ba356', fontWeight: '600', lineHeight: 1.5 }}>
+            <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--color-primary)', fontWeight: '600', lineHeight: 1.5 }}>
               Imported — look it over and change anything that isn’t right.
             </p>
           </div>
@@ -330,7 +352,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 <button
                   type="button"
                   onClick={() => photoInputRef.current?.click()}
-                  style={{ marginTop: '8px', background: 'none', border: 'none', color: '#6ba356', fontSize: '13px', fontWeight: '700', cursor: 'pointer', padding: 0 }}
+                  style={{ marginTop: '8px', background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', padding: 0 }}
                 >
                   Choose a different photo
                 </button>
@@ -343,7 +365,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed var(--color-primary-border)', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
               >
                 <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Camera size={18} color="#6ba356" />
+                  <Camera size={18} color="var(--color-primary)" />
                 </div>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-muted)' }}>
                   {photoBusy ? 'Processing photo…' : 'Add a photo'}
@@ -413,9 +435,9 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                     style={{
                       display: 'flex', alignItems: 'center', gap: '5px',
                       padding: '8px 14px',
-                      background: active ? '#6ba356' : 'var(--color-card)',
+                      background: active ? 'var(--color-primary)' : 'var(--color-card)',
                       color: active ? '#fff' : 'var(--color-text-secondary)',
-                      border: active ? '2px solid #6ba356' : '2px solid var(--color-border)',
+                      border: active ? '2px solid var(--color-primary)' : '2px solid var(--color-border)',
                       borderRadius: '999px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                     }}
                   >
@@ -462,7 +484,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
           type="submit"
           form="addRecipeForm"
           disabled={loading}
-          style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: loading ? '#a7c99a' : '#6ba356', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+          style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: loading ? '#a7c99a' : 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}
         >
           {loading ? 'Saving…' : draft ? 'Save recipe' : 'Create recipe'}
         </button>

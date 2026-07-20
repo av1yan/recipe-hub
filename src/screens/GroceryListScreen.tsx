@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Trash2, Plus, Check, Camera, Image as ImageIcon, Loader2, X } from 'lucide-react'
+import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Crown, Loader2, X } from 'lucide-react'
 import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
+import { useProPlan } from '../utils/proPlan'
+import { shareText } from '../utils/share'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -86,6 +88,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const libraryRef = useRef<HTMLInputElement>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
   const { toast, show } = useToast()
+  const [isPro] = useProPlan()
 
   useEffect(() => {
     loadLists()
@@ -175,6 +178,23 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   // the person can snap a fresh photo or pick an existing one, matching the
   // recipe photo import.
   const openCamera = () => setPickerOpen(true)
+
+  // Pro feature: share the current list as text — native share sheet on a
+  // phone, clipboard on desktop.
+  async function shareList() {
+    if (!isPro) { show('Sharing your list is a Pro feature — upgrade in Settings.', 'error'); return }
+    const list = lists.find(l => l.id === selectedListId)
+    const items = list?.items || []
+    if (items.length === 0) { show('Nothing to share yet.', 'error'); return }
+    const lines = [
+      `🛒 ${list?.name || 'Grocery list'}`,
+      '',
+      ...items.map(i => `${i.checked ? '✓' : '•'} ${i.name}${i.quantity ? ` — ${i.quantity}${i.unit ? ' ' + i.unit : ''}` : ''}`),
+    ]
+    const res = await shareText('My grocery list', lines.join('\n'))
+    if (res === 'failed') show('Could not share the list', 'error')
+    else show(res === 'copied' ? 'List copied to clipboard' : 'List shared')
+  }
 
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -273,13 +293,25 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedList ? '12px' : 0 }}>
           <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
-          <button
-            onClick={openCamera}
-            aria-label="Scan a grocery note"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: '#6ba356', border: '1.5px solid var(--color-primary-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
-          >
-            <Camera size={16} /> Scan
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {selectedList && (selectedList.items?.length || 0) > 0 && (
+              <button
+                onClick={shareList}
+                aria-label="Share grocery list"
+                style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+              >
+                <Share2 size={15} /> Share
+                {!isPro && <Crown size={11} color="#f4b860" style={{ position: 'absolute', top: '-5px', right: '-5px' }} />}
+              </button>
+            )}
+            <button
+              onClick={openCamera}
+              aria-label="Scan a grocery note"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1.5px solid var(--color-primary-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+            >
+              <Camera size={16} /> Scan
+            </button>
+          </div>
         </div>
         {selectedList && (
           <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
@@ -302,13 +334,13 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                 className="input"
                 style={{ marginBottom: '8px' }}
               />
-              <button onClick={createNewList} className="btn" style={{ width: '100%', background: '#6ba356', color: '#fff' }}>
+              <button onClick={createNewList} className="btn" style={{ width: '100%', background: 'var(--color-primary)', color: '#fff' }}>
                 Create List
               </button>
               <button
                 onClick={openCamera}
                 className="btn"
-                style={{ width: '100%', background: 'var(--color-card)', color: '#6ba356', border: '1.5px solid var(--color-primary-border)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ width: '100%', background: 'var(--color-card)', color: 'var(--color-primary)', border: '1.5px solid var(--color-primary-border)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
                 <Camera size={16} /> Scan a note
               </button>
@@ -330,7 +362,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                       padding: '8px 12px',
                       borderRadius: '8px',
                       border: 'none',
-                      background: list.id === selectedListId ? '#6ba356' : 'var(--color-subtle)',
+                      background: list.id === selectedListId ? 'var(--color-primary)' : 'var(--color-subtle)',
                       color: list.id === selectedListId ? '#fff' : 'var(--color-text)',
                       fontSize: '13px',
                       fontWeight: '600',
@@ -385,7 +417,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     <button
                       onClick={addItemToList}
                       className="btn btn-icon"
-                      style={{ background: '#6ba356', color: '#fff', width: '40px', height: '40px', padding: '8px' }}
+                      style={{ background: 'var(--color-primary)', color: '#fff', width: '40px', height: '40px', padding: '8px' }}
                     >
                       <Plus size={18} />
                     </button>
@@ -420,8 +452,8 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                             height: '22px',
                             borderRadius: '6px',
                             flexShrink: 0,
-                            border: `2px solid ${item.checked ? '#6ba356' : 'var(--color-border)'}`,
-                            background: item.checked ? '#6ba356' : 'transparent',
+                            border: `2px solid ${item.checked ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                            background: item.checked ? 'var(--color-primary)' : 'transparent',
                             color: '#fff',
                             cursor: 'pointer',
                             padding: 0,
@@ -459,10 +491,10 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       {/* Scanning overlay */}
       {scanning && (
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.96)', zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
-          <Loader2 size={40} color="#6ba356" style={{ animation: 'spin 1s linear infinite' }} />
+          <Loader2 size={40} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
           <p style={{ fontSize: '15px', color: 'var(--color-text)', fontWeight: '600', margin: 0 }}>Reading your note…</p>
           <div style={{ width: '200px', height: '6px', background: 'var(--color-border)', borderRadius: '3px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: '#6ba356', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
+            <div style={{ height: '100%', background: 'var(--color-primary)', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
           </div>
           <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
@@ -507,7 +539,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             <button
               onClick={addScannedItems}
               disabled={savingScan || scanned.length === 0}
-              style={{ flex: 2, padding: '13px', borderRadius: '12px', background: '#6ba356', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1 }}
+              style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1 }}
             >
               {savingScan ? 'Adding…' : `Add ${scanned.length} item${scanned.length === 1 ? '' : 's'}`}
             </button>
@@ -525,7 +557,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)', textAlign: 'center' }}>Scan a grocery note</p>
             <button
               onClick={() => { setPickerOpen(false); cameraRef.current?.click() }}
-              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#6ba356', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
               <Camera size={17} /> Take a photo
             </button>
