@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles, BookmarkPlus, Flame } from 'lucide-react'
+import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles, BookmarkPlus, Flame, CalendarPlus } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
-import { recipeAPI, groceryAPI, insightsAPI } from '../utils/api'
+import { recipeAPI, groceryAPI, insightsAPI, mealPlanAPI } from '../utils/api'
+import { DAY_NAMES, getMeals, sameWeek, mondayOf } from './MealPlanScreen'
 import { getPantry, savePantry, pantryMatch } from '../utils/pantry'
 import { useProPlan } from '../utils/proPlan'
 import { Toast, useToast } from '../components/Toast'
@@ -19,9 +20,11 @@ const STAPLES = [
   'butter', 'milk', 'cheese', 'flour', 'potato', 'bell pepper', 'carrot', 'spinach',
 ]
 
+type Dish = { name: string; steps: string; nutrition: string }
+
 // Fallback for when the backend returns only a joined `text` string: split it
 // into { name, steps, nutrition } tiles on "::", " — " or " - ".
-function parseDishes(text: string): { name: string; steps: string; nutrition: string }[] {
+function parseDishes(text: string): Dish[] {
   return text
     .split('\n')
     .map(l => l.trim())
@@ -63,6 +66,8 @@ export default function PantryScreen({ onNavigate }: Props) {
   const [cookNote, setCookNote] = useState('')
   const [savingIdx, setSavingIdx] = useState<number | null>(null)
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set())
+  const [planningIdx, setPlanningIdx] = useState<number | null>(null)
+  const [plannedRecipes, setPlannedRecipes] = useState<Set<string>>(new Set())
   const { toast, show } = useToast()
 
   useEffect(() => {
@@ -107,14 +112,14 @@ export default function PantryScreen({ onNavigate }: Props) {
   }
   const clearPantry = () => {
     setPantry([]); savePantry([])
-    setCookDishes([]); setCookNote(''); setSavedRecipes(new Set())
+    setCookDishes([]); setCookNote(''); setSavedRecipes(new Set()); setPlannedRecipes(new Set())
   }
 
   // Ask the AI cook for dish ideas from whatever's in the pantry. Falls back to a
   // friendly note when the backend has no API key (rather than a hard error).
   async function runCook() {
     if (!pantry.length || cookLoading) return
-    setCookLoading(true); setCookDishes([]); setCookNote(''); setSavedRecipes(new Set())
+    setCookLoading(true); setCookDishes([]); setCookNote(''); setSavedRecipes(new Set()); setPlannedRecipes(new Set())
     try {
       const res: any = await insightsAPI.cook(pantry)
       if (res?.configured === false) setCookNote(res.message || "The AI cook isn't switched on yet.")
@@ -131,43 +136,62 @@ export default function PantryScreen({ onNavigate }: Props) {
     }
   }
 
-  // Turn one AI dish idea into a saved recipe: pull in the pantry items it
-  // mentions as ingredients, and split its how-to into steps.
-  async function saveDish(dish: { name: string; steps: string; nutrition: string }, idx: number) {
+  // Build a recipe from an AI dish idea: pull in the pantry items it mentions as
+  // ingredients, split its how-to into steps, and carry over the calorie estimate.
+  function dishToRecipePayload(dish: Dish) {
+    const hay = (dish.name + ' ' + dish.steps).toLowerCase()
+    const ingredients = pantry
+      .filter(p => hay.includes(p.toLowerCase()))
+      .map(p => ({ name: p, quantity: 1, unit: '' }))
+    // Sentence split without lookbehind, so it works on older mobile Safari.
+    const sentences = (dish.steps || '').match(/[^.!?]+[.!?]+/g) || (dish.steps ? [dish.steps] : [])
+    const steps = sentences.map(s => s.trim()).filter(Boolean)
+    const instructions = (steps.length ? steps : [dish.name]).map((text, i) => ({ stepNumber: i + 1, text }))
+    const calMatch = (dish.nutrition || '').match(/(\d{2,4})\s*k?cal/i)
+    return {
+      name: dish.name, cuisine: 'Other', mealType: 'dinner', difficulty: 'easy',
+      prepTime: 10, cookTime: 20, servings: 2,
+      calories: calMatch ? parseInt(calMatch[1], 10) : null,
+      imageUrl: null, sourceUrl: '', tags: ['pantry'],
+      ingredients, instructions,
+    }
+  }
+
+  // Save one dish idea as a recipe in the collection.
+  async function saveDish(dish: Dish, idx: number) {
     if (savingIdx !== null || savedRecipes.has(dish.name)) return
     setSavingIdx(idx)
     try {
-      const hay = (dish.name + ' ' + dish.steps).toLowerCase()
-      const ingredients = pantry
-        .filter(p => hay.includes(p.toLowerCase()))
-        .map(p => ({ name: p, quantity: 1, unit: '' }))
-      // Sentence split without lookbehind, so it works on older mobile Safari.
-      const sentences = (dish.steps || '').match(/[^.!?]+[.!?]+/g) || (dish.steps ? [dish.steps] : [])
-      const steps = sentences.map(s => s.trim()).filter(Boolean)
-      const instructions = (steps.length ? steps : [dish.name]).map((text, i) => ({ stepNumber: i + 1, text }))
-      // Carry the calorie estimate onto the saved recipe when we can read one.
-      const calMatch = (dish.nutrition || '').match(/(\d{2,4})\s*k?cal/i)
-      await recipeAPI.create({
-        name: dish.name,
-        cuisine: 'Other',
-        mealType: 'dinner',
-        difficulty: 'easy',
-        prepTime: 10,
-        cookTime: 20,
-        servings: 2,
-        calories: calMatch ? parseInt(calMatch[1], 10) : null,
-        imageUrl: null,
-        sourceUrl: '',
-        tags: ['pantry'],
-        ingredients,
-        instructions,
-      })
+      await recipeAPI.create(dishToRecipePayload(dish))
       setSavedRecipes(prev => new Set(prev).add(dish.name))
       show(`Saved “${dish.name}” to your recipes`)
     } catch {
       show('Could not save that recipe', 'error')
     } finally {
       setSavingIdx(null)
+    }
+  }
+
+  // Save the dish as a recipe and drop it into this week's plan, in today's first
+  // open slot (dinner first). Creates the week's plan if there isn't one yet.
+  async function planDish(dish: Dish, idx: number) {
+    if (planningIdx !== null || plannedRecipes.has(dish.name)) return
+    setPlanningIdx(idx)
+    try {
+      const created: any = await recipeAPI.create(dishToRecipePayload(dish))
+      const today = new Date()
+      const plans: any = await mealPlanAPI.list()
+      let plan = (Array.isArray(plans) ? plans : []).find((p: any) => sameWeek(p.weekStart, today))
+      if (!plan?.id) plan = await mealPlanAPI.create(mondayOf(today))
+      const todayName = DAY_NAMES[(today.getDay() + 6) % 7]
+      const slot = ['dinner', 'lunch', 'breakfast', 'snack'].find(s => getMeals(plan, todayName, s).length === 0) || 'dinner'
+      await mealPlanAPI.addMeal(plan.id, created.id, todayName, slot)
+      setPlannedRecipes(prev => new Set(prev).add(dish.name))
+      show(`Added “${dish.name}” to today’s ${slot}`)
+    } catch {
+      show('Could not add to your meal plan', 'error')
+    } finally {
+      setPlanningIdx(null)
     }
   }
 
@@ -317,15 +341,26 @@ export default function PantryScreen({ onNavigate }: Props) {
                             </span>
                           </div>
                         )}
-                        <button
-                          onClick={() => saveDish(d, i)}
-                          disabled={savingIdx === i || savedRecipes.has(d.name)}
-                          style={{ marginTop: '9px', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '9px', border: '1px solid var(--color-primary-border)', background: savedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'transparent', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: savingIdx === i || savedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
-                        >
-                          {savedRecipes.has(d.name)
-                            ? <><Check size={13} /> Saved</>
-                            : <><BookmarkPlus size={13} /> {savingIdx === i ? 'Saving…' : 'Save to recipes'}</>}
-                        </button>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                          <button
+                            onClick={() => saveDish(d, i)}
+                            disabled={savingIdx === i || savedRecipes.has(d.name)}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '9px', border: '1px solid var(--color-primary-border)', background: savedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'transparent', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: savingIdx === i || savedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                          >
+                            {savedRecipes.has(d.name)
+                              ? <><Check size={13} /> Saved</>
+                              : <><BookmarkPlus size={13} /> {savingIdx === i ? 'Saving…' : 'Save to recipes'}</>}
+                          </button>
+                          <button
+                            onClick={() => planDish(d, i)}
+                            disabled={planningIdx === i || plannedRecipes.has(d.name)}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '9px', border: '1px solid var(--color-border)', background: plannedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'transparent', color: plannedRecipes.has(d.name) ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: planningIdx === i || plannedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                          >
+                            {plannedRecipes.has(d.name)
+                              ? <><Check size={13} /> Planned</>
+                              : <><CalendarPlus size={13} /> {planningIdx === i ? 'Adding…' : 'Add to plan'}</>}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
