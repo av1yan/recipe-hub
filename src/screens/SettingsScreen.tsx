@@ -354,7 +354,7 @@ function Subscription({ onBack }: { onBack: () => void }) {
                     style={{
                       flex: 1, padding: '8px 6px', borderRadius: '999px', border: 'none',
                       cursor: 'pointer', fontFamily: 'inherit', fontSize: '12.5px', fontWeight: '700',
-                      background: plan === t.key ? 'var(--color-card)' : 'transparent',
+                      background: plan === t.key ? '#fff' : 'transparent',
                       color: plan === t.key ? 'var(--color-primary-dark)' : 'rgba(255,255,255,0.92)',
                       transition: 'background 0.15s ease',
                     }}
@@ -367,7 +367,7 @@ function Subscription({ onBack }: { onBack: () => void }) {
 
             <button
               onClick={() => { if (showTrial) startTrial(); else setPro(true) }}
-              style={{ marginTop: trial.used ? '14px' : '10px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary-dark)', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ marginTop: trial.used ? '14px' : '10px', width: '100%', padding: '12px', background: '#fff', color: 'var(--color-primary-dark)', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {showTrial ? `Start ${TRIAL_DAYS}-day free trial` : 'Upgrade for $4.99/mo'}
             </button>
