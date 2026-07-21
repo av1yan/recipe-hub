@@ -5,6 +5,7 @@ import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
+import { getCalorieGoal } from '../utils/goals'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 
@@ -22,8 +23,6 @@ export const MEALS = [
   { key: 'snack', label: 'Snack', tint: '#fce7f3', emoji: '🍎' },
 ]
 
-// A sensible default daily calorie target for the Pro nutrition goal bar.
-const GOAL_CAL = 2000
 
 // Monday (local midnight) of whatever week a date falls in.
 export function mondayOf(date: Date | string): Date {
@@ -70,6 +69,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [generating, setGenerating] = useState(false)
   const [isPro] = useProPlan()
   const { toast, show } = useToast()
+  const goalCal = getCalorieGoal()
 
   useEffect(() => {
     loadData()
@@ -356,9 +356,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>cal</span>
                 </div>
                 <div style={{ height: '6px', borderRadius: '3px', background: 'var(--color-subtle)', overflow: 'hidden', marginTop: '9px' }}>
-                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / GOAL_CAL) * 100))}%`, background: 'var(--color-primary)', borderRadius: '3px', transition: 'width 0.3s ease' }} />
+                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / goalCal) * 100))}%`, background: 'var(--color-primary)', borderRadius: '3px', transition: 'width 0.3s ease' }} />
                 </div>
-                <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>of {GOAL_CAL.toLocaleString()} cal goal</span>
+                <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>of {goalCal.toLocaleString()} cal goal</span>
               </div>
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <MacroStat color="#a78bfa" label="Protein" grams={dayNutrition.protein} />

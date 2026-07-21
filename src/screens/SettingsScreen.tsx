@@ -12,6 +12,7 @@ import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT } from '../utils/pro
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings } from '../utils/preferences'
+import { getCalorieGoal, setCalorieGoal } from '../utils/goals'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
@@ -346,12 +347,14 @@ function Preferences({ onBack }: { onBack: () => void }) {
   const [servings, setServingsState] = useState(() => getDefaultServings())
   const [diet, setDiet] = useState<string[]>(() => getDietPrefs())
   const [allergies, setAllergiesState] = useState<string[]>(() => getAllergies())
+  const [goal, setGoalState] = useState(() => getCalorieGoal())
   const [saved, setSaved] = useState(false)
 
-  // Units and default servings persist the moment they're picked, so recipes
-  // reflect them straight away.
+  // Units, default servings and the calorie goal persist the moment they change,
+  // so recipes and Insights reflect them straight away.
   const setUnits = (u: 'imperial' | 'metric') => { setUnitsState(u); setUnitPref(u) }
   const setServings = (s: number) => { setServingsState(s); setDefaultServings(s) }
+  const setGoal = (v: number) => { const n = Math.min(6000, Math.max(1000, Math.round(v / 50) * 50)); setGoalState(n); setCalorieGoal(n) }
 
   const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2500) }
 
@@ -414,6 +417,21 @@ function Preferences({ onBack }: { onBack: () => void }) {
                 <button key={s} onClick={() => setServings(s)} style={toggleStyle(servings === s)}>{s}</button>
               ))}
             </div>
+          </div>
+        </div>
+
+        <SectionHeader label="DAILY CALORIE GOAL" />
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
+          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 10px', lineHeight: 1.35 }}>
+            Your target for Insights and the meal-plan nutrition bar.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button onClick={() => setGoal(goal - 50)} aria-label="Lower goal" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '20px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>−</button>
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <span style={{ fontSize: '22px', fontWeight: '800', color: 'var(--color-text)' }}>{goal.toLocaleString()}</span>
+              <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginLeft: '5px' }}>cal/day</span>
+            </div>
+            <button onClick={() => setGoal(goal + 50)} aria-label="Raise goal" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '20px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>+</button>
           </div>
         </div>
 
