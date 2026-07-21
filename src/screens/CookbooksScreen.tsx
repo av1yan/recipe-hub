@@ -209,7 +209,7 @@ export default function CookbooksScreen({ onNavigate }: Props) {
                         <button
                           onClick={() => deleteCookbook(cookbook.id)}
                           disabled={deleting}
-                          style={{ flex: 1, padding: '9px', borderRadius: '10px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: deleting ? 'default' : 'pointer', opacity: deleting ? 0.6 : 1, fontFamily: 'inherit' }}
+                          style={{ flex: 1, padding: '9px', borderRadius: '10px', background: '#dc2626', color: '#fff', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: deleting ? 'default' : 'pointer', opacity: deleting ? 0.6 : 1, fontFamily: 'inherit' }}
                         >
                           {deleting ? '…' : 'Delete'}
                         </button>

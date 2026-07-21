@@ -224,7 +224,7 @@ function AccountPage({ onBack }: { onBack: () => void }) {
           {showDelete && (
             <div style={{ padding: '0 16px 16px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
               <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '12px 0' }}>This will permanently delete your account and all your recipes. This cannot be undone.</p>
-              <button style={{ width: '100%', padding: '12px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+              <button style={{ width: '100%', padding: '12px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
                 Permanently Delete Account
               </button>
             </div>
@@ -522,7 +522,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {ALLERGY_OPTIONS.map(a => (
-              <button key={a.id} onClick={() => toggleAllergy(a.id)} style={pill(allergies.includes(a.id), '#ef4444')}>{a.label}</button>
+              <button key={a.id} onClick={() => toggleAllergy(a.id)} style={pill(allergies.includes(a.id), '#dc2626')}>{a.label}</button>
             ))}
           </div>
         </div>

@@ -342,7 +342,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               <button onClick={() => setConfirmDelete(false)} style={{ flex: 1, padding: '11px', borderRadius: '11px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Cancel
               </button>
-              <button onClick={deleteWeek} disabled={deleting} style={{ flex: 1, padding: '11px', borderRadius: '11px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: deleting ? 0.6 : 1, fontFamily: 'inherit' }}>
+              <button onClick={deleteWeek} disabled={deleting} style={{ flex: 1, padding: '11px', borderRadius: '11px', background: '#dc2626', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: deleting ? 0.6 : 1, fontFamily: 'inherit' }}>
                 {deleting ? 'Deleting…' : 'Delete week'}
               </button>
             </div>
