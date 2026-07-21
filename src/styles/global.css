@@ -197,6 +197,8 @@
 /* On a narrow phone the grocery add-row runs out of room: the amount, unit and
    add button hold fixed widths, squeezing the item name down to a few
    characters. Give the name its own full-width line instead. */
+.grocery-add > input[type="text"] { flex: 1 1 auto; }
+
 @media (max-width: 380px) {
   .grocery-add { flex-wrap: wrap; }
   .grocery-add > input[type="text"] { flex: 1 0 100%; }

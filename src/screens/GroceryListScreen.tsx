@@ -448,7 +448,9 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     onChange={(e) => setNewItemName(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addItemToList()}
                     placeholder="Add an item…"
-                    style={{ ...fieldStyle, flex: 1, minWidth: 0 }}
+                    /* flex lives in .grocery-add so the narrow-width rule can
+                       widen it; an inline flex would outrank the stylesheet. */
+                    style={{ ...fieldStyle, minWidth: 0 }}
                   />
                   <input
                     type="number"
