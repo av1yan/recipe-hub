@@ -20,6 +20,7 @@ const VEG_KEYWORDS = [
 ]
 
 const calOf = (r: any): number => (r?.nutrition?.calories ?? r?.calories ?? 0) || 0
+const proteinOf = (r: any): number => (r?.nutrition?.protein ?? 0) || 0
 const tagsOf = (r: any): string[] =>
   (r?.tags || []).map((t: any) => (typeof t === 'string' ? t : t?.tag)).filter(Boolean).map((s: string) => s.toLowerCase())
 
@@ -32,8 +33,9 @@ export function computeInsights(opts: {
   allRecipes: Recipe[]
   pantry: string[]
   goalCal: number
+  proteinGoal: number
 }): Insight[] {
-  const { planned, allRecipes, pantry, goalCal } = opts
+  const { planned, allRecipes, pantry, goalCal, proteinGoal } = opts
   const out: Insight[] = []
   const nDays = new Set(planned.map(p => p.day)).size
 
@@ -53,7 +55,21 @@ export function computeInsights(opts: {
     }
   }
 
-  // 2. Cuisine variety
+  // 2. Protein vs goal
+  const withProtein = planned.filter(p => proteinOf(p.recipe) > 0)
+  if (withProtein.length && nDays && proteinGoal > 0) {
+    const perDay = Math.round(withProtein.reduce((s, p) => s + proteinOf(p.recipe), 0) / nDays)
+    const diff = perDay - proteinGoal
+    if (diff <= -20) {
+      out.push({ emoji: '🍗', tone: 'warn', text: `Protein's light — about ${perDay}g/day, ${Math.abs(diff)}g under your ${proteinGoal}g goal.` })
+    } else if (diff >= 20) {
+      out.push({ emoji: '💪', tone: 'good', text: `Protein-packed — about ${perDay}g/day, over your ${proteinGoal}g goal.` })
+    } else {
+      out.push({ emoji: '💪', tone: 'good', text: `On track for protein — about ${perDay}g/day against your ${proteinGoal}g goal.` })
+    }
+  }
+
+  // 3. Cuisine variety
   const cuisines = planned.map(p => p.recipe?.cuisine).filter(Boolean) as string[]
   if (cuisines.length >= 3) {
     const counts: Record<string, number> = {}

@@ -3,7 +3,7 @@ import { ArrowLeft, Crown, Sparkles, Loader2, Lightbulb } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { mealPlanAPI, recipeAPI, insightsAPI } from '../utils/api'
 import { getPantry } from '../utils/pantry'
-import { getCalorieGoal } from '../utils/goals'
+import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { getDietPrefs } from './DietPreferencesScreen'
 import { computeInsights, type Insight, type PlannedMeal } from '../utils/insights'
 import { useProPlan } from '../utils/proPlan'
@@ -80,16 +80,21 @@ export default function InsightsScreen({ onNavigate }: Props) {
 
   const pantry = getPantry()
   const goalCal = getCalorieGoal()
-  const insights = computeInsights({ planned, allRecipes: recipes, pantry, goalCal })
+  const macroGoals = getMacroGoals()
+  const insights = computeInsights({ planned, allRecipes: recipes, pantry, goalCal, proteinGoal: macroGoals.protein })
 
   const askAI = async () => {
     setAiLoading(true); setAiPoints([]); setAiNote('')
     try {
       const summary = {
         goalCaloriesPerDay: goalCal,
+        dailyMacroGoals: macroGoals,
         plannedMeals: planned.map(p => ({
           day: p.day, slot: p.slot, name: p.recipe?.name, cuisine: p.recipe?.cuisine,
           calories: p.recipe?.nutrition?.calories ?? p.recipe?.calories ?? null,
+          protein: p.recipe?.nutrition?.protein ?? null,
+          carbs: p.recipe?.nutrition?.carbs ?? null,
+          fat: p.recipe?.nutrition?.fat ?? null,
         })),
         pantry,
         diet: getDietPrefs(),

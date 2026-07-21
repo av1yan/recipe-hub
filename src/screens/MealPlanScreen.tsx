@@ -5,7 +5,7 @@ import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
-import { getCalorieGoal } from '../utils/goals'
+import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 
@@ -70,6 +70,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [isPro] = useProPlan()
   const { toast, show } = useToast()
   const goalCal = getCalorieGoal()
+  const macroGoals = getMacroGoals()
 
   useEffect(() => {
     loadData()
@@ -361,9 +362,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>of {goalCal.toLocaleString()} cal goal</span>
               </div>
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <MacroStat color="#a78bfa" label="Protein" grams={dayNutrition.protein} />
-                <MacroStat color="#fbbf24" label="Carbs" grams={dayNutrition.carbs} />
-                <MacroStat color="var(--color-primary)" label="Fat" grams={dayNutrition.fat} />
+                <MacroStat color="#a78bfa" label="Protein" grams={dayNutrition.protein} goal={macroGoals.protein} />
+                <MacroStat color="#fbbf24" label="Carbs" grams={dayNutrition.carbs} goal={macroGoals.carbs} />
+                <MacroStat color="var(--color-primary)" label="Fat" grams={dayNutrition.fat} goal={macroGoals.fat} />
               </div>
             </div>
           </div>
@@ -457,12 +458,14 @@ export default function MealPlanScreen({ onNavigate }: Props) {
  * swap) is ticked.
  */
 /** One macro line in the nutrition card: coloured dot, label, grams. */
-function MacroStat({ color, label, grams }: { color: string; label: string; grams: number }) {
+function MacroStat({ color, label, grams, goal }: { color: string; label: string; grams: number; goal: number }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, flexShrink: 0 }} />
       <span style={{ flex: 1, fontSize: '13px', color: 'var(--color-text-secondary)' }}>{label}</span>
-      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>{grams}g</span>
+      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>
+        {grams}<span style={{ color: 'var(--color-text-muted)', fontWeight: '600' }}> / {goal}g</span>
+      </span>
     </div>
   )
 }

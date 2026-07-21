@@ -12,7 +12,7 @@ import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT } from '../utils/pro
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings } from '../utils/preferences'
-import { getCalorieGoal, setCalorieGoal } from '../utils/goals'
+import { getCalorieGoal, setCalorieGoal, getMacroGoals, setMacroGoal } from '../utils/goals'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).
@@ -348,6 +348,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
   const [diet, setDiet] = useState<string[]>(() => getDietPrefs())
   const [allergies, setAllergiesState] = useState<string[]>(() => getAllergies())
   const [goal, setGoalState] = useState(() => getCalorieGoal())
+  const [macros, setMacrosState] = useState(() => getMacroGoals())
   const [saved, setSaved] = useState(false)
 
   // Units, default servings and the calorie goal persist the moment they change,
@@ -355,6 +356,10 @@ function Preferences({ onBack }: { onBack: () => void }) {
   const setUnits = (u: 'imperial' | 'metric') => { setUnitsState(u); setUnitPref(u) }
   const setServings = (s: number) => { setServingsState(s); setDefaultServings(s) }
   const setGoal = (v: number) => { const n = Math.min(6000, Math.max(1000, Math.round(v / 50) * 50)); setGoalState(n); setCalorieGoal(n) }
+  const setMacro = (m: 'protein' | 'carbs' | 'fat', v: number) => {
+    const n = Math.min(500, Math.max(0, Math.round(v / 5) * 5))
+    setMacrosState(prev => ({ ...prev, [m]: n })); setMacroGoal(m, n)
+  }
 
   const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2500) }
 
@@ -433,6 +438,23 @@ function Preferences({ onBack }: { onBack: () => void }) {
             </div>
             <button onClick={() => setGoal(goal + 50)} aria-label="Raise goal" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '20px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>+</button>
           </div>
+        </div>
+
+        <SectionHeader label="DAILY MACROS" />
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px 12px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {([
+            { key: 'protein', label: 'Protein', color: '#a78bfa' },
+            { key: 'carbs', label: 'Carbs', color: '#fbbf24' },
+            { key: 'fat', label: 'Fat', color: 'var(--color-primary)' },
+          ] as const).map(m => (
+            <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 0' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+              <span style={{ flex: 1, fontSize: '13.5px', color: 'var(--color-text)', fontWeight: '600' }}>{m.label}</span>
+              <button onClick={() => setMacro(m.key, macros[m.key] - 5)} aria-label={`Lower ${m.label}`} style={{ width: '32px', height: '32px', borderRadius: '9px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '17px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>−</button>
+              <span style={{ width: '48px', textAlign: 'center', fontSize: '15px', fontWeight: '800', color: 'var(--color-text)' }}>{macros[m.key]}g</span>
+              <button onClick={() => setMacro(m.key, macros[m.key] + 5)} aria-label={`Raise ${m.label}`} style={{ width: '32px', height: '32px', borderRadius: '9px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '17px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>+</button>
+            </div>
+          ))}
         </div>
 
         <SectionHeader label="DIET" />
