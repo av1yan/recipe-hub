@@ -254,10 +254,10 @@ function Subscription({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="My Subscription" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px' }}>
         {/* Current plan. On Pro the perks live here, since the upsell card below
             is only shown to Free users -- selling Pro to a Pro user is noise. */}
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px 18px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
+        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '13px 16px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '3px' }}>Current plan</div>
@@ -271,24 +271,23 @@ function Subscription({ onBack }: { onBack: () => void }) {
               Active
             </span>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '10px 0 0', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '7px 0 0', lineHeight: 1.45 }}>
             {isPro
               ? 'Pro is on — every feature below is unlocked.'
               : 'Everything you need to save and cook your own recipes.'}
           </p>
 
           {isPro && (
-            <div style={{ marginTop: '14px', borderTop: '1px solid var(--color-subtle)', paddingTop: '14px' }}>
-              <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '11px' }}>Included</div>
-              {PRO_FEATURES.map(f => (
-                <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '11px' }}>
-                  <Check size={15} color="var(--color-primary)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', lineHeight: 1.2 }}>{f.title}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.3 }}>{f.desc}</div>
+            <div style={{ marginTop: '12px', borderTop: '1px solid var(--color-subtle)', paddingTop: '12px' }}>
+              <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '10px' }}>Included</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {PRO_FEATURES.map(f => (
+                  <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                    <Check size={15} color="var(--color-primary)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--color-text)', lineHeight: 1.2 }}>{f.title}</span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -308,29 +307,28 @@ function Subscription({ onBack }: { onBack: () => void }) {
 
         {/* On Free: the full gold upsell card. */}
         {!isPro && (
-          <div style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '14px', padding: '18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '13px' }}>
-              <Crown size={20} color="#f4b860" />
-              <span style={{ fontSize: '17px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
+          <div style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '14px', padding: '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '11px' }}>
+              <Crown size={19} color="#f4b860" />
+              <span style={{ fontSize: '16px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
             </div>
-            {PRO_FEATURES.map(f => (
-              <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>{f.title}</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.3 }}>{f.desc}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {PRO_FEATURES.map(f => (
+                <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: '13.5px', fontWeight: '600', color: '#fff', lineHeight: 1.2 }}>{f.title}</span>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <button
               onClick={() => setPro(true)}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.25)' }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)' }}
-              style={{ marginTop: '16px', width: '100%', padding: '13px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
+              style={{ marginTop: '13px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
             >
               Upgrade for $4.99/mo
             </button>
-            <p style={{ margin: '9px 0 0', textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
+            <p style={{ margin: '7px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.8)' }}>
               Cancel anytime — no commitment.
             </p>
           </div>
