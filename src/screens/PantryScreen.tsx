@@ -183,11 +183,20 @@ export default function PantryScreen({ onNavigate }: Props) {
       const plans: any = await mealPlanAPI.list()
       let plan = (Array.isArray(plans) ? plans : []).find((p: any) => sameWeek(p.weekStart, today))
       if (!plan?.id) plan = await mealPlanAPI.create(mondayOf(today))
-      const todayName = DAY_NAMES[(today.getDay() + 6) % 7]
-      const slot = ['dinner', 'lunch', 'breakfast', 'snack'].find(s => getMeals(plan, todayName, s).length === 0) || 'dinner'
-      await mealPlanAPI.addMeal(plan.id, created.id, todayName, slot)
+      // First open slot from today onward through the week (dinner first each
+      // day); rolls to the next day when today's slots are all taken.
+      const todayIdx = (today.getDay() + 6) % 7
+      const todayName = DAY_NAMES[todayIdx]
+      const slotOrder = ['dinner', 'lunch', 'breakfast', 'snack']
+      let day = todayName, slot = 'dinner'
+      for (let d = todayIdx; d < DAY_NAMES.length; d++) {
+        const dn = DAY_NAMES[d]
+        const open = slotOrder.find(s => getMeals(plan, dn, s).length === 0)
+        if (open) { day = dn; slot = open; break }
+      }
+      await mealPlanAPI.addMeal(plan.id, created.id, day, slot)
       setPlannedRecipes(prev => new Set(prev).add(dish.name))
-      show(`Added “${dish.name}” to today’s ${slot}`)
+      show(day === todayName ? `Added “${dish.name}” to today’s ${slot}` : `Added “${dish.name}” to ${day}’s ${slot}`)
     } catch {
       show('Could not add to your meal plan', 'error')
     } finally {

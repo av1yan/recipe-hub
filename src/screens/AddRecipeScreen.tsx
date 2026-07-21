@@ -195,6 +195,17 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
         return out
       })
 
+    if (!name.trim()) {
+      setError('Give your recipe a name.')
+      setLoading(false)
+      return
+    }
+    if (cleanIngredients.length === 0 && cleanInstructions.length === 0) {
+      setError('Add at least one ingredient or step.')
+      setLoading(false)
+      return
+    }
+
     try {
       const created: any = await recipeAPI.create({
         name,
