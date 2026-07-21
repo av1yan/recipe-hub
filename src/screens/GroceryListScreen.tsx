@@ -4,6 +4,7 @@ import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI, mealPlanAPI } from '../utils/api'
 import { DAY_NAMES, MEALS, getMeals, sameWeek } from './MealPlanScreen'
+import { toGroceryLine } from '../utils/grocery'
 import { Toast, useToast } from '../components/Toast'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
@@ -191,7 +192,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     const lines = [
       `🛒 ${list?.name || 'Grocery list'}`,
       '',
-      ...items.map(i => `${i.checked ? '✓' : '•'} ${i.name}${i.quantity ? ` — ${i.quantity}${i.unit ? ' ' + i.unit : ''}` : ''}`),
+      ...items.map(i => `${i.checked ? '✓' : '•'} ${i.name}${(i.unit || '').trim() ? ` — ${i.quantity} ${i.unit}` : ''}`),
     ]
     const res = await shareText('My grocery list', lines.join('\n'))
     if (res === 'failed') show('Could not share the list', 'error')
@@ -279,15 +280,16 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           (meal.ingredients || []).forEach((ing: any) => ingredients.push(ing))
         })
       }))
-      if (ingredients.length === 0) { show('No ingredients in this week’s plan yet.', 'error'); return }
+      // Normalize recipe measures into shopping-friendly lines (buy the item, not
+      // "3 tbsp"). The backend then merges repeats by name+unit.
+      const lines = ingredients.map(toGroceryLine).filter(l => l.name)
+      if (lines.length === 0) { show('No ingredients in this week’s plan yet.', 'error'); return }
 
       let list: any = lists.find(l => l.id === selectedListId)
       if (!list?.id) { const gl: any = await groceryAPI.list(); list = Array.isArray(gl) ? gl[0] : gl }
       if (!list?.id) list = await groceryAPI.create('Groceries')
-      await Promise.all(ingredients.map(ing =>
-        groceryAPI.addItem(list.id, { name: ing.name, quantity: ing.quantity || 1, unit: ing.unit, category: ing.category || 'general' })
-      ))
-      const unique = new Set(ingredients.map(i => `${(i.name || '').trim().toLowerCase()}|${(i.unit || '').trim().toLowerCase()}`)).size
+      await Promise.all(lines.map(l => groceryAPI.addItem(list.id, l)))
+      const unique = new Set(lines.map(l => `${l.name.toLowerCase()}|${l.unit.toLowerCase()}`)).size
       await loadLists()
       setSelectedListId(list.id)
       show(`Added ${unique} ingredient${unique === 1 ? '' : 's'} from your plan`)
@@ -513,9 +515,11 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                           <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', textDecoration: item.checked ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.name}
                           </div>
-                          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                            {item.quantity} {item.unit}
-                          </div>
+                          {(item.unit || '').trim() && (
+                            <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                              {item.quantity} {item.unit}
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={() => deleteItem(item.id)}

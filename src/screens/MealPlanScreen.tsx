@@ -4,6 +4,7 @@ import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
+import { toGroceryLine } from '../utils/grocery'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 
@@ -153,16 +154,17 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           (meal.ingredients || []).forEach((ing: any) => ingredients.push(ing))
         })
       }))
-      if (ingredients.length === 0) { show('No ingredients in this week’s plan yet.', 'error'); return }
+      // Normalize recipe measures into shopping-friendly lines (buy the item, not
+      // "3 tbsp"); the backend merges repeats by name+unit.
+      const lines = ingredients.map(toGroceryLine).filter(l => l.name)
+      if (lines.length === 0) { show('No ingredients in this week’s plan yet.', 'error'); return }
 
       const lists: any = await groceryAPI.list()
       let list = Array.isArray(lists) ? lists[0] : lists
       if (!list?.id) list = await groceryAPI.create('Groceries')
-      await Promise.all(ingredients.map(ing =>
-        groceryAPI.addItem(list.id, { name: ing.name, quantity: ing.quantity || 1, unit: ing.unit, category: ing.category || 'general' })
-      ))
+      await Promise.all(lines.map(l => groceryAPI.addItem(list.id, l)))
 
-      const unique = new Set(ingredients.map(i => `${(i.name || '').trim().toLowerCase()}|${(i.unit || '').trim().toLowerCase()}`)).size
+      const unique = new Set(lines.map(l => `${l.name.toLowerCase()}|${l.unit.toLowerCase()}`)).size
       show(`Added ${unique} ingredient${unique === 1 ? '' : 's'} to your grocery list`)
     } catch {
       show('Could not build your grocery list', 'error')

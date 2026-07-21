@@ -221,7 +221,9 @@ export default function PantryScreen({ onNavigate }: Props) {
       let list = Array.isArray(lists) ? lists[0] : lists
       if (!list?.id) list = await groceryAPI.create('Groceries')
       await Promise.all(missing.map(name =>
-        groceryAPI.addItem(list.id, { name, quantity: 1, unit: 'piece', category: 'general' })
+        // Just the item on the shopping list — these are ingredient names, so a
+        // "1 piece" amount would only add noise.
+        groceryAPI.addItem(list.id, { name, quantity: 1, unit: '', category: 'general' })
       ))
       show(`Added ${missing.length} item${missing.length === 1 ? '' : 's'} to your grocery list`)
     } catch {
