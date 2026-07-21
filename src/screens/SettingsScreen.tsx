@@ -251,6 +251,10 @@ function Subscription({ onBack }: { onBack: () => void }) {
   const [isPro, setPro] = useProPlan()
   const trial = getTrialInfo()
   const onTrial = isPro && !isUpgraded()  // Pro because of the trial, not an upgrade
+  // Which way in the person is looking at. Once the trial is spent there is only
+  // one path, so the tabs collapse and this is forced to the paid plan.
+  const [plan, setPlan] = useState<'trial' | 'monthly'>('trial')
+  const showTrial = !trial.used && plan === 'trial'
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
@@ -333,37 +337,47 @@ function Subscription({ onBack }: { onBack: () => void }) {
                 </div>
               ))}
             </div>
-            {trial.used ? (
-              <>
-                <button
-                  onClick={() => setPro(true)}
-                  style={{ marginTop: '13px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', fontFamily: 'inherit' }}
-                >
-                  Upgrade for $4.99/mo
-                </button>
-                <p style={{ margin: '7px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.8)' }}>
-                  Your free trial has ended · cancel anytime.
-                </p>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={startTrial}
-                  style={{ marginTop: '13px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', fontFamily: 'inherit' }}
-                >
-                  Start {TRIAL_DAYS}-day free trial
-                </button>
-                <button
-                  onClick={() => setPro(true)}
-                  style={{ marginTop: '8px', width: '100%', padding: '9px', background: 'transparent', color: '#fff', border: '1.5px solid rgba(255,255,255,0.55)', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
-                >
-                  or upgrade now — $4.99/mo
-                </button>
-                <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.8)' }}>
-                  No card needed · reverts to Free after {TRIAL_DAYS} days.
-                </p>
-              </>
+            {/* The two ways in, as tabs. Each carries its own button *and* its
+                own fine print -- the trial's "no card needed" line used to sit
+                under the upgrade button, where it read as a promise about the
+                paid plan. */}
+            {!trial.used && (
+              <div style={{ display: 'flex', gap: '3px', background: 'rgba(255,255,255,0.18)', borderRadius: '999px', padding: '3px', marginTop: '14px' }}>
+                {([
+                  { key: 'trial' as const, label: `${TRIAL_DAYS}-day free trial` },
+                  { key: 'monthly' as const, label: '$4.99/mo' },
+                ]).map(t => (
+                  <button
+                    key={t.key}
+                    onClick={() => setPlan(t.key)}
+                    aria-pressed={plan === t.key}
+                    style={{
+                      flex: 1, padding: '8px 6px', borderRadius: '999px', border: 'none',
+                      cursor: 'pointer', fontFamily: 'inherit', fontSize: '12.5px', fontWeight: '700',
+                      background: plan === t.key ? 'var(--color-card)' : 'transparent',
+                      color: plan === t.key ? 'var(--color-primary-dark)' : 'rgba(255,255,255,0.92)',
+                      transition: 'background 0.15s ease',
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             )}
+
+            <button
+              onClick={() => { if (showTrial) startTrial(); else setPro(true) }}
+              style={{ marginTop: trial.used ? '14px' : '10px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary-dark)', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              {showTrial ? `Start ${TRIAL_DAYS}-day free trial` : 'Upgrade for $4.99/mo'}
+            </button>
+            <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.85)' }}>
+              {showTrial
+                ? `No card needed · reverts to Free after ${TRIAL_DAYS} days.`
+                : trial.used
+                  ? 'Your free trial has ended · cancel anytime.'
+                  : 'Billed monthly · cancel anytime.'}
+            </p>
           </div>
         )}
       </div>
