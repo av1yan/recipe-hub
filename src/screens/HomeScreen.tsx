@@ -162,67 +162,28 @@ export default function HomeScreen({ onNavigate }: Props) {
         </div>
 
         <div style={{ padding: '20px 16px 0' }}>
-          {/* Pro feature shortcuts only appear once Pro is active. */}
-          {isPro && (<>
-          {/* Cook with what I have — Pro pantry / "what can I make" feature. */}
-          <button
-            onClick={() => onNavigate('pantry')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '16px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
-          >
-            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <ChefHat size={22} color="#fff" />
+          {/* Pro shortcuts, compact — one quick-action row instead of three big
+              cards, so Home stays calm for people who already know the features. */}
+          {isPro && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '24px' }}>
+              {([
+                { icon: ChefHat, label: 'Pantry', screen: 'pantry' as Screen },
+                { icon: Lightbulb, label: 'Insights', screen: 'insights' as Screen },
+                { icon: Users, label: 'Family', screen: 'household' as Screen },
+              ]).map(a => (
+                <button
+                  key={a.label}
+                  onClick={() => onNavigate(a.screen)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <a.icon size={20} color="var(--color-primary)" />
+                  </div>
+                  <span style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--color-text)' }}>{a.label}</span>
+                </button>
+              ))}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>Cook with what I have</span>
-                {!isPro && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'var(--color-primary)', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '999px' }}>
-                    <Crown size={10} color="#f4b860" /> PRO
-                  </span>
-                )}
-              </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Recipes you can make from your pantry</div>
-            </div>
-            <ChevronRight size={18} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-          </button>
-
-          {/* Insights — Pro "your week, read for you" */}
-          <button
-            onClick={() => onNavigate('insights')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '10px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
-          >
-            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Lightbulb size={22} color="var(--color-primary)" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>Insights</span>
-                {!isPro && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'var(--color-primary)', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '999px' }}>
-                    <Crown size={10} color="#f4b860" /> PRO
-                  </span>
-                )}
-              </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Your week, read for you</div>
-            </div>
-            <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
-          </button>
-
-          {/* Family share & sync — one live grocery list for the household */}
-          <button
-            onClick={() => onNavigate('household')}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', marginBottom: '22px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
-          >
-            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Users size={22} color="var(--color-primary)" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>Family share &amp; sync</span>
-              <div style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>One grocery list, live across the household</div>
-            </div>
-            <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
-          </button>
-          </>)}
+          )}
 
           {/* Today's meals — real plan data */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
