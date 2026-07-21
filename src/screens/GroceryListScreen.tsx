@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Loader2, X } from 'lucide-react'
+import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Loader2, X, CalendarDays } from 'lucide-react'
 import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { groceryAPI } from '../utils/api'
+import { groceryAPI, mealPlanAPI } from '../utils/api'
+import { DAY_NAMES, MEALS, getMeals, sameWeek } from './MealPlanScreen'
 import { Toast, useToast } from '../components/Toast'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
@@ -89,6 +90,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const { toast, show } = useToast()
   const [isPro] = useProPlan()
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     loadLists()
@@ -259,6 +261,43 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     }
   }
 
+  // Pro: pull every ingredient from this week's planned meals into the grocery
+  // list (the backend merges repeats by name+unit). Same logic the Meal Plan
+  // screen uses, offered here from where you read the list.
+  async function generateFromPlan() {
+    if (generating) return
+    if (!isPro) { show('Building the list from your plan is a Pro feature — upgrade in Settings.', 'error'); return }
+    setGenerating(true)
+    try {
+      const plans: any = await mealPlanAPI.list()
+      const plan = (Array.isArray(plans) ? plans : []).find((p: any) => sameWeek(p.weekStart, new Date()))
+      if (!plan?.id) { show('Plan some meals this week first.', 'error'); return }
+      const full: any = await mealPlanAPI.get(plan.id)
+      const ingredients: any[] = []
+      DAY_NAMES.forEach(day => MEALS.forEach(m => {
+        getMeals(full, day, m.key).forEach((meal: any) => {
+          (meal.ingredients || []).forEach((ing: any) => ingredients.push(ing))
+        })
+      }))
+      if (ingredients.length === 0) { show('No ingredients in this week’s plan yet.', 'error'); return }
+
+      let list: any = lists.find(l => l.id === selectedListId)
+      if (!list?.id) { const gl: any = await groceryAPI.list(); list = Array.isArray(gl) ? gl[0] : gl }
+      if (!list?.id) list = await groceryAPI.create('Groceries')
+      await Promise.all(ingredients.map(ing =>
+        groceryAPI.addItem(list.id, { name: ing.name, quantity: ing.quantity || 1, unit: ing.unit, category: ing.category || 'general' })
+      ))
+      const unique = new Set(ingredients.map(i => `${(i.name || '').trim().toLowerCase()}|${(i.unit || '').trim().toLowerCase()}`)).size
+      await loadLists()
+      setSelectedListId(list.id)
+      show(`Added ${unique} ingredient${unique === 1 ? '' : 's'} from your plan`)
+    } catch {
+      show('Could not build your grocery list', 'error')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   const selectedList = lists.find(l => l.id === selectedListId)
   const checkedCount = selectedList?.items?.filter(i => i.checked).length || 0
   const totalCount = selectedList?.items?.length || 0
@@ -293,7 +332,17 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedList ? '12px' : 0 }}>
           <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            {isPro && selectedList && (
+              <button
+                onClick={generateFromPlan}
+                disabled={generating}
+                aria-label="Generate from this week's plan"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: generating ? 'default' : 'pointer' }}
+              >
+                <CalendarDays size={15} /> {generating ? '…' : 'From plan'}
+              </button>
+            )}
             {isPro && selectedList && (selectedList.items?.length || 0) > 0 && (
               <button
                 onClick={shareList}
@@ -478,7 +527,18 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                       </div>
                     ))
                   ) : (
-                    <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', margin: '24px 0' }}>No items in this list</p>
+                    <div style={{ textAlign: 'center', padding: '28px 0' }}>
+                      <p style={{ color: 'var(--color-text-muted)', margin: '0 0 16px' }}>No items in this list</p>
+                      {isPro && (
+                        <button
+                          onClick={generateFromPlan}
+                          disabled={generating}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                        >
+                          <CalendarDays size={16} /> {generating ? 'Building…' : 'Generate from this week’s plan'}
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </>
