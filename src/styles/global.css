@@ -20,7 +20,9 @@
      labels, meta lines), so they carry real contrast rather than a whisper. */
   --color-text: #1e293b;
   --color-text-secondary: #475569;
-  --color-text-muted: #64748b;
+  /* Dark enough to clear 4.5:1 on the *subtle* panel fill too, not just the
+     page -- muted labels sit inside those panels (nutrition, invite code). */
+  --color-text-muted: #5b6b80;
 
   /* The gold PRO badge and the amber "medium" difficulty label, dark enough
      to read on a light page. */
