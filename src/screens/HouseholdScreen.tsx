@@ -218,19 +218,19 @@ export default function HouseholdScreen({ onNavigate }: Props) {
   }
 
   const header = (
-    <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', background: 'var(--color-card)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
+    <header style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 24px', background: 'var(--color-bg)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
       <button onClick={() => onNavigate('home')} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
         <ArrowLeft size={22} color="var(--color-text)" />
       </button>
-      <h1 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>Family share &amp; sync</h1>
+      <h1 style={{ fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', color: 'var(--color-text)', margin: 0 }}>Family share &amp; sync</h1>
     </header>
   )
 
   if (!isPro) {
     return (
-      <div className="screen">
+      <div className="screen" style={{ background: 'var(--color-bg)' }}>
         {header}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '40px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Users size={32} color="#fff" />
           </div>
@@ -251,7 +251,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
   return (
     <div className="screen" style={{ background: 'var(--color-bg)', position: 'relative' }}>
       {header}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 24px 24px' }}>
         {loading ? (
           <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', padding: '32px 0' }}>Loading…</p>
         ) : !household ? (
@@ -266,21 +266,25 @@ export default function HouseholdScreen({ onNavigate }: Props) {
               </p>
             </div>
 
-            <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 10px' }}>Start a family</h2>
+            <div style={{ marginBottom: '28px' }}>
+              <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)', marginBottom: '14px' }}>
+                <h2 style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>Start a family</h2>
+              </div>
               <input
                 value={createName}
                 onChange={e => setCreateName(e.target.value)}
                 placeholder="Family name (e.g. The Smiths)"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-bg)', outline: 'none', fontFamily: 'inherit', marginBottom: '10px' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit', marginBottom: '10px' }}
               />
-              <button onClick={createFamily} disabled={busy} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={createFamily} disabled={busy} style={{ width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit' }}>
                 Create family
               </button>
             </div>
 
-            <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', padding: '16px' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 10px' }}>Join a family</h2>
+            <div>
+              <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)', marginBottom: '14px' }}>
+                <h2 style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>Join a family</h2>
+              </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   value={joinCode}
@@ -288,9 +292,9 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                   onKeyDown={e => { if (e.key === 'Enter') joinFamily() }}
                   placeholder="Invite code"
                   autoCapitalize="characters"
-                  style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '15px', letterSpacing: '0.12em', fontWeight: '700', color: 'var(--color-text)', background: 'var(--color-bg)', outline: 'none', fontFamily: 'inherit' }}
+                  style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', letterSpacing: '0.12em', fontWeight: '700', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
                 />
-                <button onClick={joinFamily} disabled={busy || !joinCode.trim()} style={{ flexShrink: 0, padding: '0 18px', borderRadius: '12px', border: 'none', background: joinCode.trim() ? 'var(--color-primary)' : 'var(--color-border)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: busy || !joinCode.trim() ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+                <button onClick={joinFamily} disabled={busy || !joinCode.trim()} style={{ flexShrink: 0, padding: '0 18px', borderRadius: '12px', border: 'none', background: joinCode.trim() ? 'var(--color-primary)' : 'var(--color-subtle)', color: joinCode.trim() ? '#fff' : 'var(--color-text-muted)', fontSize: '14px', fontWeight: '700', cursor: busy || !joinCode.trim() ? 'default' : 'pointer', fontFamily: 'inherit' }}>
                   Join
                 </button>
               </div>
@@ -300,7 +304,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
           /* ---- In a family ---- */
           <>
             {/* Family + invite code */}
-            <div style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '18px', padding: '18px', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--color-subtle)', borderRadius: '18px', padding: '18px', marginBottom: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <Users size={16} color="var(--color-primary)" />
                 <h2 style={{ fontSize: '17px', fontWeight: '800', color: 'var(--color-text)', margin: 0 }}>{household.name}</h2>
@@ -314,7 +318,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                 <span style={{ flex: 1, fontSize: '26px', fontWeight: '800', letterSpacing: '0.18em', color: 'var(--color-primary)', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
                   {household.inviteCode}
                 </span>
-                <button onClick={copyCode} aria-label="Copy code" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1px solid var(--color-primary-border)', background: 'var(--color-card)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <button onClick={copyCode} aria-label="Copy code" style={{ width: '40px', height: '40px', borderRadius: '11px', border: 'none', background: 'var(--color-card)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                   <Copy size={17} />
                 </button>
                 <button onClick={shareCode} aria-label="Share code" style={{ width: '40px', height: '40px', borderRadius: '11px', border: 'none', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -331,9 +335,9 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                   <RefreshCw size={14} />
                 </button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {household.members.map(m => (
-                  <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'var(--color-card)', borderRadius: '12px', border: '1px solid var(--color-subtle)' }}>
+              <div>
+                {household.members.map((m, i) => (
+                  <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
                     <div style={{ width: '34px', height: '34px', borderRadius: '17px', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '700', flexShrink: 0 }}>
                       {(m.name || '?').charAt(0).toUpperCase()}
                     </div>
@@ -366,7 +370,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                 onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addItem() }}
                 placeholder="Add to the shared list…"
-                style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', fontFamily: 'inherit' }}
+                style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
               />
               <button onClick={addItem} aria-label="Add item" style={{ flexShrink: 0, width: '46px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                 <Plus size={20} />
@@ -379,9 +383,9 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                 <p style={{ fontSize: '13px', margin: 0 }}>The list is empty. Add something — everyone in the family will see it.</p>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '18px' }}>
-                {items.map(item => (
-                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '11px', padding: '11px 13px', background: 'var(--color-card)', borderRadius: '12px', border: '1px solid var(--color-subtle)' }}>
+              <div style={{ marginBottom: '18px' }}>
+                {items.map((item, i) => (
+                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '13px', padding: '13px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
                     <button
                       onClick={() => toggleItem(item)}
                       aria-label={item.checked ? 'Uncheck' : 'Check'}
@@ -408,11 +412,11 @@ export default function HouseholdScreen({ onNavigate }: Props) {
             {/* Owner tools + leave */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--color-subtle)' }}>
               {household.members.find(m => m.isYou)?.role === 'owner' && (
-                <button onClick={regenerate} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '11px', borderRadius: '12px', border: '1px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <button onClick={regenerate} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                   <RefreshCw size={15} /> New invite code
                 </button>
               )}
-              <button onClick={leaveFamily} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '11px', borderRadius: '12px', border: '1px solid var(--color-error-border, #f0c8c8)', background: 'var(--color-error-bg)', color: '#ef4444', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={leaveFamily} disabled={busy} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-error-bg)', color: '#ef4444', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                 <LogOut size={15} /> Leave family
               </button>
             </div>
