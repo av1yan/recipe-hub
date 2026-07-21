@@ -1,171 +1,109 @@
 import { useState } from 'react'
-import { ChevronRight, Sparkles, Clock, UtensilsCrossed, BookOpen } from 'lucide-react'
+import { ChevronRight, Sparkles } from 'lucide-react'
 import type { Screen } from '../types'
 
 interface Props {
   onNavigate: (screen: Screen) => void
 }
 
+const STEPS = [
+  {
+    icon: '🍳',
+    title: 'Welcome to recipHub',
+    description: 'Your personal recipe companion. Save, plan, and cook smarter.',
+  },
+  {
+    icon: '📚',
+    title: 'Save any recipe',
+    description: 'Collect recipes from anywhere — blogs, links, or just type them in. All in one place.',
+  },
+  {
+    icon: '📅',
+    title: 'Plan your week',
+    description: 'Drop recipes into your meal planner. Stay organised and discover new meals.',
+  },
+  {
+    icon: '🛒',
+    title: 'Auto grocery list',
+    description: 'One tap turns your meal plan into a full shopping list.',
+  },
+  {
+    icon: '👨‍🍳',
+    title: 'Cook smarter',
+    description: 'Full-screen step-by-step guides with timers. Hands-free cooking made easy.',
+  },
+]
+
 export default function OnboardingScreen({ onNavigate }: Props) {
   const [currentStep, setCurrentStep] = useState(0)
-
-  const steps = [
-    {
-      icon: '🍳',
-      title: 'Welcome to recipHub',
-      description: 'Your personal recipe companion. Save, plan, and cook smarter.',
-      bgColor: 'var(--color-bg)',
-      accentColor: '#c67139',
-    },
-    {
-      icon: '📚',
-      title: 'Save Any Recipe',
-      description: 'Collect recipes from anywhere—blogs, URLs, or just type them in. All in one place.',
-      bgColor: 'var(--color-bg)',
-      accentColor: '#d4a574',
-    },
-    {
-      icon: '📅',
-      title: 'Plan Your Week',
-      description: 'Drag recipes into your meal planner. Stay organized and discover new meals.',
-      bgColor: 'var(--color-bg)',
-      accentColor: 'var(--color-primary)',
-    },
-    {
-      icon: '🛒',
-      title: 'Auto Grocery List',
-      description: 'One tap generates your full shopping list from the meal plan.',
-      bgColor: 'var(--color-bg)',
-      accentColor: 'var(--color-primary)',
-    },
-    {
-      icon: '👨‍🍳',
-      title: 'Cook Smarter',
-      description: 'Full-screen step-by-step guides with timers. Hands-free cooking made easy.',
-      bgColor: 'var(--color-bg)',
-      accentColor: '#c67139',
-    },
-  ]
-
-  const step = steps[currentStep]
+  const step = STEPS[currentStep]
+  const isLast = currentStep === STEPS.length - 1
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      onNavigate('diet-preferences')
-    }
+    if (!isLast) setCurrentStep(currentStep + 1)
+    else onNavigate('diet-preferences')
   }
 
   return (
     <div
       className="screen"
-      style={{
-        background: step.bgColor,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        transition: 'background 0.5s ease',
-      }}
+      style={{ background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
     >
-      {/* Progress Dots */}
-      <div style={{ padding: '24px 16px', display: 'flex', justifyContent: 'center', gap: '6px' }}>
-        {steps.map((_, idx) => (
+      {/* Progress — a widening pill for the step you're on, like the app's
+          other step indicators. */}
+      <div style={{ padding: '28px 24px', display: 'flex', justifyContent: 'center', gap: '6px' }}>
+        {STEPS.map((_, idx) => (
           <div
             key={idx}
             style={{
-              width: '6px',
+              width: idx === currentStep ? '20px' : '6px',
               height: '6px',
-              borderRadius: '50%',
-              background: idx === currentStep ? step.accentColor : 'var(--color-border)',
+              borderRadius: '3px',
+              background: idx === currentStep ? 'var(--color-primary)' : 'var(--color-border)',
               transition: 'all 0.3s ease',
             }}
           />
         ))}
       </div>
 
-      {/* Content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', textAlign: 'center' }}>
-        <div style={{ fontSize: '80px', marginBottom: '24px', display: 'block' }}>{step.icon}</div>
+        <div style={{ fontSize: '76px', marginBottom: '28px' }}>{step.icon}</div>
 
-        <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--color-text)', marginBottom: '12px', margin: 0 }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--color-text)', margin: 0, lineHeight: 1.2 }}>
           {step.title}
         </h1>
 
-        <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginTop: '12px', maxWidth: '280px' }}>
+        <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: '14px 0 0', maxWidth: '280px' }}>
           {step.description}
         </p>
       </div>
 
-      {/* Button */}
-      <div style={{ padding: '24px 16px' }}>
+      <div style={{ padding: '24px' }}>
         <button
           onClick={handleNext}
           style={{
-            width: '100%',
-            padding: '16px',
-            background: step.accentColor,
-            color: '#fff',
-            border: 'none',
-            borderRadius: '14px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            transition: 'all 0.3s ease',
-            boxShadow: `0 4px 12px ${step.accentColor}40`,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = `0 8px 20px ${step.accentColor}50`
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = `0 4px 12px ${step.accentColor}40`
+            width: '100%', padding: '16px',
+            background: 'var(--color-primary)', color: '#fff',
+            border: 'none', borderRadius: '14px',
+            fontSize: '16px', fontWeight: '700', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            fontFamily: 'inherit',
           }}
         >
-          {currentStep === steps.length - 1 ? (
-            <>
-              <Sparkles size={18} />
-              Get Started
-            </>
-          ) : (
-            <>
-              Next
-              <ChevronRight size={18} />
-            </>
-          )}
+          {isLast ? <><Sparkles size={18} /> Get started</> : <>Next <ChevronRight size={18} /></>}
         </button>
 
-        {currentStep < steps.length - 1 && (
+        {!isLast && (
           <button
             onClick={() => {
               localStorage.setItem('onboardingCompleted', 'true')
               onNavigate('home')
             }}
             style={{
-              width: '100%',
-              padding: '12px',
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              marginTop: '12px',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--color-text)'
-              e.currentTarget.style.background = 'rgba(0,0,0,0.05)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--color-text-secondary)'
-              e.currentTarget.style.background = 'transparent'
+              width: '100%', padding: '13px', marginTop: '10px',
+              background: 'transparent', color: 'var(--color-text-muted)',
+              border: 'none', fontSize: '14px', fontWeight: '600',
+              cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
             Skip

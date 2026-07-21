@@ -49,13 +49,13 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
   return (
     <div style={{ background: 'var(--color-bg)', height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ padding: '32px 24px 16px', textAlign: 'center', flexShrink: 0 }}>
-        <div style={{ fontSize: '52px', marginBottom: '12px' }}>🥗</div>
-        <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px' }}>
-          Your Diet
+      <div style={{ padding: '40px 24px 20px', textAlign: 'center', flexShrink: 0 }}>
+        <div style={{ fontSize: '52px', marginBottom: '16px' }}>🥗</div>
+        <h1 style={{ fontSize: '27px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--color-text)', margin: '0 0 8px' }}>
+          Your diet
         </h1>
-        <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0 }}>
-          Select your preferences so we can tailor suggestions.
+        <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
+          Pick any that apply so we can tailor suggestions.
         </p>
       </div>
 
@@ -70,15 +70,15 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
                 onClick={() => toggleDiet(diet.id)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '11px 18px',
-                  background: active ? 'var(--color-primary)' : 'var(--color-card)',
-                  color: active ? '#fff' : 'var(--color-text-secondary)',
-                  border: active ? '2px solid var(--color-primary)' : '2px solid var(--color-border)',
+                  padding: '10px 16px',
+                  background: active ? 'var(--color-primary-bg)' : 'transparent',
+                  color: active ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
+                  border: '1px solid ' + (active ? 'var(--color-primary)' : 'var(--color-border)'),
                   borderRadius: '999px',
                   fontSize: '14px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  boxShadow: active ? '0 2px 8px rgba(107,163,86,0.3)' : '0 1px 2px rgba(0,0,0,0.04)',
+                  fontFamily: 'inherit',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -114,7 +114,7 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            boxShadow: '0 4px 12px rgba(107, 163, 86, 0.3)',
+            fontFamily: 'inherit',
           }}
         >
           {selectedDiet.length > 0 ? 'Continue' : 'Skip for now'}

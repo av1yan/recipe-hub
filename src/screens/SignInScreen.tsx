@@ -60,29 +60,28 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
   }
 
   return (
-    <div className="screen" style={{ background: 'var(--color-card)', padding: '24px 16px', display: 'flex', flexDirection: 'column' }}>
+    <div className="screen" style={{ background: 'var(--color-bg)', padding: '28px 24px', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '26px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
           <div style={{
             width: '64px', height: '64px', borderRadius: '18px',
-            background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
+            background: 'var(--color-primary)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 20px rgba(107, 163, 86, 0.35)',
           }}>
             <ChefHat size={34} color="#fff" strokeWidth={2} />
           </div>
         </div>
-        <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--color-text)', margin: 0, marginBottom: '6px', wordBreak: 'break-word' }}>
+        <h1 style={{ fontSize: '27px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--color-text)', margin: '0 0 6px', wordBreak: 'break-word' }}>
           {isSignUp ? 'Create your account' : 'Welcome to recipHub'}
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, wordBreak: 'break-word' }}>
+        <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, wordBreak: 'break-word' }}>
           {isSignUp ? 'Start cooking smarter in about a minute' : 'Sign in to continue'}
         </p>
       </div>
 
       {error && (
-        <div style={{ background: 'var(--color-error-bg)', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '20px', color: '#991b1b', fontSize: '13px' }}>
+        <div style={{ background: 'var(--color-error-bg)', borderRadius: '12px', padding: '12px 14px', marginBottom: '20px', color: 'var(--color-error)', fontSize: '13px' }}>
           {error}
         </div>
       )}
@@ -101,10 +100,12 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                fontSize: '14px',
-                border: '1px solid var(--color-border)',
-                borderRadius: '10px',
-                background: 'var(--color-bg)',
+                fontSize: '15px',
+                border: 'none',
+                borderRadius: '12px',
+                background: 'var(--color-subtle)',
+                color: 'var(--color-text)',
+                outline: 'none',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit'
               }}
@@ -118,8 +119,8 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
           </label>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             {isSignUp
-              ? <Mail size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
-              : <AtSign size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />}
+              ? <Mail size={18} style={{ position: 'absolute', left: '12px', color: 'var(--color-text-muted)', pointerEvents: 'none' }} />
+              : <AtSign size={18} style={{ position: 'absolute', left: '12px', color: 'var(--color-text-muted)', pointerEvents: 'none' }} />}
             <input
               // Signing up needs a real address, but signing in also takes a
               // username -- type="email" would reject one as malformed.
@@ -133,10 +134,12 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
               style={{
                 width: '100%',
                 padding: '12px 14px 12px 40px',
-                fontSize: '14px',
-                border: '1px solid var(--color-border)',
-                borderRadius: '10px',
-                background: 'var(--color-bg)',
+                fontSize: '15px',
+                border: 'none',
+                borderRadius: '12px',
+                background: 'var(--color-subtle)',
+                color: 'var(--color-text)',
+                outline: 'none',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit'
               }}
@@ -147,7 +150,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
         <div>
           <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Password</label>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Lock size={18} style={{ position: 'absolute', left: '12px', color: '#cbd5e1', pointerEvents: 'none' }} />
+            <Lock size={18} style={{ position: 'absolute', left: '12px', color: 'var(--color-text-muted)', pointerEvents: 'none' }} />
             <input
               type="password"
               placeholder="Password"
@@ -157,10 +160,12 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
               style={{
                 width: '100%',
                 padding: '12px 14px 12px 40px',
-                fontSize: '14px',
-                border: '1px solid var(--color-border)',
-                borderRadius: '10px',
-                background: 'var(--color-bg)',
+                fontSize: '15px',
+                border: 'none',
+                borderRadius: '12px',
+                background: 'var(--color-subtle)',
+                color: 'var(--color-text)',
+                outline: 'none',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit'
               }}
@@ -200,11 +205,9 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
             fontWeight: '600',
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
-            transition: 'all 0.3s ease',
-            marginTop: '8px'
+            marginTop: '8px',
+            fontFamily: 'inherit',
           }}
-          onMouseEnter={(e) => !loading && (e.currentTarget.style.background = 'var(--color-primary-dark)')}
-          onMouseLeave={(e) => !loading && (e.currentTarget.style.background = 'var(--color-primary)')}
         >
           {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
         </button>
@@ -258,17 +261,14 @@ function OAuthButton({ provider, label, icon }: { provider: string; label: strin
         gap: '8px',
         padding: '12px 16px',
         border: '1px solid var(--color-border)',
-        background: 'var(--color-card)',
-        borderRadius: '10px',
+        background: 'transparent',
+        borderRadius: '12px',
         fontSize: '14px',
         fontWeight: '600',
         color: 'var(--color-text)',
         cursor: 'pointer',
-        transition: 'all 0.3s ease',
         fontFamily: 'inherit',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg)'}
-      onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-card)'}
     >
       {icon}
       {label}

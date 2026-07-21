@@ -300,7 +300,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           style={{
             flex: 1, padding: '14px', borderRadius: '12px',
             background: currentStep === 0 ? 'var(--color-bg)' : 'var(--color-primary-bg)',
-            color: currentStep === 0 ? '#cbd5e1' : 'var(--color-primary)',
+            color: currentStep === 0 ? 'var(--color-disabled)' : 'var(--color-primary-dark)',
             border: 'none', cursor: currentStep === 0 ? 'default' : 'pointer',
             fontSize: '14px', fontWeight: '700',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',

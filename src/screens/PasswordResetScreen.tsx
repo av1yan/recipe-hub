@@ -52,17 +52,17 @@ export default function PasswordResetScreen({ mode, token, onNavigate }: Props) 
   }
 
   return (
-    <div className="screen" style={{ background: 'var(--color-card)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', flexShrink: 0 }}>
+    <div className="screen" style={{ background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <header style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 24px', flexShrink: 0 }}>
         <button onClick={() => { sessionStorage.removeItem('pendingReset'); onNavigate('signin') }} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
           <ChevronLeft size={22} color="var(--color-text)" />
         </button>
-        <h1 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>
+        <h1 style={{ fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', color: 'var(--color-text)', margin: 0 }}>
           {mode === 'request' ? 'Forgot password' : 'Choose a new password'}
         </h1>
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px 24px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 24px 24px' }}>
         {/* ── asked for a link, and it has gone ── */}
         {mode === 'request' && sent ? (
           <div style={{ textAlign: 'center', paddingTop: '28px' }}>
@@ -123,8 +123,8 @@ export default function PasswordResetScreen({ mode, token, onNavigate }: Props) 
         )}
 
         {error && (
-          <div style={{ marginTop: '14px', padding: '12px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px' }}>
-            <p style={{ margin: 0, fontSize: '13px', color: '#b91c1c', lineHeight: 1.5 }}>{error}</p>
+          <div style={{ marginTop: '14px', padding: '12px 14px', background: 'var(--color-error-bg)', borderRadius: '12px' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-error)', lineHeight: 1.5 }}>{error}</p>
           </div>
         )}
       </div>
@@ -138,8 +138,8 @@ const labelStyle: React.CSSProperties = {
 }
 
 const inputBase: React.CSSProperties = {
-  width: '100%', padding: '13px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)',
-  fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-bg)', outline: 'none',
+  width: '100%', padding: '13px 14px', borderRadius: '12px', border: 'none',
+  fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none',
   boxSizing: 'border-box', fontFamily: 'inherit',
 }
 

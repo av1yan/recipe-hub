@@ -58,27 +58,27 @@ type IngredientRow = { name: string; quantity: string; unit: string }
 type InstructionRow = { text: string; duration: string }
 
 const rowInput: React.CSSProperties = {
-  padding: '9px 10px', borderRadius: '10px', border: '1.5px solid var(--color-border)',
-  fontSize: '14px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none',
+  padding: '10px 12px', borderRadius: '11px', border: 'none',
+  fontSize: '14px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none',
   boxSizing: 'border-box', fontFamily: 'inherit', width: '100%',
 }
 
 const removeBtn: React.CSSProperties = {
   flexShrink: 0, width: '34px', height: '38px', display: 'flex', alignItems: 'center',
-  justifyContent: 'center', background: 'var(--color-card)', border: '1.5px solid var(--color-border)',
-  borderRadius: '10px', color: 'var(--color-text-muted)', cursor: 'pointer',
+  justifyContent: 'center', background: 'transparent', border: 'none',
+  borderRadius: '11px', color: 'var(--color-text-muted)', cursor: 'pointer',
 }
 
 const addBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
   width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
-  border: '1.5px dashed var(--color-primary-border)', borderRadius: '10px', fontSize: '13px',
+  border: '1px solid var(--color-primary-border)', borderRadius: '11px', fontSize: '13px',
   fontWeight: '700', cursor: 'pointer',
 }
 
 const stepBadge: React.CSSProperties = {
-  flexShrink: 0, width: '32px', height: '32px', borderRadius: '9px', background: 'var(--color-primary)',
-  color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  flexShrink: 0, width: '28px', height: '28px', borderRadius: '14px', background: 'var(--color-primary-bg)',
+  color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center',
   fontSize: '14px', fontWeight: '700', marginTop: '5px',
 }
 
@@ -259,14 +259,14 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
   return (
     <div className="screen" style={{ position: 'relative' }}>
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <header style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button onClick={() => onNavigate(backTo, reopenPanelOnBack ? { openAddSheet: true } : undefined)} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
         </button>
         <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>{draft ? 'Review recipe' : 'Add Recipe'}</h2>
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 24px 24px' }}>
         {error && (
           <div style={{ background: 'var(--color-error-bg)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#ef4444', fontSize: '14px' }}>
             {error}
@@ -276,8 +276,8 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
         {/* An import is a guess. Say which parts the parser was unsure of, so a
             shaky read doesn't look as confident as a clean one. */}
         {draft?.warnings?.length > 0 && (
-          <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
-            <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#92400e' }}>
+          <div style={{ background: 'var(--color-subtle)', borderRadius: '12px', padding: '12px 14px', marginBottom: '16px' }}>
+            <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>
               Check this import before saving
             </p>
             <ul style={{ margin: '6px 0 0', paddingLeft: '18px' }}>
@@ -306,13 +306,13 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="field">
               <label>Cuisine</label>
-              <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}>
+              <select className="input" value={cuisine} onChange={(e) => setCuisine(e.target.value)} style={{ background: 'var(--color-subtle)', color: 'var(--color-text)', cursor: 'pointer' }}>
                 {CUISINES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div className="field">
               <label>Meal Type</label>
-              <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}>
+              <select className="input" value={mealType} onChange={(e) => setMealType(e.target.value)} style={{ background: 'var(--color-subtle)', color: 'var(--color-text)', cursor: 'pointer' }}>
                 {MEAL_TYPES.map(m => (
                   <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
                 ))}
@@ -322,7 +322,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
           <div className="field">
             <label>Difficulty</label>
-            <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}>
+            <select className="input" value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{ background: 'var(--color-subtle)', color: 'var(--color-text)', cursor: 'pointer' }}>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
@@ -383,7 +383,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={photoBusy}
-                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-card)', border: '1.5px dashed var(--color-primary-border)', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
+                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-subtle)', border: 'none', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
               >
                 <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Camera size={18} color="var(--color-primary)" />
@@ -456,10 +456,11 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                     style={{
                       display: 'flex', alignItems: 'center', gap: '5px',
                       padding: '8px 14px',
-                      background: active ? 'var(--color-primary)' : 'var(--color-card)',
-                      color: active ? '#fff' : 'var(--color-text-secondary)',
-                      border: active ? '2px solid var(--color-primary)' : '2px solid var(--color-border)',
+                      background: active ? 'var(--color-primary-bg)' : 'transparent',
+                      color: active ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
+                      border: '1px solid ' + (active ? 'var(--color-primary)' : 'var(--color-border)'),
                       borderRadius: '999px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                      fontFamily: 'inherit',
                     }}
                   >
                     {active && <Check size={13} />}
@@ -479,7 +480,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
               className="input"
               value={cookbookId}
               onChange={(e) => setCookbookId(e.target.value)}
-              style={{ background: 'var(--color-card)', color: 'var(--color-text)', cursor: 'pointer' }}
+              style={{ background: 'var(--color-subtle)', color: 'var(--color-text)', cursor: 'pointer' }}
             >
               <option value="">Don't file it anywhere</option>
               {cookbooks.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -500,12 +501,12 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
       {/* Save is pinned above the nav so it's always in reach, not buried at the
           bottom of a long scroll. */}
-      <div style={{ flexShrink: 0, padding: '10px 16px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
+      <div style={{ flexShrink: 0, padding: '12px 24px 16px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-bg)' }}>
         <button
           type="submit"
           form="addRecipeForm"
           disabled={loading}
-          style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: loading ? '#a7c99a' : 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+          style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: loading ? 'var(--color-disabled)' : 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}
         >
           {loading ? 'Saving…' : draft ? 'Save recipe' : 'Create recipe'}
         </button>

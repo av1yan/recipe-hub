@@ -152,14 +152,14 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home', 
 
   return (
     <div className="screen" style={{ background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', background: 'var(--color-card)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
+      <header style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 24px', background: 'var(--color-bg)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
         <button onClick={() => onNavigate(backTo, { openAddSheet: true })} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
           <ChevronLeft size={22} color="var(--color-text)" />
         </button>
-        <h1 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{copy.title}</h1>
+        <h1 style={{ fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', color: 'var(--color-text)', margin: 0 }}>{copy.title}</h1>
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '22px 24px 24px' }}>
         <div style={{ width: '44px', height: '44px', borderRadius: '22px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
           {icon}
         </div>
@@ -175,8 +175,8 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home', 
                 onError={e => { e.currentTarget.style.display = 'none' }}
               />
             )}
-            <div style={{ padding: '12px 14px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', marginBottom: '12px' }}>
-              <p style={{ margin: 0, fontSize: '12.5px', color: '#92400e', lineHeight: 1.55 }}>
+            <div style={{ padding: '12px 14px', background: 'var(--color-subtle)', borderRadius: '12px', marginBottom: '12px' }}>
+              <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
                 TikTok hands the caption over with its line breaks removed, so the
                 ingredients tend to run together. Put each one on its own line
                 below and it can be read properly.
@@ -272,8 +272,8 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home', 
         )}
 
         {error && (
-          <div style={{ marginTop: '14px', padding: '12px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px' }}>
-            <p style={{ margin: 0, fontSize: '13px', color: '#b91c1c', lineHeight: 1.5 }}>{error}</p>
+          <div style={{ marginTop: '14px', padding: '12px 14px', background: 'var(--color-error-bg)', borderRadius: '12px' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-error)', lineHeight: 1.5 }}>{error}</p>
           </div>
         )}
 
@@ -299,14 +299,14 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home', 
 }
 
 const inputBase: React.CSSProperties = {
-  width: '100%', padding: '13px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)',
-  fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none',
+  width: '100%', padding: '13px 14px', borderRadius: '12px', border: 'none',
+  fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none',
   boxSizing: 'border-box', fontFamily: 'inherit',
 }
 
 const miniBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px',
-  background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '8px',
+  background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '999px',
   fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', cursor: 'pointer',
   fontFamily: 'inherit',
 }
@@ -319,8 +319,8 @@ const primaryBtn = (disabled: boolean): React.CSSProperties => ({
 })
 
 const secondaryBtn: React.CSSProperties = {
-  width: '100%', padding: '13px', borderRadius: '12px', border: '1.5px solid var(--color-border)',
-  background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '15px', fontWeight: '700',
+  width: '100%', padding: '13px', borderRadius: '12px', border: '1px solid var(--color-border)',
+  background: 'transparent', color: 'var(--color-text)', fontSize: '15px', fontWeight: '700',
   cursor: 'pointer', fontFamily: 'inherit',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
 }

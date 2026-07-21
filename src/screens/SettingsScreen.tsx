@@ -219,7 +219,7 @@ function AccountPage({ onBack }: { onBack: () => void }) {
               <User size={18} color="#ef4444" />
             </div>
             <span style={{ flex: 1, fontSize: '15px', color: '#ef4444', fontWeight: '500' }}>Delete account</span>
-            <ChevronRight size={17} color="#cbd5e1" />
+            <ChevronRight size={17} color="var(--color-text-muted)" />
           </button>
           {showDelete && (
             <div style={{ padding: '0 16px 16px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
