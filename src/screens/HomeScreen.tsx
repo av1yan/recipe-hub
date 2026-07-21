@@ -1,5 +1,5 @@
 import { useState, useEffect, type CSSProperties } from 'react'
-import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight, Crown, ChefHat, Lightbulb, Users } from 'lucide-react'
+import { Plus, X, Crown, ChefHat, Lightbulb, Users } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
@@ -11,14 +11,6 @@ import { DAY_NAMES, MEALS, sameWeek, getMeals, mondayOf } from './MealPlanScreen
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
 }
-
-/** Warm tones, matching the covers on the Cookbooks screen. */
-const COOKBOOK_COLORS = ['#c67139', 'var(--color-primary)', '#d4a574', '#b8956a', '#a48a6e']
-
-const RECIPE_COLORS = ['#d4a574', 'var(--color-primary)', '#c67139', '#5b9acd', '#9b7ec8']
-
-/** Soft, layered card shadow — a floated, premium feel over the old flat 1px. */
-const CARD_SHADOW = '0 1px 2px rgba(15,23,42,0.04), 0 8px 20px -8px rgba(15,23,42,0.10)'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -32,6 +24,20 @@ function getDateLabel() {
   const day = d.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()
   const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
   return `${day}, ${month} ${d.getDate()}`
+}
+
+/** One list row on a hairline. No card, no fill -- typography and space do the
+    work. Every row past the first carries a top rule so the shelf reads as a
+    single ruled list under its label. */
+function rowStyle(divider: boolean): CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '15px 0',
+    borderTop: divider ? '1px solid var(--color-subtle)' : 'none',
+    cursor: 'pointer',
+  }
 }
 
 export default function HomeScreen({ onNavigate }: Props) {
@@ -126,59 +132,49 @@ export default function HomeScreen({ onNavigate }: Props) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--color-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        {/* Header */}
-        <div style={{ background: 'linear-gradient(180deg, var(--color-primary-bg), var(--color-card) 78%)', padding: '16px 16px 0', borderBottom: '1px solid var(--color-subtle)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '12px' }}>
-            <div style={{ minWidth: 0 }}>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '11px', fontWeight: '600', letterSpacing: '0.06em', margin: '0 0 2px' }}>
+        {/* Header -- lives on the page, no panel behind it. Date + Pro sit on a
+            quiet top line with the avatar; the greeting gets its own full-width
+            line so it never wraps mid-phrase. */}
+        <div style={{ padding: '20px 24px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              <span style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '0.08em', color: 'var(--color-text-muted)' }}>
                 {getDateLabel()}
-              </p>
-              <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--color-text)', margin: 0, lineHeight: 1.2 }}>
-                {/* The wave is joined by a non-breaking space so it wraps with
-                    the last word instead of stranding itself on its own line. */}
-                {getGreeting()}{displayName ? `,\u00A0${displayName}` : ''}{'\u00A0\u{1F44B}'}
-              </h1>
-              {loading ? (
-                <div className="rh-skel" style={{ width: '180px', height: '13px', borderRadius: '7px', marginTop: '8px' }} />
-              ) : (
-                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
-                  {recipes.length} recipe{recipes.length === 1 ? '' : 's'} · {plannedThisWeek} meal{plannedThisWeek === 1 ? '' : 's'} planned this week
-                </p>
-              )}
-            </div>
-            {/* The avatar is the only way into settings from here -- a gear
-                beside it went to the same place and just split the target.
-                On Pro, a gold badge rides alongside it so the plan is visible
-                the moment you open the app. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              </span>
               {isPro && (
-                <button
-                  onClick={() => onNavigate('settings')}
-                  aria-label="Pro plan"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '11px', fontWeight: '800', padding: '5px 9px', borderRadius: '999px', letterSpacing: '0.04em', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-                >
-                  <Crown size={12} /> PRO
-                </button>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '10px', fontWeight: '800', letterSpacing: '0.08em', color: 'var(--color-primary)' }}>
+                  <Crown size={11} /> PRO
+                </span>
               )}
-              <button
-                onClick={() => onNavigate('settings')}
-                aria-label="Settings"
-                title={user?.name || undefined}
-                style={{ width: '38px', height: '38px', borderRadius: '19px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}
-              >
-                {initial}
-              </button>
             </div>
+            <button
+              onClick={() => onNavigate('settings')}
+              aria-label="Settings"
+              title={user?.name || undefined}
+              style={{ width: '34px', height: '34px', borderRadius: '17px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', fontSize: '14px', fontWeight: '700', flexShrink: 0 }}
+            >
+              {initial}
+            </button>
           </div>
 
+          <h1 style={{ fontSize: '27px', fontWeight: '700', color: 'var(--color-text)', margin: 0, lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+            {getGreeting()}{displayName ? `, ${displayName}` : ''}{' \u{1F44B}'}
+          </h1>
+          {loading ? (
+            <div className="rh-skel" style={{ width: '96px', height: '12px', borderRadius: '6px', marginTop: '10px' }} />
+          ) : (
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '8px 0 0' }}>
+              {recipes.length} recipe{recipes.length === 1 ? '' : 's'}{plannedThisWeek > 0 ? ` · ${plannedThisWeek} planned this week` : ''}
+            </p>
+          )}
         </div>
 
-        <div style={{ padding: '20px 16px 0' }}>
+        <div style={{ padding: '30px 24px 0' }}>
           {loading ? <HomeSkeleton isPro={isPro} /> : <>
-          {/* Pro shortcuts, compact — one quick-action row instead of three big
-              cards, so Home stays calm for people who already know the features. */}
+
+          {/* Pro shortcuts -- three quiet ringed icons, no cards. */}
           {isPro && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '36px' }}>
               {([
                 { icon: ChefHat, label: 'Pantry', screen: 'pantry' as Screen },
                 { icon: Lightbulb, label: 'Insights', screen: 'insights' as Screen },
@@ -187,28 +183,21 @@ export default function HomeScreen({ onNavigate }: Props) {
                 <button
                   key={a.label}
                   onClick={() => onNavigate(a.screen)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '9px', padding: '16px 8px', background: 'linear-gradient(155deg, var(--color-card) 52%, var(--color-primary-bg))', border: '1px solid var(--color-subtle)', borderRadius: '18px', boxShadow: CARD_SHADOW, cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '4px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
-                  <div style={{ width: '42px', height: '42px', borderRadius: '13px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(15,23,42,0.05)' }}>
-                    <a.icon size={20} color="var(--color-primary)" />
-                  </div>
-                  <span style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--color-text)' }}>{a.label}</span>
+                  <span style={{ width: '46px', height: '46px', borderRadius: '50%', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <a.icon size={19} color="var(--color-primary)" />
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>{a.label}</span>
                 </button>
               ))}
             </div>
           )}
 
-          {/* Today's meals — real plan data */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: 0, letterSpacing: '-0.01em' }}>
-              Today's Meals
-            </h2>
-            <button onClick={() => onNavigate('meal-plan')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-              Plan →
-            </button>
-          </div>
+          {/* Today */}
+          <section style={{ marginBottom: '36px' }}>
+            <SectionHead title="Today" action="Plan →" onAction={() => onNavigate('meal-plan')} />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
             {todayMeals.length > 0 ? (
               todayMeals.map(({ meal, cfg }, i) => (
                 <div
@@ -216,91 +205,70 @@ export default function HomeScreen({ onNavigate }: Props) {
                   // The meal-plan API strips ingredients from its recipes, so
                   // open the full one we already loaded; the meal is the fallback.
                   onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}
-                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW, cursor: 'pointer' }}
+                  style={rowStyle(i > 0)}
                 >
-                  <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: cfg.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0, overflow: 'hidden' }}>
-                    {meal.imageUrl
-                      ? <img src={recipeImageSrc(meal.imageUrl, 64, 64)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                      : cfg.emoji}
-                  </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: '10px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.06em' }}>
+                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.05em' }}>
                       {cfg.label.toUpperCase()}
                     </p>
-                    <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <h3 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {meal.name}
                     </h3>
                   </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: '500', margin: 0 }}>
-                      {(meal.prepTime || 0) + (meal.cookTime || 0)} min
-                    </p>
-                    {meal.calories && <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>{meal.calories} cal</p>}
-                  </div>
-                  {/* Taking a meal off the day, not deleting the recipe, so no
-                      confirming -- it is put straight back by adding it again. */}
+                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', flexShrink: 0 }}>
+                    {(meal.prepTime || 0) + (meal.cookTime || 0)} min
+                  </span>
+                  {/* Taking a meal off the day, not deleting the recipe. */}
                   <button
                     onClick={e => { e.stopPropagation(); removeMeal(meal.mealId) }}
                     aria-label={`Remove ${meal.name} from ${cfg.label}`}
-                    style={{ flexShrink: 0, width: '26px', height: '26px', borderRadius: '13px', background: 'var(--color-bg)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    style={{ flexShrink: 0, width: '28px', height: '28px', borderRadius: '14px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                   >
-                    <X size={13} color="var(--color-text-muted)" />
+                    <X size={14} color="var(--color-text-muted)" />
                   </button>
                 </div>
               ))
             ) : (
-              <button
-                onClick={() => onNavigate('meal-plan')}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
-              >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CalendarDays size={18} color="var(--color-primary)" />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>Nothing planned today</p>
-                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Tap to plan your day</p>
-                </div>
-              </button>
+              <EmptyRow label="Nothing planned today" action="Plan →" onClick={() => onNavigate('meal-plan')} />
             )}
 
-            {/* Add a meal without leaving Home. Inline, like the meal plan's
-                own picker, rather than a popup. */}
+            {/* Add a meal without leaving Home. */}
             {addingSlot === null ? (
               MEALS.some(cfg => !filledSlots.has(cfg.key)) && (
                 <button
                   onClick={() => setAddingSlot(MEALS.find(cfg => !filledSlots.has(cfg.key))!.key)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', padding: '10px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1.5px dashed var(--color-primary-border)', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '16px', background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
                 >
                   <Plus size={14} /> Add a meal
                 </button>
               )
             ) : (
-              <div style={{ background: 'var(--color-card)', border: '1px solid #e8eef0', borderRadius: '14px', padding: '12px' }}>
+              <div style={{ marginTop: '16px', background: 'var(--color-subtle)', borderRadius: '14px', padding: '12px' }}>
                 <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
                   {MEALS.filter(cfg => !filledSlots.has(cfg.key)).map(cfg => (
                     <button
                       key={cfg.key}
                       onClick={() => setAddingSlot(cfg.key)}
-                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-border)'), background: addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-card)', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-border)'), background: addingSlot === cfg.key ? 'var(--color-primary)' : 'transparent', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       {cfg.label}
                     </button>
                   ))}
                 </div>
-                <div style={{ maxHeight: '168px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {recipes.map((r: any) => (
+                <div style={{ maxHeight: '168px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                  {recipes.map((r: any, idx: number) => (
                     <button
                       key={r.id}
                       onClick={() => addMeal(r.id, addingSlot)}
                       disabled={busy}
-                      style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '7px', background: 'none', border: 'none', borderRadius: '10px', cursor: busy ? 'default' : 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 4px', background: 'none', border: 'none', borderTop: idx > 0 ? '1px solid var(--color-border)' : 'none', cursor: busy ? 'default' : 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' }}
                     >
-                      <span style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'var(--color-subtle)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
+                      <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'var(--color-card)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
                         {r.imageUrl
-                          ? <img src={recipeImageSrc(r.imageUrl, 32, 32)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                          ? <img src={recipeImageSrc(r.imageUrl, 30, 30)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                           : '🍽️'}
                       </span>
-                      <span style={{ flex: 1, minWidth: 0, fontSize: '13px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: '500', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {r.name}
                       </span>
                     </button>
@@ -308,192 +276,138 @@ export default function HomeScreen({ onNavigate }: Props) {
                 </div>
                 <button
                   onClick={() => setAddingSlot(null)}
-                  style={{ width: '100%', marginTop: '8px', padding: '8px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ width: '100%', marginTop: '8px', padding: '8px', background: 'transparent', color: 'var(--color-text-secondary)', border: 'none', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   Cancel
                 </button>
               </div>
             )}
-          </div>
+          </section>
 
-          {/* Favorites — the recipes you've hearted, in the shelf shape that
-              used to hold "Your Recipes". "See all" opens the full list. */}
-          <div style={{ marginBottom: '28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: 0, letterSpacing: '-0.01em' }}>
-                Favorites
-              </h2>
-              {favorites.length > 0 && (
-                <button onClick={() => onNavigate('favorites')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-                  See all →
-                </button>
-              )}
-            </div>
-
+          {/* Favorites */}
+          <section style={{ marginBottom: '36px' }}>
+            <SectionHead title="Favorites" action={favorites.length > 0 ? 'See all →' : undefined} onAction={() => onNavigate('favorites')} />
             {favorites.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {favorites.slice(0, 6).map((recipe: any, i: number) => {
-                  const tint = RECIPE_COLORS[i % RECIPE_COLORS.length]
-                  const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
-                  return (
-                    <div
-                      key={recipe.id}
-                      onClick={() => onNavigate('recipe', { recipe })}
-                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW, cursor: 'pointer' }}
-                    >
-                      {/* Recipe photo in the same tile the cookbook cards use, so
-                          the whole Home shelf reads as one card system. */}
-                      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
-                        {recipe.imageUrl
-                          ? <img src={recipeImageSrc(recipe.imageUrl, 48, 48)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                          : '🍽️'}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {recipe.name}
-                        </h4>
-                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                          {time} min
-                        </p>
-                      </div>
-                      <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
-                    </div>
-                  )
-                })}
-              </div>
+              favorites.slice(0, 5).map((recipe: any, i: number) => {
+                const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+                return (
+                  <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={rowStyle(i > 0)}>
+                    <h4 style={{ flex: 1, minWidth: 0, fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {recipe.name}
+                    </h4>
+                    <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', flexShrink: 0 }}>{time} min</span>
+                  </div>
+                )
+              })
             ) : (
-              <button
-                onClick={() => onNavigate('browse')}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
-              >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-error-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Heart size={18} color="#ef4444" />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>No favorites yet</p>
-                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Tap the heart on a recipe to save it</p>
-                </div>
-              </button>
+              <EmptyRow label="No favorites yet" action="Browse →" onClick={() => onNavigate('browse')} />
             )}
-          </div>
+          </section>
 
-          {/* Cookbooks — same shelf shape as the recipes they group. */}
-          <div style={{ marginBottom: '28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: 0, letterSpacing: '-0.01em' }}>
-                Cookbooks
-              </h2>
-              {cookbooks.length > 0 && (
-                <button onClick={() => onNavigate('cookbooks')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0 }}>
-                  See all →
-                </button>
-              )}
-            </div>
-
+          {/* Cookbooks */}
+          <section style={{ marginBottom: '36px' }}>
+            <SectionHead title="Cookbooks" action={cookbooks.length > 0 ? 'See all →' : undefined} onAction={() => onNavigate('cookbooks')} />
             {cookbooks.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {cookbooks.slice(0, 6).map((book: any, i: number) => {
-                  const count = book.recipes?.length ?? 0
-                  const tint = COOKBOOK_COLORS[i % COOKBOOK_COLORS.length]
-                  return (
-                    <div
-                      key={book.id}
-                      onClick={() => onNavigate('cookbook', { cookbookId: book.id })}
-                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW, cursor: 'pointer' }}
-                    >
-                      {/* Small tinted book tile, echoing the meal cards' icon squares
-                          rather than the old full-bleed colour block. */}
-                      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
-                        📖
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {book.name}
-                        </h4>
-                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                          {count} recipe{count === 1 ? '' : 's'}
-                        </p>
-                      </div>
-                      <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
-                    </div>
-                  )
-                })}
-              </div>
+              cookbooks.slice(0, 5).map((book: any, i: number) => {
+                const count = book.recipes?.length ?? 0
+                return (
+                  <div key={book.id} onClick={() => onNavigate('cookbook', { cookbookId: book.id })} style={rowStyle(i > 0)}>
+                    <h4 style={{ flex: 1, minWidth: 0, fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {book.name}
+                    </h4>
+                    <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', flexShrink: 0 }}>
+                      {count} recipe{count === 1 ? '' : 's'}
+                    </span>
+                  </div>
+                )
+              })
             ) : (
-              <button
-                onClick={() => onNavigate('cookbooks')}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--color-card)', border: '1.5px dashed #dbe2d6', borderRadius: '14px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
-              >
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <BookOpen size={18} color="var(--color-primary)" />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0 }}>No cookbooks yet</p>
-                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Group your recipes into one</p>
-                </div>
-              </button>
+              <EmptyRow label="No cookbooks yet" action="Create →" onClick={() => onNavigate('cookbooks')} />
             )}
-          </div>
+          </section>
+
           </>}
         </div>
+        <div style={{ height: '24px' }} />
       </div>
       <BottomNavigation active="home" onNavigate={onNavigate} />
     </div>
   )
 }
 
-/* --- First-load skeleton ----------------------------------------------------
-   Mirrors the real layout (quick actions, then the meal / favorites / cookbook
-   shelves) so the switch to content is a fill-in, not a reflow. */
-
-function Skel({ w = '100%', h, r = 10, style }: { w?: number | string; h: number; r?: number; style?: CSSProperties }) {
-  return <div className="rh-skel" style={{ width: w, height: h, borderRadius: r, ...style }} />
-}
-
-/** A card-row placeholder: tinted tile + two text lines, in the real card shell. */
-function SkelRow({ big = false }: { big?: boolean }) {
-  const s = big ? 64 : 48
+/** A ruled section label: small all-caps title on a hairline, optional link. */
+function SectionHead({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW }}>
-      <Skel w={s} h={s} r={14} style={{ flexShrink: 0 }} />
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}>
-        <Skel w="60%" h={12} />
-        <Skel w="35%" h={10} />
-      </div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)' }}>
+      <h2 style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>
+        {title}
+      </h2>
+      {action && (
+        <button onClick={onAction} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+          {action}
+        </button>
+      )}
     </div>
   )
 }
 
-function SkelLabel() {
-  return <Skel w={116} h={15} r={7} style={{ marginBottom: '12px' }} />
+/** Empty shelf: a single muted line with the action floated right. */
+function EmptyRow({ label, action, onClick }: { label: string; action: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', padding: '17px 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+    >
+      <span style={{ fontSize: '15px', color: 'var(--color-text-secondary)' }}>{label}</span>
+      <span style={{ fontSize: '13px', color: 'var(--color-primary)', fontWeight: '600' }}>{action}</span>
+    </button>
+  )
+}
+
+/* --- First-load skeleton ----------------------------------------------------
+   Mirrors the ruled-list layout so the switch to content is a fill-in. */
+
+function Skel({ w = '100%', h, r = 7, style }: { w?: number | string; h: number; r?: number; style?: CSSProperties }) {
+  return <div className="rh-skel" style={{ width: w, height: h, borderRadius: r, ...style }} />
+}
+
+function SkelTextRow({ divider = false }: { divider?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 0', borderTop: divider ? '1px solid var(--color-subtle)' : 'none' }}>
+      <Skel w="52%" h={13} />
+      <Skel w={38} h={11} />
+    </div>
+  )
+}
+
+function SkelSection() {
+  return (
+    <div style={{ marginBottom: '36px' }}>
+      <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)' }}>
+        <Skel w={84} h={11} r={6} />
+      </div>
+      <SkelTextRow />
+      <SkelTextRow divider />
+    </div>
+  )
 }
 
 function HomeSkeleton({ isPro }: { isPro: boolean }) {
   return (
     <div>
       {isPro && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '24px' }}>
-          {[0, 1, 2].map(i => <Skel key={i} h={88} r={18} />)}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '36px' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <Skel w={46} h={46} r={23} />
+              <Skel w={44} h={10} r={5} />
+            </div>
+          ))}
         </div>
       )}
-
-      <SkelLabel />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-        <SkelRow big />
-        <Skel h={42} r={12} />
-      </div>
-
-      <SkelLabel />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
-        <SkelRow />
-        <SkelRow />
-      </div>
-
-      <SkelLabel />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
-        <SkelRow />
-        <SkelRow />
-      </div>
+      <SkelSection />
+      <SkelSection />
+      <SkelSection />
     </div>
   )
 }
