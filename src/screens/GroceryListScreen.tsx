@@ -439,8 +439,9 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
             {selectedList && (
               <>
-                {/* Add an item */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
+                {/* Add an item. On a very narrow phone this wraps so the name
+                    field gets the full width — see .grocery-add in global.css. */}
+                <div className="grocery-add" style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
                   <input
                     type="text"
                     value={newItemName}
