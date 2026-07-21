@@ -290,7 +290,7 @@ export default function App() {
       <div className="phone-desk">
         <div className="phone-frame">
           {/* Status bar — the mock one, hidden on a real device. */}
-          <div className="phone-statusbar" style={{ height: '44px', background: 'var(--color-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', fontSize: '14px', fontWeight: '600', flexShrink: 0 }}>
+          <div className="phone-statusbar">
             <span>9:41</span>
             <span>📶 🔋</span>
           </div>

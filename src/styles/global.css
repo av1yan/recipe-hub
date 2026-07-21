@@ -180,6 +180,20 @@
   border: 12px solid #000;
 }
 
+/* Layout lives here rather than inline, so the media query below can actually
+   hide it — an inline display would outrank the stylesheet. */
+.phone-statusbar {
+  height: 44px;
+  flex-shrink: 0;
+  background: var(--color-card);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 @media (max-width: 480px) {
   .phone-desk { padding: 0; align-items: stretch; }
   .phone-frame {
