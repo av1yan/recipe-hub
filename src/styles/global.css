@@ -147,6 +147,54 @@
   --color-pro-badge: #f4b860;
 }
 
+/* --- The phone mockup ---------------------------------------------------------
+   A presentation device for desktop, never something that should clip the app.
+   Two rules make it safe everywhere:
+   1. The frame's height is capped to the viewport, so on a short window it
+      shrinks instead of running off the bottom (which used to put the bottom
+      navigation out of reach, with nothing able to scroll to it).
+   2. On a real phone the chrome is dropped entirely and the app runs
+      full-bleed -- a phone drawn inside a phone just wastes the screen, and
+      the device already renders its own status bar. */
+.phone-desk {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-desk);
+  padding: 20px;
+}
+
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  max-height: calc(100dvh - 40px);
+  background: var(--color-card);
+  border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 12px solid #000;
+}
+
+@media (max-width: 480px) {
+  .phone-desk { padding: 0; align-items: stretch; }
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  /* The real device draws the clock and battery. */
+  .phone-statusbar { display: none; }
+}
+
 * {
   margin: 0;
   padding: 0;

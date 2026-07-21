@@ -285,21 +285,12 @@ export default function App() {
 
   return (
     <AppProvider user={user} openAddSheet={openAddSheet}>
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: 'var(--color-desk)', padding: '20px' }}>
-        <div style={{
-          width: '375px',
-          height: '812px',
-          background: 'var(--color-card)',
-          borderRadius: '40px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative',
-          border: '12px solid #000'
-        }}>
-          {/* Status bar */}
-          <div style={{ height: '44px', background: 'var(--color-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', fontSize: '14px', fontWeight: '600' }}>
+      {/* Sizing/responsive rules live in global.css so the frame can collapse to
+          full-bleed on a real phone -- see .phone-desk / .phone-frame. */}
+      <div className="phone-desk">
+        <div className="phone-frame">
+          {/* Status bar — the mock one, hidden on a real device. */}
+          <div className="phone-statusbar" style={{ height: '44px', background: 'var(--color-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '24px', paddingRight: '24px', fontSize: '14px', fontWeight: '600', flexShrink: 0 }}>
             <span>9:41</span>
             <span>📶 🔋</span>
           </div>
