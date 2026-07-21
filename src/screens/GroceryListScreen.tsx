@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Loader2, X, CalendarDays } from 'lucide-react'
 import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
@@ -70,6 +70,24 @@ function parseItemParts(raw: string): { name: string; quantity: number; unit: st
     return { name: (m[2] ? m[2] + ' ' : '') + m[3].trim(), quantity: qty, unit: 'piece' }
   }
   return { name: raw.trim(), quantity: 1, unit: 'piece' }
+}
+
+/** Quiet square header button — subtle by default, accent when active. */
+function iconBtnStyle(active = false): CSSProperties {
+  return {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: '36px', height: '36px', borderRadius: '11px',
+    background: active ? 'var(--color-primary)' : 'var(--color-subtle)',
+    color: active ? '#fff' : 'var(--color-text-secondary)',
+    border: 'none', cursor: 'pointer',
+  }
+}
+
+// Filled, borderless input — the minimal field used across this screen.
+const fieldStyle: CSSProperties = {
+  padding: '11px 13px', borderRadius: '11px', border: 'none',
+  background: 'var(--color-subtle)', color: 'var(--color-text)',
+  fontSize: '14px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
 }
 
 export default function GroceryListScreen({ onNavigate }: Props) {
@@ -313,14 +331,47 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     </>
   )
 
+  const headerTop = (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <h1 style={{ fontSize: '27px', fontWeight: '700', letterSpacing: '-0.02em', margin: 0, color: 'var(--color-text)' }}>Groceries</h1>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {isPro && selectedList && (
+          <button onClick={generateFromPlan} disabled={generating} aria-label="Generate from this week's plan" style={iconBtnStyle()}>
+            <CalendarDays size={16} />
+          </button>
+        )}
+        {isPro && selectedList && (selectedList.items?.length || 0) > 0 && (
+          <button onClick={shareList} aria-label="Share grocery list" style={iconBtnStyle()}>
+            <Share2 size={15} />
+          </button>
+        )}
+        <button
+          onClick={openCamera}
+          aria-label="Scan a grocery note"
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)', borderRadius: '11px', padding: '0 13px', height: '36px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          <Camera size={16} /> Scan
+        </button>
+      </div>
+    </div>
+  )
+
   if (isLoading) {
     return (
-      <div className="screen">
-        <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)' }}>
-          <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
+      <div className="screen" style={{ background: 'var(--color-bg)' }}>
+        <header style={{ padding: '20px 24px 14px', background: 'var(--color-bg)' }}>
+          <h1 style={{ fontSize: '27px', fontWeight: '700', letterSpacing: '-0.02em', margin: 0, color: 'var(--color-text)' }}>Groceries</h1>
         </header>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
-          <p>Loading...</p>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 24px 0' }}>
+          {[0, 1, 2, 3, 4].map(i => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
+              <Skel w={22} h={22} r={6} />
+              <div style={{ flex: 1 }}>
+                <Skel w="48%" h={13} />
+                <Skel w="22%" h={10} style={{ marginTop: '8px' }} />
+              </div>
+            </div>
+          ))}
         </div>
         <BottomNavigation active="grocery" onNavigate={(s) => onNavigate(s as Screen)} />
       </div>
@@ -328,69 +379,37 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen" style={{ position: 'relative' }}>
+    <div className="screen" style={{ position: 'relative', background: 'var(--color-bg)' }}>
       {hiddenFileInputs}
 
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedList ? '12px' : 0 }}>
-          <h2 style={{ fontSize: '18px', margin: 0 }}>Grocery List</h2>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            {isPro && selectedList && (
-              <button
-                onClick={generateFromPlan}
-                disabled={generating}
-                aria-label="Generate from this week's plan"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: generating ? 'default' : 'pointer' }}
-              >
-                <CalendarDays size={15} /> {generating ? '…' : 'From plan'}
-              </button>
-            )}
-            {isPro && selectedList && (selectedList.items?.length || 0) > 0 && (
-              <button
-                onClick={shareList}
-                aria-label="Share grocery list"
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
-              >
-                <Share2 size={15} /> Share
-              </button>
-            )}
-            <button
-              onClick={openCamera}
-              aria-label="Scan a grocery note"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1.5px solid var(--color-primary-border)', borderRadius: '10px', padding: '7px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
-            >
-              <Camera size={16} /> Scan
-            </button>
-          </div>
-        </div>
+      <header style={{ padding: '20px 24px 14px', background: 'var(--color-bg)', flexShrink: 0 }}>
+        {headerTop}
         {selectedList && (
-          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-            {checkedCount} of {totalCount} items checked
+          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+            {checkedCount} of {totalCount} checked
           </div>
         )}
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '6px 24px 24px', display: 'flex', flexDirection: 'column' }}>
         {lists.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, color: 'var(--color-text-muted)', gap: '16px' }}>
-            <p style={{ marginBottom: 0 }}>No grocery lists yet</p>
+            <p style={{ marginBottom: 0, fontSize: '15px' }}>No grocery lists yet</p>
             <div style={{ width: '100%', maxWidth: '300px' }}>
               <input
                 type="text"
                 value={newListName}
                 onChange={(e) => setNewListName(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && createNewList()}
-                placeholder="Create a new list..."
-                className="input"
-                style={{ marginBottom: '8px' }}
+                placeholder="Create a new list…"
+                style={{ ...fieldStyle, width: '100%', marginBottom: '8px' }}
               />
-              <button onClick={createNewList} className="btn" style={{ width: '100%', background: 'var(--color-primary)', color: '#fff' }}>
-                Create List
+              <button onClick={createNewList} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                Create list
               </button>
               <button
                 onClick={openCamera}
-                className="btn"
-                style={{ width: '100%', background: 'var(--color-card)', color: 'var(--color-primary)', border: '1.5px solid var(--color-primary-border)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                style={{ width: '100%', padding: '11px', borderRadius: '12px', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary-border)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 <Camera size={16} /> Scan a note
               </button>
@@ -398,125 +417,102 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           </div>
         ) : (
           <>
-            {/* Only a switcher when there's something to switch to. It also
-                needs flex-shrink: 0 -- overflow-x makes it a scroll container,
-                which otherwise collapses to its padding inside the scrolling
-                column (it rendered as a thin green sliver). */}
+            {/* List switcher — minimal outline pills. flex-shrink 0 keeps it from
+                collapsing inside the scrolling column (overflow-x makes it a
+                scroll container). */}
             {lists.length > 1 && (
-              <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', flexShrink: 0 }}>
-                {lists.map(list => (
-                  <button
-                    key={list.id}
-                    onClick={() => setSelectedListId(list.id)}
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      background: list.id === selectedListId ? 'var(--color-primary)' : 'var(--color-subtle)',
-                      color: list.id === selectedListId ? '#fff' : 'var(--color-text)',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {list.name}
-                  </button>
-                ))}
+              <div style={{ marginBottom: '14px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', flexShrink: 0 }}>
+                {lists.map(list => {
+                  const on = list.id === selectedListId
+                  return (
+                    <button
+                      key={list.id}
+                      onClick={() => setSelectedListId(list.id)}
+                      style={{ padding: '7px 14px', borderRadius: '999px', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'transparent', color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+                    >
+                      {list.name}
+                    </button>
+                  )
+                })}
               </div>
             )}
 
             {selectedList && (
               <>
-                <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--color-bg)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                    <input
-                      type="text"
-                      value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addItemToList()}
-                      placeholder="Item name..."
-                      className="input"
-                      style={{ flex: 1, fontSize: '14px' }}
-                    />
-                    <input
-                      type="number"
-                      value={newItemQuantity}
-                      onChange={(e) => setNewItemQuantity(e.target.value)}
-                      placeholder="Qty"
-                      className="input"
-                      style={{ width: '60px', fontSize: '14px' }}
-                    />
-                    <select
-                      value={newItemUnit}
-                      onChange={(e) => setNewItemUnit(e.target.value)}
-                      className="input"
-                      style={{ width: '80px', fontSize: '14px' }}
-                    >
-                      <option>piece</option>
-                      <option>lb</option>
-                      <option>oz</option>
-                      <option>kg</option>
-                      <option>g</option>
-                      <option>cup</option>
-                      <option>tbsp</option>
-                      <option>tsp</option>
-                      <option>ml</option>
-                      <option>l</option>
-                    </select>
-                    <button
-                      onClick={addItemToList}
-                      className="btn btn-icon"
-                      style={{ background: 'var(--color-primary)', color: '#fff', width: '40px', height: '40px', padding: '8px' }}
-                    >
-                      <Plus size={18} />
-                    </button>
-                  </div>
+                {/* Add an item */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
+                  <input
+                    type="text"
+                    value={newItemName}
+                    onChange={(e) => setNewItemName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addItemToList()}
+                    placeholder="Add an item…"
+                    style={{ ...fieldStyle, flex: 1, minWidth: 0 }}
+                  />
+                  <input
+                    type="number"
+                    value={newItemQuantity}
+                    onChange={(e) => setNewItemQuantity(e.target.value)}
+                    aria-label="Quantity"
+                    style={{ ...fieldStyle, width: '52px', textAlign: 'center', padding: '11px 6px' }}
+                  />
+                  <select
+                    value={newItemUnit}
+                    onChange={(e) => setNewItemUnit(e.target.value)}
+                    aria-label="Unit"
+                    style={{ ...fieldStyle, width: '74px' }}
+                  >
+                    <option>piece</option>
+                    <option>lb</option>
+                    <option>oz</option>
+                    <option>kg</option>
+                    <option>g</option>
+                    <option>cup</option>
+                    <option>tbsp</option>
+                    <option>tsp</option>
+                    <option>ml</option>
+                    <option>l</option>
+                  </select>
+                  <button
+                    onClick={addItemToList}
+                    aria-label="Add item"
+                    style={{ flexShrink: 0, width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                  >
+                    <Plus size={18} />
+                  </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div>
                   {selectedList.items && selectedList.items.length > 0 ? (
-                    selectedList.items.map(item => (
+                    selectedList.items.map((item, i) => (
                       <div
                         key={item.id}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          padding: '12px 14px',
-                          background: 'var(--color-card)',
-                          borderRadius: '14px',
-                          border: '1px solid var(--color-subtle)',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                          opacity: item.checked ? 0.6 : 1,
+                          display: 'flex', alignItems: 'center', gap: '14px',
+                          padding: '14px 0',
+                          borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none',
+                          opacity: item.checked ? 0.5 : 1,
                         }}
                       >
                         <button
                           onClick={() => toggleItem(item.id, item.checked || false)}
                           aria-label={item.checked ? `Uncheck ${item.name}` : `Check ${item.name}`}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '22px',
-                            height: '22px',
-                            borderRadius: '6px',
-                            flexShrink: 0,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: '23px', height: '23px', borderRadius: '7px', flexShrink: 0,
                             border: `2px solid ${item.checked ? 'var(--color-primary)' : 'var(--color-border)'}`,
                             background: item.checked ? 'var(--color-primary)' : 'transparent',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            padding: 0,
+                            color: '#fff', cursor: 'pointer', padding: 0,
                           }}
                         >
                           {item.checked && <Check size={14} />}
                         </button>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', textDecoration: item.checked ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ fontSize: '15px', fontWeight: '500', color: 'var(--color-text)', textDecoration: item.checked ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {item.name}
                           </div>
                           {(item.unit || '').trim() && (
-                            <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                            <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
                               {item.quantity} {pluralizeUnit(item.unit, item.quantity)}
                             </div>
                           )}
@@ -524,22 +520,22 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                         <button
                           onClick={() => deleteItem(item.id)}
                           aria-label={`Delete ${item.name}`}
-                          style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '10px', background: 'var(--color-subtle)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                          style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                         >
-                          <Trash2 size={15} color="#ef4444" />
+                          <Trash2 size={15} color="var(--color-text-muted)" />
                         </button>
                       </div>
                     ))
                   ) : (
-                    <div style={{ textAlign: 'center', padding: '28px 0' }}>
-                      <p style={{ color: 'var(--color-text-muted)', margin: '0 0 16px' }}>No items in this list</p>
+                    <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                      <p style={{ color: 'var(--color-text-muted)', margin: '0 0 16px', fontSize: '15px' }}>No items in this list yet</p>
                       {isPro && (
                         <button
                           onClick={generateFromPlan}
                           disabled={generating}
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '11px 18px', borderRadius: '12px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer', fontFamily: 'inherit' }}
                         >
-                          <CalendarDays size={16} /> {generating ? 'Building…' : 'Generate from this week’s plan'}
+                          <CalendarDays size={16} /> {generating ? 'Building…' : "Generate from this week's plan"}
                         </button>
                       )}
                     </div>
@@ -553,10 +549,10 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
       {/* Scanning overlay */}
       {scanning && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.96)', zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'var(--color-bg)', zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
           <Loader2 size={40} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
           <p style={{ fontSize: '15px', color: 'var(--color-text)', fontWeight: '600', margin: 0 }}>Reading your note…</p>
-          <div style={{ width: '200px', height: '6px', background: 'var(--color-border)', borderRadius: '3px', overflow: 'hidden' }}>
+          <div style={{ width: '200px', height: '6px', background: 'var(--color-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
             <div style={{ height: '100%', background: 'var(--color-primary)', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
           </div>
           <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
@@ -566,26 +562,26 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
       {/* Review overlay */}
       {scanned && (
-        <div style={{ position: 'absolute', inset: 0, background: 'var(--color-card)', zIndex: 20, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'var(--color-bg)', zIndex: 20, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button onClick={() => setScanned(null)} aria-label="Cancel scan" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
               <X size={22} color="var(--color-text)" />
             </button>
             <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: 'var(--color-text)' }}>Review items</h3>
+              <h3 style={{ fontSize: '17px', fontWeight: '700', margin: 0, color: 'var(--color-text)' }}>Review items</h3>
               <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Edit or remove any misreads, then add.</p>
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '14px 24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {scanned.map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <input
                   value={item}
                   onChange={e => updateScanned(i, e.target.value)}
-                  style={{ flex: 1, minWidth: 0, padding: '10px 12px', borderRadius: '10px', border: '1.5px solid var(--color-border)', fontSize: '14px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                  style={{ ...fieldStyle, flex: 1, minWidth: 0 }}
                 />
-                <button onClick={() => removeScanned(i)} aria-label="Remove item" style={{ flexShrink: 0, width: '36px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-card)', border: '1.5px solid var(--color-border)', borderRadius: '10px', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+                <button onClick={() => removeScanned(i)} aria-label="Remove item" style={{ flexShrink: 0, width: '40px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-subtle)', border: 'none', borderRadius: '11px', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
                   <X size={15} />
                 </button>
               </div>
@@ -595,14 +591,14 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             )}
           </div>
 
-          <div style={{ padding: '12px 16px', borderTop: '1px solid var(--color-subtle)', display: 'flex', gap: '10px' }}>
-            <button onClick={() => setScanned(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+          <div style={{ padding: '14px 24px', borderTop: '1px solid var(--color-subtle)', display: 'flex', gap: '10px' }}>
+            <button onClick={() => setScanned(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
               Cancel
             </button>
             <button
               onClick={addScannedItems}
               disabled={savingScan || scanned.length === 0}
-              style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1 }}
+              style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1, fontFamily: 'inherit' }}
             >
               {savingScan ? 'Adding…' : `Add ${scanned.length} item${scanned.length === 1 ? '' : 's'}`}
             </button>
@@ -616,23 +612,23 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           onClick={() => setPickerOpen(false)}
           style={{ position: 'absolute', inset: 0, zIndex: 40, background: 'rgba(15,23,42,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
         >
-          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--color-card)', borderTopLeftRadius: '18px', borderTopRightRadius: '18px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '700', color: 'var(--color-text-secondary)', textAlign: 'center' }}>Scan a grocery note</p>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--color-card)', borderTopLeftRadius: '20px', borderTopRightRadius: '20px', padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <p style={{ margin: '2px 0 6px', fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', textAlign: 'center' }}>Scan a grocery note</p>
             <button
               onClick={() => { setPickerOpen(false); cameraRef.current?.click() }}
-              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}
             >
               <Camera size={17} /> Take a photo
             </button>
             <button
               onClick={() => { setPickerOpen(false); libraryRef.current?.click() }}
-              style={{ width: '100%', padding: '13px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              style={{ width: '100%', padding: '13px', borderRadius: '12px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text)', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}
             >
               <ImageIcon size={17} /> Choose from library
             </button>
             <button
               onClick={() => setPickerOpen(false)}
-              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Cancel
             </button>
@@ -644,4 +640,10 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       <BottomNavigation active="grocery" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
+}
+
+/* --- First-load skeleton ---------------------------------------------------- */
+
+function Skel({ w = '100%', h, r = 7, style }: { w?: number | string; h: number; r?: number; style?: CSSProperties }) {
+  return <div className="rh-skel" style={{ width: w, height: h, borderRadius: r, ...style }} />
 }
