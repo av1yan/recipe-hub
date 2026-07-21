@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Clock, CheckCircle, List } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { ChevronLeft, ChevronRight, Clock, CheckCircle, List, Volume2, VolumeX, ChefHat, Crown, PartyPopper } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { getUnitPref, convertMeasurement, getTempPref, convertTempInText } from '../utils/preferences'
+import { useProPlan } from '../utils/proPlan'
 
 interface Props {
   recipe: Recipe | null
@@ -9,21 +10,32 @@ interface Props {
 }
 
 export default function CookingModeScreen({ recipe, onNavigate }: Props) {
+  const [isPro] = useProPlan()
   const [currentStep, setCurrentStep] = useState(0)
   const [timerSeconds, setTimerSeconds] = useState<number | null>(null)
   const [timerActive, setTimerActive] = useState(false)
   const [showIngredients, setShowIngredients] = useState(false)
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+  const [speaking, setSpeaking] = useState(false)
+  const [finished, setFinished] = useState(false)
 
   const instructions = (recipe as any)?.instructions || []
   const totalSteps = instructions.length
   const step = instructions[currentStep]
   const unitPref = getUnitPref()
   const tempPref = getTempPref()
+  const stepText = convertTempInText(step?.text || '', tempPref)
 
   useEffect(() => {
     if (!timerActive || timerSeconds === null || timerSeconds <= 0) {
-      if (timerSeconds === 0) setTimerActive(false)
+      if (timerSeconds === 0) {
+        setTimerActive(false)
+        // A buzz + a spoken heads-up the moment a step's timer finishes.
+        try { navigator.vibrate?.([200, 100, 200]) } catch { /* unsupported */ }
+        try {
+          if ('speechSynthesis' in window) speechSynthesis.speak(new SpeechSynthesisUtterance("Time's up"))
+        } catch { /* unsupported */ }
+      }
       return
     }
     const id = setInterval(() => setTimerSeconds(s => (s !== null ? s - 1 : null)), 1000)
@@ -33,7 +45,48 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   useEffect(() => {
     setTimerActive(false)
     setTimerSeconds(step?.duration ? step.duration * 60 : null)
+    // Stop any read-aloud when the step changes.
+    try { speechSynthesis?.cancel() } catch { /* unsupported */ }
+    setSpeaking(false)
   }, [currentStep])
+
+  // Keep the screen awake while cooking (hands are busy) — Pro perk. Released
+  // on unmount; re-acquired if the tab is re-shown.
+  const wakeRef = useRef<any>(null)
+  useEffect(() => {
+    let cancelled = false
+    const acquire = async () => {
+      try {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+          wakeRef.current = await (navigator as any).wakeLock.request('screen')
+        }
+      } catch { /* denied or unsupported */ }
+    }
+    acquire()
+    const onVis = () => { if (document.visibilityState === 'visible' && !cancelled) acquire() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      cancelled = true
+      document.removeEventListener('visibilitychange', onVis)
+      try { wakeRef.current?.release?.() } catch { /* noop */ }
+      try { speechSynthesis?.cancel() } catch { /* noop */ }
+    }
+  }, [])
+
+  // Read the current step aloud (toggle).
+  const toggleSpeak = () => {
+    try {
+      if (!('speechSynthesis' in window)) return
+      if (speaking) { speechSynthesis.cancel(); setSpeaking(false); return }
+      speechSynthesis.cancel()
+      const u = new SpeechSynthesisUtterance(stepText)
+      u.rate = 0.95
+      u.onend = () => setSpeaking(false)
+      u.onerror = () => setSpeaking(false)
+      setSpeaking(true)
+      speechSynthesis.speak(u)
+    } catch { setSpeaking(false) }
+  }
 
   const goNext = () => {
     setCompletedSteps(prev => new Set([...prev, currentStep]))
@@ -51,6 +104,31 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   }
 
   if (!recipe) return null
+
+  if (!isPro) {
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
+        <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
+          <button onClick={() => onNavigate('recipe', { recipe })} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex' }}>
+            <ChevronLeft size={22} color="var(--color-text-secondary)" />
+          </button>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>Cooking Mode</span>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChefHat size={32} color="#fff" />
+          </div>
+          <h2 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-text)', margin: 0 }}>Guided Cooking is Pro</h2>
+          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5, maxWidth: '300px' }}>
+            Full-screen steps, per-step timers, ingredients on tap, hands-free read-aloud, and a screen that stays awake while you cook.
+          </p>
+          <button onClick={() => onNavigate('settings')} style={{ marginTop: '6px', padding: '13px 22px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+            <Crown size={16} color="#f4b860" /> Upgrade to Pro
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   if (totalSteps === 0) {
     return (
@@ -156,11 +234,20 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
 
         {/* Step card */}
         <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', padding: '18px' }}>
-          <p style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: '800', letterSpacing: '0.1em', margin: '0 0 10px' }}>
-            STEP {step?.stepNumber || currentStep + 1}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <p style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: '800', letterSpacing: '0.1em', margin: 0 }}>
+              STEP {step?.stepNumber || currentStep + 1}
+            </p>
+            <button
+              onClick={toggleSpeak}
+              aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 11px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
+            </button>
+          </div>
           <p style={{ fontSize: '19px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.65, margin: 0 }}>
-            {convertTempInText(step?.text || '', tempPref)}
+            {stepText}
           </p>
         </div>
 
@@ -198,6 +285,9 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             >
               {timerSeconds === 0 ? '↺ Reset' : timerActive ? 'Pause' : 'Start Timer'}
             </button>
+            {timerSeconds === 0 && (
+              <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--color-primary)' }}>⏰ Time's up!</span>
+            )}
           </div>
         )}
       </div>
@@ -224,9 +314,8 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <button
             onClick={() => {
               setCompletedSteps(prev => new Set([...prev, currentStep]))
-              // Finishing drops you back on the recipe you were cooking -- the
-              // same place the back arrow goes -- not all the way out to Home.
-              onNavigate('recipe', { recipe })
+              try { navigator.vibrate?.([120, 60, 120, 60, 200]) } catch { /* unsupported */ }
+              setFinished(true)
             }}
             style={{
               flex: 2, padding: '14px', borderRadius: '12px',
@@ -256,6 +345,25 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           </button>
         )}
       </div>
+
+      {/* Finish celebration — the fun payoff for getting through every step. */}
+      {finished && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 20, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '32px', gap: '16px' }}>
+          <div style={{ width: '84px', height: '84px', borderRadius: '26px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <PartyPopper size={42} color="var(--color-primary)" />
+          </div>
+          <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--color-text)', margin: 0 }}>Nicely done! 🎉</h2>
+          <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5, maxWidth: '300px' }}>
+            You cooked <strong style={{ color: 'var(--color-text)' }}>{recipe.name}</strong> — all {totalSteps} steps. Enjoy!
+          </p>
+          <button
+            onClick={() => onNavigate('recipe', { recipe })}
+            style={{ marginTop: '8px', padding: '13px 26px', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.35)', fontFamily: 'inherit' }}
+          >
+            <CheckCircle size={17} /> Back to recipe
+          </button>
+        </div>
+      )}
     </div>
   )
 }
