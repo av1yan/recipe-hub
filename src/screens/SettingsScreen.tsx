@@ -8,7 +8,7 @@ import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
 import { authAPI } from '../utils/api'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
-import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT } from '../utils/proPlan'
+import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT, startTrial, getTrialInfo, isUpgraded, TRIAL_DAYS } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref } from '../utils/preferences'
@@ -251,6 +251,9 @@ const PRO_FEATURES = [
 
 function Subscription({ onBack }: { onBack: () => void }) {
   const [isPro, setPro] = useProPlan()
+  const trial = getTrialInfo()
+  const onTrial = isPro && !isUpgraded()  // Pro because of the trial, not an upgrade
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
       <SubHeader title="My Subscription" onBack={onBack} />
@@ -268,13 +271,15 @@ function Subscription({ onBack }: { onBack: () => void }) {
             </div>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', padding: '5px 11px', borderRadius: '999px', flexShrink: 0 }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
-              Active
+              {onTrial ? `Trial · ${trial.daysLeft}d left` : 'Active'}
             </span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '7px 0 0', lineHeight: 1.45 }}>
-            {isPro
-              ? 'Pro is on — every feature below is unlocked.'
-              : 'Everything you need to save and cook your own recipes.'}
+            {onTrial
+              ? `Free trial — ${trial.daysLeft} day${trial.daysLeft === 1 ? '' : 's'} left, then it reverts to Free.`
+              : isPro
+                ? 'Pro is on — every feature below is unlocked.'
+                : 'Everything you need to save and cook your own recipes.'}
           </p>
 
           {isPro && (
@@ -291,6 +296,16 @@ function Subscription({ onBack }: { onBack: () => void }) {
             </div>
           )}
         </div>
+
+        {/* On a trial: one tap to convert before it ends. */}
+        {onTrial && (
+          <button
+            onClick={() => setPro(true)}
+            style={{ width: '100%', marginBottom: '10px', padding: '13px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Keep Pro after the trial — $4.99/mo
+          </button>
+        )}
 
         {/* On Pro: downgrade gets its own quiet tile, not buried in an upsell. */}
         {isPro && (
@@ -320,17 +335,37 @@ function Subscription({ onBack }: { onBack: () => void }) {
                 </div>
               ))}
             </div>
-            <button
-              onClick={() => setPro(true)}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.25)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)' }}
-              style={{ marginTop: '13px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', transition: 'transform 0.14s ease, box-shadow 0.2s ease' }}
-            >
-              Upgrade for $4.99/mo
-            </button>
-            <p style={{ margin: '7px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.8)' }}>
-              Cancel anytime — no commitment.
-            </p>
+            {trial.used ? (
+              <>
+                <button
+                  onClick={() => setPro(true)}
+                  style={{ marginTop: '13px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', fontFamily: 'inherit' }}
+                >
+                  Upgrade for $4.99/mo
+                </button>
+                <p style={{ margin: '7px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.8)' }}>
+                  Your free trial has ended · cancel anytime.
+                </p>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={startTrial}
+                  style={{ marginTop: '13px', width: '100%', padding: '12px', background: 'var(--color-card)', color: 'var(--color-primary)', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.12)', fontFamily: 'inherit' }}
+                >
+                  Start {TRIAL_DAYS}-day free trial
+                </button>
+                <button
+                  onClick={() => setPro(true)}
+                  style={{ marginTop: '8px', width: '100%', padding: '9px', background: 'transparent', color: '#fff', border: '1.5px solid rgba(255,255,255,0.55)', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  or upgrade now — $4.99/mo
+                </button>
+                <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.8)' }}>
+                  No card needed · reverts to Free after {TRIAL_DAYS} days.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>
