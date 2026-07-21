@@ -108,7 +108,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   if (!isPro) {
     return (
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
-        <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
+        <div style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)' }}>
           <button onClick={() => onNavigate('recipe', { recipe })} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex' }}>
             <ChevronLeft size={22} color="var(--color-text-secondary)" />
           </button>
@@ -133,7 +133,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   if (totalSteps === 0) {
     return (
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
-        <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
+        <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)' }}>
           <button onClick={() => onNavigate('recipe', { recipe })} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}>
             <ChevronLeft size={22} color="var(--color-text-secondary)" />
           </button>
@@ -160,7 +160,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)', position: 'relative', overflow: 'hidden' }}>
 
       {/* Header */}
-      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-card)', flexShrink: 0 }}>
+      <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)', flexShrink: 0 }}>
         <button onClick={() => onNavigate('recipe', { recipe })} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center' }}>
           <ChevronLeft size={20} color="var(--color-text-secondary)" />
         </button>
@@ -187,10 +187,10 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 16px' }}>Ingredients</h3>
             {(recipe as any).ingredients?.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {(recipe as any).ingredients.map((ing: any) => (
-                  <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ing.name}</span>
+              <div>
+                {(recipe as any).ingredients.map((ing: any, i: number) => (
+                  <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '14px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
+                    <span style={{ fontSize: '15px', fontWeight: '500', color: 'var(--color-text)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ing.name}</span>
                     <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>{(() => { const c = convertMeasurement(ing.quantity || 0, ing.unit, unitPref); return `${c.quantity} ${c.unit}` })()}</span>
                   </div>
                 ))}
@@ -232,21 +232,21 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           </span>
         </div>
 
-        {/* Step card */}
-        <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', padding: '18px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        {/* Step — the hero of the screen, on the page, no card */}
+        <div style={{ padding: '2px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
             <p style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: '800', letterSpacing: '0.1em', margin: 0 }}>
               STEP {step?.stepNumber || currentStep + 1}
             </p>
             <button
               onClick={toggleSpeak}
               aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 11px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
             </button>
           </div>
-          <p style={{ fontSize: '19px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.65, margin: 0 }}>
+          <p style={{ fontSize: '22px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.6, margin: 0, letterSpacing: '-0.01em' }}>
             {stepText}
           </p>
         </div>
@@ -293,7 +293,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
       </div>
 
       {/* Prev / Next */}
-      <div style={{ padding: '12px 16px 20px', display: 'flex', gap: '10px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-card)', flexShrink: 0 }}>
+      <div style={{ padding: '12px 20px 20px', display: 'flex', gap: '10px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-bg)', flexShrink: 0 }}>
         <button
           onClick={goPrev}
           disabled={currentStep === 0}

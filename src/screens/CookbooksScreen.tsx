@@ -8,6 +8,12 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
 }
 
+const fieldStyle = {
+  width: '100%', padding: '11px 13px', borderRadius: '11px', border: 'none',
+  background: 'var(--color-subtle)', color: 'var(--color-text)',
+  fontSize: '14px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const,
+}
+
 export default function CookbooksScreen({ onNavigate }: Props) {
   const [cookbooks, setCookbooks] = useState<Cookbook[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -67,84 +73,72 @@ export default function CookbooksScreen({ onNavigate }: Props) {
     }
   }
 
-  const getColorForCookbook = (index: number): string => {
-    const colors = ['#c67139', 'var(--color-primary)', '#d4a574', '#b8956a', '#a48a6e']
-    return colors[index % colors.length]
-  }
+  const header = (
+    <header style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+      <button onClick={() => onNavigate('home')} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+        <ArrowLeft size={22} color="var(--color-text)" />
+      </button>
+      <h1 style={{ flex: 1, fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', margin: 0, color: 'var(--color-text)' }}>My Cookbooks</h1>
+      <button
+        onClick={() => {
+          if (!isPro && !showCreateForm && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
+            setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
+            return
+          }
+          setError('')
+          setShowCreateForm(!showCreateForm)
+        }}
+        aria-label="New cookbook"
+        style={{ width: '36px', height: '36px', borderRadius: '11px', background: 'var(--color-subtle)', color: 'var(--color-primary)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Plus size={20} />
+      </button>
+    </header>
+  )
 
   if (isLoading) {
     return (
-      <div className="screen">
-        <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={() => onNavigate('home')} className="btn btn-icon" style={{ background: 'none' }}>
-            <ArrowLeft size={22} />
-          </button>
-          <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>My Cookbooks</h2>
-        </header>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
-          <p>Loading cookbooks...</p>
+      <div className="screen" style={{ background: 'var(--color-bg)' }}>
+        {header}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 24px 0' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{ padding: '16px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
+              <div className="rh-skel" style={{ width: '45%', height: '14px', borderRadius: '7px' }} />
+              <div className="rh-skel" style={{ width: '25%', height: '11px', borderRadius: '6px', marginTop: '8px' }} />
+            </div>
+          ))}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="screen">
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button onClick={() => onNavigate('home')} className="btn btn-icon" style={{ background: 'none' }}>
-          <ArrowLeft size={22} />
-        </button>
-        <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>My Cookbooks</h2>
-        <button
-          onClick={() => {
-            if (!isPro && !showCreateForm && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
-              setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
-              return
-            }
-            setError('')
-            setShowCreateForm(!showCreateForm)
-          }}
-          className="btn btn-icon"
-          style={{ background: 'transparent', color: '#c67139' }}
-        >
-          <Plus size={22} />
-        </button>
-      </header>
+    <div className="screen" style={{ background: 'var(--color-bg)' }}>
+      {header}
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px 24px' }}>
         {showCreateForm && (
-          <div style={{ background: 'var(--color-bg)', borderRadius: '12px', padding: '16px', gap: '12px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <input
               type="text"
               value={newCookbookName}
               onChange={(e) => setNewCookbookName(e.target.value)}
-              placeholder="Cookbook name..."
-              className="input"
-              style={{ marginBottom: '8px' }}
+              placeholder="Cookbook name…"
+              style={fieldStyle}
             />
             <textarea
               value={newCookbookDesc}
               onChange={(e) => setNewCookbookDesc(e.target.value)}
-              placeholder="Description (optional)..."
-              className="input"
-              style={{ minHeight: '80px', marginBottom: '8px', resize: 'none' }}
+              placeholder="Description (optional)…"
+              style={{ ...fieldStyle, minHeight: '76px', resize: 'none' }}
             />
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={createCookbook}
-                className="btn"
-                style={{ flex: 1, background: '#c67139', color: '#fff' }}
-              >
+              <button onClick={createCookbook} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Create
               </button>
               <button
-                onClick={() => {
-                  setShowCreateForm(false)
-                  setNewCookbookName('')
-                  setNewCookbookDesc('')
-                }}
-                className="btn"
-                style={{ flex: 1, background: 'var(--color-border)', color: 'var(--color-text)' }}
+                onClick={() => { setShowCreateForm(false); setNewCookbookName(''); setNewCookbookDesc('') }}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Cancel
               </button>
@@ -153,84 +147,69 @@ export default function CookbooksScreen({ onNavigate }: Props) {
         )}
 
         {error && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px' }}>
-            <p style={{ margin: 0, fontSize: '13px', color: '#b91c1c' }}>{error}</p>
+          <div style={{ background: 'var(--color-error-bg)', borderRadius: '12px', padding: '11px 13px', marginBottom: '14px' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-error)' }}>{error}</p>
           </div>
         )}
 
         {cookbooks.length === 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-text-muted)', gap: '16px' }}>
-            <p>No cookbooks yet</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '64px', color: 'var(--color-text-muted)', gap: '16px' }}>
+            <p style={{ margin: 0, fontSize: '15px' }}>No cookbooks yet</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="btn"
-              style={{ background: '#c67139', color: '#fff' }}
+              style={{ padding: '12px 20px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
-              Create Your First Cookbook
+              Create your first cookbook
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div>
             {cookbooks.map((cookbook, index) => {
-              const tint = getColorForCookbook(index)
               const count = cookbook.recipes?.length || 0
               return (
-                <div
-                  key={cookbook.id}
-                  style={{
-                    borderRadius: '14px',
-                    overflow: 'hidden',
-                    background: 'var(--color-card)',
-                    border: '1px solid var(--color-subtle)',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                  }}
-                >
+                <div key={cookbook.id} style={{ borderTop: index > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
                   <div
                     onClick={() => confirmId !== cookbook.id && onNavigate('cookbook', { cookbookId: cookbook.id })}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', cursor: 'pointer' }}
                   >
-                    {/* Small tinted book tile, matching the Home cookbook cards. */}
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0 }}>
-                      📖
-                    </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <h3 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {cookbook.name}
                       </h3>
                       {cookbook.description && (
-                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {cookbook.description}
                         </p>
                       )}
-                      <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                      <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
                         {count} recipe{count === 1 ? '' : 's'}
                       </p>
                     </div>
                     <button
                       onClick={e => { e.stopPropagation(); setConfirmId(cookbook.id); setError('') }}
                       aria-label={`Delete ${cookbook.name}`}
-                      style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '10px', background: 'var(--color-subtle)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                     >
                       <Trash2 size={15} color="var(--color-text-muted)" />
                     </button>
                   </div>
 
                   {confirmId === cookbook.id && (
-                    <div style={{ padding: '0 14px 12px', borderTop: '1px solid var(--color-subtle)' }}>
-                      <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', margin: '10px 0 8px', lineHeight: 1.45 }}>
+                    <div style={{ padding: '0 0 14px' }}>
+                      <p style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', margin: '0 0 10px', lineHeight: 1.45 }}>
                         Delete this cookbook? The recipes in it stay.
                       </p>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button
                           onClick={() => setConfirmId(null)}
-                          style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                          style={{ flex: 1, padding: '9px', borderRadius: '10px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                         >
                           Keep
                         </button>
                         <button
                           onClick={() => deleteCookbook(cookbook.id)}
                           disabled={deleting}
-                          style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '12px', fontWeight: '700', cursor: deleting ? 'default' : 'pointer', opacity: deleting ? 0.6 : 1, fontFamily: 'inherit' }}
+                          style={{ flex: 1, padding: '9px', borderRadius: '10px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: deleting ? 'default' : 'pointer', opacity: deleting ? 0.6 : 1, fontFamily: 'inherit' }}
                         >
                           {deleting ? '…' : 'Delete'}
                         </button>

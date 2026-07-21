@@ -11,8 +11,6 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
 }
 
-const TILE_COLORS = ['#e8b4a8', '#d4a574', '#c9a582', '#b8956a', '#a48a6e']
-
 // Common kitchen staples, one tap to add — so filling the pantry doesn't mean
 // typing a dozen things.
 const STAPLES = [
@@ -234,19 +232,19 @@ export default function PantryScreen({ onNavigate }: Props) {
   }
 
   const header = (
-    <header style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', background: 'var(--color-card)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
+    <header style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 24px', background: 'var(--color-bg)', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
       <button onClick={() => onNavigate('home')} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
         <ArrowLeft size={22} color="var(--color-text)" />
       </button>
-      <h1 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>Cook with what I have</h1>
+      <h1 style={{ fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', color: 'var(--color-text)', margin: 0 }}>Cook with what I have</h1>
     </header>
   )
 
   if (!isPro) {
     return (
-      <div className="screen">
+      <div className="screen" style={{ background: 'var(--color-bg)' }}>
         {header}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '40px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <ChefHat size={32} color="#fff" />
           </div>
@@ -265,23 +263,23 @@ export default function PantryScreen({ onNavigate }: Props) {
   return (
     <div className="screen" style={{ background: 'var(--color-bg)', position: 'relative' }}>
       {header}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 24px 24px' }}>
         {/* Pantry manager */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 0 8px' }}>
-          <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: 0 }}>MY PANTRY{pantry.length > 0 ? ` · ${pantry.length}` : ''}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '0 0 10px' }}>
+          <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.09em', margin: 0 }}>MY PANTRY{pantry.length > 0 ? ` · ${pantry.length}` : ''}</p>
           {pantry.length > 0 && (
-            <button onClick={clearPantry} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '700', letterSpacing: '0.03em', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
+            <button onClick={clearPantry} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
               Clear
             </button>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') addFromInput() }}
             placeholder="Add an ingredient you have…"
-            style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: '1.5px solid var(--color-border)', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', fontFamily: 'inherit' }}
+            style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
           />
           <button onClick={addFromInput} aria-label="Add to pantry" style={{ flexShrink: 0, width: '46px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <Plus size={20} />
@@ -290,9 +288,9 @@ export default function PantryScreen({ onNavigate }: Props) {
 
         {/* Current pantry */}
         {pantry.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
             {pantry.map(item => (
-              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--color-primary-bg)', color: 'var(--color-text)', borderRadius: '9px', padding: '5px 8px 5px 11px', fontSize: '13px', fontWeight: '600' }}>
+              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--color-subtle)', color: 'var(--color-text)', borderRadius: '999px', padding: '5px 8px 5px 12px', fontSize: '13px', fontWeight: '600' }}>
                 {item}
                 <button onClick={() => removeItem(item)} aria-label={`Remove ${item}`} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: 'var(--color-text-muted)' }}>
                   <X size={14} />
@@ -304,14 +302,14 @@ export default function PantryScreen({ onNavigate }: Props) {
 
         {/* Quick-add staples */}
         {staplesToAdd.length > 0 && (
-          <div style={{ marginBottom: '22px' }}>
-            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '0 0 8px' }}>Quick add:</p>
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '0 0 8px' }}>Quick add</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
               {staplesToAdd.map(s => (
                 <button
                   key={s}
                   onClick={() => add(s)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--color-card)', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)', borderRadius: '999px', padding: '6px 11px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', borderRadius: '999px', padding: '6px 12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   <Plus size={13} color="var(--color-primary)" /> {s}
                 </button>
@@ -322,41 +320,41 @@ export default function PantryScreen({ onNavigate }: Props) {
 
         {/* AI cook — dish ideas from whatever's on hand */}
         {pantry.length > 0 && (
-          <div style={{ marginBottom: '22px' }}>
+          <div style={{ marginBottom: '24px' }}>
             <button
               onClick={runCook}
               disabled={cookLoading}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '12px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '700', cursor: cookLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '12px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '14px', fontWeight: '700', cursor: cookLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
             >
               <Sparkles size={16} /> {cookLoading ? 'Thinking…' : 'Ask AI what to cook'}
             </button>
             {cookDishes.length > 0 && !cookLoading && (
-              <div style={{ marginTop: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
                   <Sparkles size={14} color="var(--color-primary)" />
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.04em' }}>IDEAS FROM YOUR PANTRY</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.08em' }}>IDEAS FROM YOUR PANTRY</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {cookDishes.map((d, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '11px', padding: '13px 15px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                      <div style={{ flexShrink: 0, width: '24px', height: '24px', borderRadius: '8px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '800' }}>
+                    <div key={i} style={{ display: 'flex', gap: '12px', padding: '15px', background: 'var(--color-subtle)', borderRadius: '16px' }}>
+                      <div style={{ flexShrink: 0, width: '24px', height: '24px', borderRadius: '8px', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '800' }}>
                         {i + 1}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{d.name}</h4>
-                        {d.steps && <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0', lineHeight: 1.5 }}>{d.steps}</p>}
+                        <h4 style={{ fontSize: '14.5px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{d.name}</h4>
+                        {d.steps && <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '5px 0 0', lineHeight: 1.5 }}>{d.steps}</p>}
                         {d.nutrition && (
-                          <div style={{ marginTop: '7px' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', background: 'var(--color-primary-bg)', padding: '3px 9px', borderRadius: '999px' }}>
+                          <div style={{ marginTop: '8px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: 'var(--color-primary-dark)', background: 'var(--color-primary-bg)', padding: '3px 9px', borderRadius: '999px' }}>
                               <Flame size={12} /> {d.nutrition}
                             </span>
                           </div>
                         )}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
                           <button
                             onClick={() => saveDish(d, i)}
                             disabled={savingIdx === i || savedRecipes.has(d.name)}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '9px', border: '1px solid var(--color-primary-border)', background: savedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'transparent', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: savingIdx === i || savedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 12px', borderRadius: '10px', border: '1px solid var(--color-primary-border)', background: savedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'var(--color-card)', color: 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: savingIdx === i || savedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
                           >
                             {savedRecipes.has(d.name)
                               ? <><Check size={13} /> Saved</>
@@ -365,7 +363,7 @@ export default function PantryScreen({ onNavigate }: Props) {
                           <button
                             onClick={() => planDish(d, i)}
                             disabled={planningIdx === i || plannedRecipes.has(d.name)}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '9px', border: '1px solid var(--color-border)', background: plannedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'transparent', color: plannedRecipes.has(d.name) ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: planningIdx === i || plannedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 12px', borderRadius: '10px', border: '1px solid var(--color-border)', background: plannedRecipes.has(d.name) ? 'var(--color-primary-bg)' : 'var(--color-card)', color: plannedRecipes.has(d.name) ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: planningIdx === i || plannedRecipes.has(d.name) ? 'default' : 'pointer', fontFamily: 'inherit' }}
                           >
                             {plannedRecipes.has(d.name)
                               ? <><Check size={13} /> Planned</>
@@ -388,7 +386,7 @@ export default function PantryScreen({ onNavigate }: Props) {
 
         {/* Results */}
         {pantry.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--color-text-muted)' }}>
+          <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--color-text-muted)' }}>
             <div style={{ fontSize: '34px', marginBottom: '8px' }}>🧑‍🍳</div>
             <p style={{ fontSize: '14px', margin: 0, lineHeight: 1.5 }}>Add a few staples above and recipHub will show what you can cook.</p>
           </div>
@@ -402,25 +400,20 @@ export default function PantryScreen({ onNavigate }: Props) {
         ) : (
           <>
             {ready.length > 0 && (
-              <div style={{ marginBottom: almost.length > 0 ? '22px' : 0 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', margin: '0 0 10px' }}>
-                  <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>Ready to cook</h2>
+              <div style={{ marginBottom: almost.length > 0 ? '28px' : 0 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)' }}>
+                  <h2 style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>Ready to cook</h2>
                   <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)' }}>{ready.length}</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {ready.map(({ r, m }) => <RecipeRow key={r.id} r={r} m={m} busy={addingList === r.id} onOpen={() => onNavigate('recipe', { recipe: r })} onAddList={() => addMissingToGrocery(r, m.missing)} />)}
-                </div>
+                {ready.map(({ r, m }, i) => <RecipeRow key={r.id} r={r} m={m} divider={i > 0} busy={addingList === r.id} onOpen={() => onNavigate('recipe', { recipe: r })} onAddList={() => addMissingToGrocery(r, m.missing)} />)}
               </div>
             )}
             {almost.length > 0 && (
               <div>
-                <div style={{ margin: '0 0 4px' }}>
-                  <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>Almost there</h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)' }}>
+                  <h2 style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>Almost there</h2>
                 </div>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '0 0 10px' }}>A few items short — tap <ShoppingCart size={11} style={{ verticalAlign: '-1px' }} /> to add them to your list.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {almost.map(({ r, m }) => <RecipeRow key={r.id} r={r} m={m} busy={addingList === r.id} onOpen={() => onNavigate('recipe', { recipe: r })} onAddList={() => addMissingToGrocery(r, m.missing)} />)}
-                </div>
+                {almost.map(({ r, m }, i) => <RecipeRow key={r.id} r={r} m={m} divider={i > 0} busy={addingList === r.id} onOpen={() => onNavigate('recipe', { recipe: r })} onAddList={() => addMissingToGrocery(r, m.missing)} />)}
               </div>
             )}
           </>
@@ -433,30 +426,24 @@ export default function PantryScreen({ onNavigate }: Props) {
 }
 
 // Hoisted to module scope: defining it inside PantryScreen gave it a new
-// identity every render, so React remounted every row (and reloaded its image)
-// on each keystroke in the pantry input.
-function RecipeRow({ r, m, busy, onOpen, onAddList }: {
-  r: any; m: any; busy: boolean; onOpen: () => void; onAddList: () => void
+// identity every render, so React remounted every row on each keystroke.
+function RecipeRow({ r, m, divider, busy, onOpen, onAddList }: {
+  r: any; m: any; divider: boolean; busy: boolean; onOpen: () => void; onAddList: () => void
 }) {
   const ready = m.missing.length === 0
   return (
     <div
       onClick={onOpen}
-      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid ' + (ready ? 'var(--color-primary-border)' : 'var(--color-subtle)'), boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', borderTop: divider ? '1px solid var(--color-subtle)' : 'none', cursor: 'pointer' }}
     >
-      <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: TILE_COLORS[0] + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
-        {r.imageUrl
-          ? <img src={r.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-          : '🍽️'}
-      </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
+        <h3 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</h3>
         {ready ? (
-          <p style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-primary)', fontWeight: '600', margin: '3px 0 0' }}>
+          <p style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12.5px', color: 'var(--color-primary)', fontWeight: '600', margin: '3px 0 0' }}>
             <Check size={13} /> You have everything
           </p>
         ) : (
-          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             Missing {m.missing.length}: {m.missing.join(', ')}
           </p>
         )}
@@ -469,7 +456,7 @@ function RecipeRow({ r, m, busy, onOpen, onAddList }: {
           disabled={busy}
           aria-label="Add missing to grocery list"
           title="Add missing to grocery list"
-          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 10px', borderRadius: '10px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit' }}
+          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px', padding: '7px 11px', borderRadius: '10px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit' }}
         >
           {busy ? <Check size={14} /> : <ShoppingCart size={14} />}
           <span>List</span>

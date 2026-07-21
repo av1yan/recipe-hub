@@ -71,40 +71,38 @@ const FAQ = [
 
 function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
   return (
-    <div style={{ background: 'var(--color-card)', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
+    <div style={{ background: 'var(--color-bg)', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--color-subtle)', flexShrink: 0 }}>
       <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}>
         <ChevronLeft size={22} color="var(--color-text)" />
       </button>
-      <h2 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0, flex: 1 }}>{title}</h2>
-      <div style={{ width: 34 }} />
+      <h2 style={{ fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', color: 'var(--color-text)', margin: 0, flex: 1 }}>{title}</h2>
+      <div style={{ width: 30 }} />
     </div>
   )
 }
 
-function Row({ icon, label, value, onPress, danger }: { icon: React.ReactNode; label: string; value?: React.ReactNode; onPress?: () => void; danger?: boolean }) {
+function Row({ icon, label, value, onPress, danger, divider }: { icon: React.ReactNode; label: string; value?: React.ReactNode; onPress?: () => void; danger?: boolean; divider?: boolean }) {
   return (
-    <button onClick={onPress} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
-      <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: danger ? 'var(--color-error-bg)' : 'var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        {icon}
-      </div>
-      <span style={{ flex: 1, minWidth: 0, fontSize: '15px', color: danger ? '#ef4444' : 'var(--color-text)', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
-      {value && <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginRight: '2px', flexShrink: 0 }}>{value}</span>}
+    <button onClick={onPress} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '14px', padding: '15px 0', borderTop: divider ? '1px solid var(--color-subtle)' : 'none', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+      <span style={{ flexShrink: 0, display: 'flex', color: danger ? '#ef4444' : 'var(--color-text-secondary)' }}>{icon}</span>
+      <span style={{ flex: 1, minWidth: 0, fontSize: '15.5px', color: danger ? '#ef4444' : 'var(--color-text)', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+      {value && <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', flexShrink: 0 }}>{value}</span>}
       <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
     </button>
   )
 }
 
 function Divider() {
-  return <div style={{ height: '1px', background: 'var(--color-subtle)', marginLeft: '66px' }} />
+  return <div style={{ height: '1px', background: 'var(--color-subtle)' }} />
 }
 
 function SectionHeader({ label }: { label: string }) {
-  return <p style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 6px', padding: '0 16px' }}>{label}</p>
+  return <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.09em', margin: '0 0 4px', padding: '0 24px' }}>{label}</p>
 }
 
 function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean }) {
   return (
-    <button onClick={onClick} style={{ width: '100%', padding: '12px', background: saved ? 'var(--color-primary-bg)' : 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: saved ? 'var(--color-primary)' : '#fff', border: saved ? '1.5px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}>
+    <button onClick={onClick} style={{ width: '100%', padding: '13px', background: saved ? 'var(--color-primary-bg)' : 'var(--color-primary)', color: saved ? 'var(--color-primary-dark)' : '#fff', border: saved ? '1px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
       {saved ? <><Check size={16} /> Saved!</> : 'Save Changes'}
     </button>
   )
@@ -154,9 +152,9 @@ function AccountPage({ onBack }: { onBack: () => void }) {
     setTimeout(() => setPwSaved(false), 2500)
   }
 
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid var(--color-border)', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-bg)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
+  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '11px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   const labelStyle: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
-  const cardStyle: React.CSSProperties = { background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }
+  const cardStyle: React.CSSProperties = { background: 'var(--color-subtle)', borderRadius: '16px', padding: '16px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
@@ -597,7 +595,7 @@ function InvitePage({ onBack }: { onBack: () => void }) {
             </button>
           </div>
         </div>
-        <button onClick={share} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+        <button onClick={share} style={{ width: '100%', padding: '14px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <Share2 size={16} /> Share recipHub
         </button>
       </div>
@@ -623,16 +621,16 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
 
-      <div style={{ background: 'var(--color-card)', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--color-subtle)' }}>
+      <div style={{ background: 'var(--color-bg)', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--color-subtle)' }}>
         <button onClick={() => onNavigate('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}>
           <ChevronLeft size={22} color="var(--color-text)" />
         </button>
-        <h2 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: 0, flex: 1 }}>Settings</h2>
+        <h2 style={{ fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', color: 'var(--color-text)', margin: 0, flex: 1 }}>Settings</h2>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto' }}>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '20px 16px 24px' }}>
+        <div style={{ margin: '8px 24px 24px' }}>
           <Row icon={<User size={18} color="var(--color-text-secondary)" />} label="Account" onPress={() => setSubPage('account')} />
           <Row
             icon={<Crown size={18} color="#f4b860" />}
@@ -641,15 +639,16 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
               ? <span style={{ background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '10px', fontWeight: '800', padding: '2.5px 7px', borderRadius: '999px', letterSpacing: '0.05em' }}>PRO</span>
               : 'Free'}
             onPress={() => setSubPage('subscription')}
+            divider
           />
-          <Row icon={<SlidersHorizontal size={18} color="var(--color-text-secondary)" />} label="Preferences" onPress={() => setSubPage('preferences')} />
-          <Row icon={<HelpCircle size={18} color="var(--color-text-secondary)" />} label="Help" onPress={() => setSubPage('help')} />
+          <Row icon={<SlidersHorizontal size={18} color="var(--color-text-secondary)" />} label="Preferences" onPress={() => setSubPage('preferences')} divider />
+          <Row icon={<HelpCircle size={18} color="var(--color-text-secondary)" />} label="Help" onPress={() => setSubPage('help')} divider />
         </div>
 
         <div style={{ marginBottom: '20px' }}>
           <SectionHeader label="APPEARANCE" />
-          <div style={{ margin: '0 16px', borderRadius: '14px', border: '1px solid var(--color-subtle)', background: 'var(--color-card)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '13px 16px' }}>
+          <div style={{ margin: '0 24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0' }}>
               <Moon size={18} color="var(--color-text-secondary)" />
               <span style={{ flex: 1, fontSize: '15px', color: 'var(--color-text)', fontWeight: '500' }}>Theme</span>
               <div style={{ display: 'flex', background: 'var(--color-subtle)', borderRadius: '999px', padding: '3px' }}>
@@ -678,13 +677,13 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
         <div style={{ marginBottom: '20px' }}>
           <SectionHeader label="CONNECT" />
-          <div style={{ margin: '0 16px' }}>
+          <div style={{ margin: '0 24px' }}>
             <Row icon={<UserPlus size={18} color="var(--color-primary)" />} label="Invite friends" onPress={() => setSubPage('invite')} />
           </div>
         </div>
 
-        <div style={{ margin: '0 16px 24px' }}>
-          <button onClick={onSignOut} style={{ width: '100%', padding: '15px', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', border: 'none', borderRadius: '14px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(107,163,86,0.25)' }}>
+        <div style={{ margin: '0 24px 24px' }}>
+          <button onClick={onSignOut} style={{ width: '100%', padding: '14px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
             <LogOut size={17} />
             Log out
           </button>

@@ -4,14 +4,11 @@ import type { Screen, Recipe } from '../types'
 import { cookbookAPI, recipeAPI } from '../utils/api'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
-import { recipeImageSrc } from '../utils/image'
 
 interface Props {
   cookbookId: string | null
   onNavigate: (screen: Screen, data?: any) => void
 }
-
-const GREEN = 'var(--color-primary)'
 
 /** What's inside one cookbook, plus the two ways to fill it: add recipes you
  *  already have, or create a new one filed straight into it. */
@@ -78,41 +75,48 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
   const addable = allRecipes.filter(r => !inCookbook.has(r.id))
 
   return (
-    <div className="screen" style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ padding: '12px 16px', borderBottom: '1px solid rgba(15, 23, 42, 0.08)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-        <button onClick={() => onNavigate('cookbooks')} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
-          <ArrowLeft size={22} />
+    <div className="screen" style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--color-bg)' }}>
+      <header style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+        <button onClick={() => onNavigate('cookbooks')} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+          <ArrowLeft size={22} color="var(--color-text)" />
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{ fontSize: '18px', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <h1 style={{ fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', margin: 0, color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {book?.name ?? 'Cookbook'}
-          </h2>
+          </h1>
           {book && (
-            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '1px 0 0' }}>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
               {recipes.length} recipe{recipes.length === 1 ? '' : 's'}
             </p>
           )}
         </div>
         {book && (
-          <button onClick={openAdd} aria-label="Add recipes" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px', background: GREEN, color: '#fff', border: 'none', borderRadius: '10px', padding: '8px 12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+          <button onClick={openAdd} aria-label="Add recipes" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)', borderRadius: '11px', padding: '0 13px', height: '36px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
             <Plus size={16} /> Add
           </button>
         )}
       </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px 24px' }}>
         {error && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px' }}>
-            <p style={{ margin: 0, fontSize: '13px', color: '#b91c1c' }}>{error}</p>
+          <div style={{ background: 'var(--color-error-bg)', borderRadius: '12px', padding: '11px 13px', marginBottom: '14px' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-error)' }}>{error}</p>
           </div>
         )}
 
         {loading ? (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', textAlign: 'center', paddingTop: '32px' }}>Loading…</p>
+          <div>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ padding: '15px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
+                <div className="rh-skel" style={{ width: '55%', height: '14px', borderRadius: '7px' }} />
+                <div className="rh-skel" style={{ width: '30%', height: '11px', borderRadius: '6px', marginTop: '8px' }} />
+              </div>
+            ))}
+          </div>
         ) : recipes.length === 0 && !error ? (
-          <div style={{ textAlign: 'center', paddingTop: '40px' }}>
+          <div style={{ textAlign: 'center', paddingTop: '48px' }}>
             <div style={{ width: '52px', height: '52px', borderRadius: '26px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-              <BookOpen size={22} color={GREEN} />
+              <BookOpen size={22} color="var(--color-primary)" />
             </div>
             <p style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 4px' }}>Nothing in here yet</p>
             <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '0 0 18px', lineHeight: 1.5 }}>
@@ -121,52 +125,37 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '260px', margin: '0 auto' }}>
               <button
                 onClick={openAdd}
-                style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: GREEN, color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
+                style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
               >
                 <Plus size={16} /> Add recipes
               </button>
               <button
                 onClick={() => onNavigate('add-recipe', { cookbookId })}
-                style={{ padding: '12px 20px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ padding: '12px 20px', borderRadius: '12px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Create a new recipe
               </button>
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            {recipes.map((recipe: any) => (
-              <div key={recipe.id} style={{ position: 'relative', minWidth: 0 }}>
-                <div onClick={() => onNavigate('recipe', { recipe })} style={{ cursor: 'pointer' }}>
-                  <div style={{
-                    width: '100%', height: '100px', borderRadius: '14px', background: 'var(--color-subtle)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '30px', marginBottom: '8px', overflow: 'hidden',
-                  }}>
-                    {recipe.imageUrl
-                      ? <img src={recipeImageSrc(recipe.imageUrl, 160, 100)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                      : '🍽️'}
-                  </div>
-                  <h4 style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text)', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div>
+            {recipes.map((recipe: any, i: number) => (
+              <div key={recipe.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
+                <div onClick={() => onNavigate('recipe', { recipe })} style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
+                  <h4 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {recipe.name}
                   </h4>
-                  <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: 0 }}>
-                    {(recipe.prepTime || 0) + (recipe.cookTime || 0)} min
+                  <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
+                    {[recipe.cuisine, `${(recipe.prepTime || 0) + (recipe.cookTime || 0)} min`].filter(Boolean).join(' · ')}
                   </p>
                 </div>
                 <button
                   onClick={() => remove(recipe.id, recipe.name)}
                   aria-label={`Remove ${recipe.name} from this cookbook`}
                   title="Remove from this cookbook"
-                  style={{
-                    position: 'absolute', top: '6px', right: '6px',
-                    width: '26px', height: '26px', borderRadius: '13px',
-                    background: 'rgba(255,255,255,0.92)', border: 'none',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer',
-                  }}
+                  style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                 >
-                  <X size={13} color="var(--color-text-secondary)" />
+                  <X size={15} color="var(--color-text-muted)" />
                 </button>
               </div>
             ))}
@@ -176,48 +165,43 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
 
       {/* Add existing recipes */}
       {showAdd && (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 30, background: 'var(--color-card)', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 30, background: 'var(--color-bg)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button onClick={() => setShowAdd(false)} aria-label="Done" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
               <X size={22} color="var(--color-text)" />
             </button>
             <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', margin: 0, color: 'var(--color-text)' }}>Add to {book?.name}</h3>
+              <h3 style={{ fontSize: '17px', fontWeight: '700', margin: 0, color: 'var(--color-text)' }}>Add to {book?.name}</h3>
               <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>Tap a recipe to add it.</p>
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '8px 24px 24px' }}>
             {loadingAdd ? (
               <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', paddingTop: '24px' }}>Loading your recipes…</p>
             ) : addable.length === 0 ? (
-              <div style={{ textAlign: 'center', paddingTop: '32px', color: 'var(--color-text-muted)' }}>
+              <div style={{ textAlign: 'center', paddingTop: '40px', color: 'var(--color-text-muted)' }}>
                 <p style={{ fontSize: '14px', margin: '0 0 16px' }}>{allRecipes.length === 0 ? "You haven't saved any recipes yet." : 'Every recipe you have is already in here.'}</p>
-                <button onClick={() => { setShowAdd(false); onNavigate('add-recipe', { cookbookId }) }} style={{ padding: '11px 18px', borderRadius: '10px', border: 'none', background: GREEN, color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <button onClick={() => { setShowAdd(false); onNavigate('add-recipe', { cookbookId }) }} style={{ padding: '11px 18px', borderRadius: '11px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                   Create a new recipe
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {addable.map((r: any) => {
+              <div>
+                {addable.map((r: any, i: number) => {
                   const busy = addingId === r.id
                   return (
                     <button
                       key={r.id}
                       onClick={() => addExisting(r)}
                       disabled={busy}
-                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '14px', cursor: busy ? 'default' : 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 0', background: 'none', border: 'none', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', cursor: busy ? 'default' : 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' }}
                     >
-                      <div style={{ width: '46px', height: '46px', borderRadius: '11px', background: 'var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0, overflow: 'hidden' }}>
-                        {r.imageUrl
-                          ? <img src={recipeImageSrc(r.imageUrl, 46, 46)} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                          : '🍽️'}
-                      </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '1px' }}>{r.cuisine} · {(r.prepTime || 0) + (r.cookTime || 0)} min</div>
+                        <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
+                        <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, `${(r.prepTime || 0) + (r.cookTime || 0)} min`].filter(Boolean).join(' · ')}</div>
                       </div>
-                      <span style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: GREEN, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {busy ? <Check size={16} /> : <Plus size={17} />}
                       </span>
                     </button>

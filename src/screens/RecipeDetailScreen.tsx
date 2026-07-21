@@ -135,11 +135,11 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   if (!recipe) {
     return (
       <div className="screen" style={{ background: 'var(--color-bg)' }}>
-        <header style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={() => onNavigate(backTo)} className="btn btn-icon" style={{ background: 'none' }}>
-            <ArrowLeft size={22} />
+        <header style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={() => onNavigate(backTo)} aria-label="Back" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
+            <ArrowLeft size={22} color="var(--color-text)" />
           </button>
-          <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>Recipe</h2>
+          <h1 style={{ flex: 1, fontSize: '19px', fontWeight: '700', margin: 0 }}>Recipe</h1>
         </header>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
           <p>Recipe not found</p>
@@ -299,7 +299,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         </div>
 
         {/* Title + stats */}
-        <div style={{ background: 'var(--color-card)', padding: '16px 16px 0', borderBottom: '1px solid var(--color-subtle)' }}>
+        <div style={{ background: 'var(--color-bg)', padding: '18px 24px 0' }}>
           <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
             {recipe.cuisine && (
               <span style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '11px', fontWeight: '700', padding: '3px 9px', borderRadius: '6px', letterSpacing: '0.04em' }}>
@@ -389,7 +389,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                   )}
 
                   {adaptText && !adaptLoading && (
-                    <div style={{ marginTop: '12px', padding: '14px 16px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', borderRadius: '14px' }}>
+                    <div style={{ marginTop: '12px', padding: '15px 16px', background: 'var(--color-subtle)', borderRadius: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                         <Sparkles size={14} color="var(--color-primary)" />
                         <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)', letterSpacing: '0.03em' }}>{adaptGoal.toUpperCase()}</span>
@@ -426,7 +426,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         </div>
 
         {/* Tabs */}
-        <div style={{ background: 'var(--color-card)', display: 'flex', borderBottom: '1px solid var(--color-border)', marginTop: '8px' }}>
+        <div style={{ background: 'var(--color-bg)', display: 'flex', borderBottom: '1px solid var(--color-subtle)', marginTop: '8px', padding: '0 24px' }}>
           {(['ingredients', 'instructions'] as const).map(tab => (
             <button
               key={tab}
@@ -450,7 +450,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         </div>
 
         {/* Tab content */}
-        <div style={{ padding: '16px' }}>
+        <div style={{ padding: '18px 24px' }}>
           {activeTab === 'ingredients' ? (
             recipe.ingredients?.length > 0 ? (
               <>
@@ -468,25 +468,23 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                   <button onClick={() => setServings(defaultServ)} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Reset</button>
                 )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {recipe.ingredients.map(ing => {
+              <div>
+                {recipe.ingredients.map((ing, i) => {
                   const checked = checkedIngredients.has(ing.id)
                   return (
                     <div
                       key={ing.id}
                       onClick={() => toggleIngredient(ing.id)}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: '12px',
-                        padding: '12px 14px',
-                        background: 'var(--color-card)', borderRadius: '14px',
-                        border: `1px solid ${checked ? 'var(--color-primary-border)' : 'var(--color-subtle)'}`,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                        cursor: 'pointer', opacity: checked ? 0.55 : 1,
-                        transition: 'all 0.15s',
+                        display: 'flex', alignItems: 'center', gap: '13px',
+                        padding: '14px 0',
+                        borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none',
+                        cursor: 'pointer', opacity: checked ? 0.5 : 1,
+                        transition: 'opacity 0.15s',
                       }}
                     >
                       <div style={{
-                        width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0,
+                        width: '23px', height: '23px', borderRadius: '7px', flexShrink: 0,
                         border: `2px solid ${checked ? 'var(--color-primary)' : 'var(--color-border)'}`,
                         background: checked ? 'var(--color-primary)' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -494,7 +492,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                       }}>
                         {checked && <span style={{ color: '#fff', fontSize: '11px', fontWeight: '800', lineHeight: 1 }}>✓</span>}
                       </div>
-                      <span style={{ flex: 1, minWidth: 0, fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', textDecoration: checked ? 'line-through' : 'none' }}>
+                      <span style={{ flex: 1, minWidth: 0, fontSize: '15px', fontWeight: '500', color: 'var(--color-text)', textDecoration: checked ? 'line-through' : 'none' }}>
                         {ing.name}
                       </span>
                       <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>
@@ -513,23 +511,23 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             )
           ) : (
             recipe.instructions?.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div>
                 {recipe.instructions.map((step, i) => (
                   <div key={step.id} style={{
-                    display: 'flex', gap: '12px', alignItems: 'flex-start',
-                    padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px',
-                    border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                    display: 'flex', gap: '14px', alignItems: 'flex-start',
+                    padding: '16px 0',
+                    borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none',
                   }}>
                     <div style={{
-                      width: '32px', height: '32px', borderRadius: '9px', flexShrink: 0,
-                      background: 'var(--color-primary)', color: '#fff',
+                      width: '28px', height: '28px', borderRadius: '14px', flexShrink: 0,
+                      background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '14px', fontWeight: '700',
+                      fontSize: '13px', fontWeight: '800',
                     }}>
                       {step.stepNumber || i + 1}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{convertTempInText(step.text, tempPref)}</p>
+                      <p style={{ fontSize: '15px', color: 'var(--color-text)', margin: 0, lineHeight: 1.55 }}>{convertTempInText(step.text, tempPref)}</p>
                       {step.duration && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', color: 'var(--color-text-secondary)', fontSize: '12px' }}>
                           <Clock size={12} />
@@ -551,10 +549,10 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
 
         {/* Nutrition — per serving, so it doesn't move when servings do. */}
         {recipe.nutrition && (
-          <div style={{ padding: '0 16px 8px' }}>
-            <div style={{ background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', padding: '16px' }}>
+          <div style={{ padding: '0 24px 8px' }}>
+            <div style={{ background: 'var(--color-subtle)', borderRadius: '16px', padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>Nutrition</h3>
+                <h3 style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>Nutrition</h3>
                 <span style={{ fontSize: '11.5px', color: 'var(--color-text-muted)' }}>Per serving</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
@@ -570,21 +568,17 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         )}
 
         {/* Start Cooking CTA */}
-        <div style={{ padding: '0 16px 16px' }}>
+        <div style={{ padding: '0 24px 24px' }}>
           <button
             onClick={() => onNavigate('cooking-mode', { recipe })}
             style={{
               width: '100%', padding: '15px',
-              background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
+              background: 'var(--color-primary)',
               color: '#fff', border: 'none', borderRadius: '14px',
               fontSize: '15px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(107, 163, 86, 0.35)',
-              transition: 'all 0.2s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(107, 163, 86, 0.4)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(107, 163, 86, 0.35)' }}
           >
             <ChefHat size={18} />
             Start Cooking
