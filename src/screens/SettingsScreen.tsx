@@ -350,6 +350,9 @@ function Preferences({ onBack }: { onBack: () => void }) {
   const [goal, setGoalState] = useState(() => getCalorieGoal())
   const [macros, setMacrosState] = useState(() => getMacroGoals())
   const [saved, setSaved] = useState(false)
+  // Calorie/macro goals feed Insights and the meal-plan nutrition bar — both
+  // Pro — so the whole section only shows once Pro is active.
+  const [isPro] = useProPlan()
 
   // Units, default servings and the calorie goal persist the moment they change,
   // so recipes and Insights reflect them straight away.
@@ -425,6 +428,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
+        {isPro && (<>
         <SectionHeader label="DAILY CALORIE GOAL" />
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
           <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 10px', lineHeight: 1.35 }}>
@@ -456,6 +460,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
             </div>
           ))}
         </div>
+        </>)}
 
         <SectionHeader label="DIET" />
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
