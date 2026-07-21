@@ -18,6 +18,33 @@ export function setDefaultServings(n: number) {
   localStorage.setItem(SERVINGS_KEY, String(n))
 }
 
+export type TempUnit = 'F' | 'C'
+const TEMP_KEY = 'reciphub_temp'
+
+export function getTempPref(): TempUnit {
+  return localStorage.getItem(TEMP_KEY) === 'C' ? 'C' : 'F'
+}
+export function setTempPref(t: TempUnit) {
+  localStorage.setItem(TEMP_KEY, t)
+}
+
+// Convert oven/cooking temperatures written into instruction text to the chosen
+// unit, e.g. "bake at 350°F" -> "bake at 175°C". Matches 2-3 digit temps written
+// as "350°F", "350 F", "350 degrees Fahrenheit", etc.
+export function convertTempInText(text: string, unit: TempUnit): string {
+  if (!text) return text
+  return text.replace(
+    /(\d{2,3})\s*°?\s*(?:degrees?\s*)?(fahrenheit|celsius|[FC])\b/gi,
+    (_m, numStr, word) => {
+      const n = Number(numStr)
+      const from = (String(word)[0].toUpperCase()) as TempUnit
+      if (from === unit) return `${n}°${unit}`
+      if (from === 'F') return `${Math.round((n - 32) * 5 / 9)}°C`
+      return `${Math.round(n * 9 / 5 + 32)}°F`
+    },
+  )
+}
+
 // --- Unit conversion -------------------------------------------------------
 // Normalise a convertible amount to grams / millilitres, then format it in the
 // chosen system with a sensible unit. Count-ish units (whole, can, clove,

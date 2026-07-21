@@ -11,7 +11,7 @@ import { activeTheme, setTheme, type Theme } from '../utils/theme'
 import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
-import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings } from '../utils/preferences'
+import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref } from '../utils/preferences'
 import { getCalorieGoal, setCalorieGoal, getMacroGoals, setMacroGoal } from '../utils/goals'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
@@ -343,7 +343,7 @@ function Subscription({ onBack }: { onBack: () => void }) {
 
 function Preferences({ onBack }: { onBack: () => void }) {
   const [units, setUnitsState] = useState<'imperial' | 'metric'>(() => getUnitPref())
-  const [temp, setTemp] = useState<'F' | 'C'>('F')
+  const [temp, setTempState] = useState<'F' | 'C'>(() => getTempPref())
   const [servings, setServingsState] = useState(() => getDefaultServings())
   const [diet, setDiet] = useState<string[]>(() => getDietPrefs())
   const [allergies, setAllergiesState] = useState<string[]>(() => getAllergies())
@@ -357,6 +357,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
   // Units, default servings and the calorie goal persist the moment they change,
   // so recipes and Insights reflect them straight away.
   const setUnits = (u: 'imperial' | 'metric') => { setUnitsState(u); setUnitPref(u) }
+  const setTemp = (t: 'F' | 'C') => { setTempState(t); setTempPref(t) }
   const setServings = (s: number) => { setServingsState(s); setDefaultServings(s) }
   const setGoal = (v: number) => { const n = Math.min(6000, Math.max(1000, Math.round(v / 50) * 50)); setGoalState(n); setCalorieGoal(n) }
   const setMacro = (m: 'protein' | 'carbs' | 'fat', v: number) => {

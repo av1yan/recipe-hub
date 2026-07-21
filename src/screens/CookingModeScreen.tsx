@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Clock, CheckCircle, List } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
-import { getUnitPref, convertMeasurement } from '../utils/preferences'
+import { getUnitPref, convertMeasurement, getTempPref, convertTempInText } from '../utils/preferences'
 
 interface Props {
   recipe: Recipe | null
@@ -19,6 +19,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   const totalSteps = instructions.length
   const step = instructions[currentStep]
   const unitPref = getUnitPref()
+  const tempPref = getTempPref()
 
   useEffect(() => {
     if (!timerActive || timerSeconds === null || timerSeconds <= 0) {
@@ -159,7 +160,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             STEP {step?.stepNumber || currentStep + 1}
           </p>
           <p style={{ fontSize: '19px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.65, margin: 0 }}>
-            {step?.text}
+            {convertTempInText(step?.text || '', tempPref)}
           </p>
         </div>
 

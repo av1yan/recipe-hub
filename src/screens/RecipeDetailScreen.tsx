@@ -5,7 +5,7 @@ import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, groceryAPI, mealPlanAPI, insightsAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
 import { DAY_NAMES, MEALS, sameWeek, mondayOf, getMeals } from './MealPlanScreen'
-import { getDefaultServings, getUnitPref, convertMeasurement } from '../utils/preferences'
+import { getDefaultServings, getUnitPref, convertMeasurement, getTempPref, convertTempInText } from '../utils/preferences'
 import { useProPlan } from '../utils/proPlan'
 
 // Quick adaptations the AI cooking assistant offers.
@@ -167,6 +167,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   const scale = servings / baseServings
   const defaultServ = getDefaultServings()
   const unitPref = getUnitPref()
+  const tempPref = getTempPref()
 
   async function addToGroceries() {
     if (actionBusy) return
@@ -528,7 +529,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                       {step.stepNumber || i + 1}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{step.text}</p>
+                      <p style={{ fontSize: '14px', color: 'var(--color-text)', margin: 0, lineHeight: 1.5 }}>{convertTempInText(step.text, tempPref)}</p>
                       {step.duration && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px', color: 'var(--color-text-secondary)', fontSize: '12px' }}>
                           <Clock size={12} />
