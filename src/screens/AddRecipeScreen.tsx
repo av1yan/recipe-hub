@@ -212,9 +212,11 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
         cuisine,
         mealType,
         difficulty,
-        prepTime: parseInt(prepTime),
-        cookTime: parseInt(cookTime),
-        servings: parseInt(servings),
+        // Times are optional: an import often has no prep time, and blocking
+        // the save on a number the parser could not find is user-hostile.
+        prepTime: parseInt(prepTime) || 0,
+        cookTime: parseInt(cookTime) || 0,
+        servings: parseInt(servings) || 1,
         calories: calories ? parseInt(calories) : null,
         imageUrl: imageUrl.trim() || null,
         sourceUrl,
@@ -333,18 +335,18 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="field">
               <label>Prep Time (min)</label>
-              <input type="number" className="input" placeholder="10" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} required />
+              <input type="number" className="input" placeholder="10" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} />
             </div>
             <div className="field">
               <label>Cook Time (min)</label>
-              <input type="number" className="input" placeholder="20" value={cookTime} onChange={(e) => setCookTime(e.target.value)} required />
+              <input type="number" className="input" placeholder="20" value={cookTime} onChange={(e) => setCookTime(e.target.value)} />
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="field">
               <label>Servings</label>
-              <input type="number" className="input" placeholder="2" value={servings} onChange={(e) => setServings(e.target.value)} required />
+              <input type="number" className="input" placeholder="2" value={servings} onChange={(e) => setServings(e.target.value)} />
             </div>
             <div className="field">
               <label>Calories (optional)</label>
