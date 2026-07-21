@@ -4,7 +4,7 @@ import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI, mealPlanAPI } from '../utils/api'
 import { DAY_NAMES, MEALS, getMeals, sameWeek } from './MealPlanScreen'
-import { toGroceryLine } from '../utils/grocery'
+import { toGroceryLine, pluralizeUnit } from '../utils/grocery'
 import { Toast, useToast } from '../components/Toast'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
@@ -192,7 +192,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     const lines = [
       `🛒 ${list?.name || 'Grocery list'}`,
       '',
-      ...items.map(i => `${i.checked ? '✓' : '•'} ${i.name}${(i.unit || '').trim() ? ` — ${i.quantity} ${i.unit}` : ''}`),
+      ...items.map(i => `${i.checked ? '✓' : '•'} ${i.name}${(i.unit || '').trim() ? ` — ${i.quantity} ${pluralizeUnit(i.unit, i.quantity)}` : ''}`),
     ]
     const res = await shareText('My grocery list', lines.join('\n'))
     if (res === 'failed') show('Could not share the list', 'error')
@@ -517,7 +517,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                           </div>
                           {(item.unit || '').trim() && (
                             <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                              {item.quantity} {item.unit}
+                              {item.quantity} {pluralizeUnit(item.unit, item.quantity)}
                             </div>
                           )}
                         </div>

@@ -33,3 +33,22 @@ export function toGroceryLine(ing: any): GroceryLine {
   }
   return { name, quantity: Math.max(1, Math.round(qty)), unit, category }
 }
+
+// Units that stay the same in the plural: measurement abbreviations (2 tbsp,
+// 2 oz) and count words used adjectivally (2 whole, 2 dozen).
+const NO_PLURAL = new Set([
+  'whole', 'dozen', 'g', 'kg', 'mg', 'ml', 'l', 'oz', 'lb', 'lbs',
+  'tsp', 'tbsp', 'fl oz', 'floz',
+])
+const IRREGULAR_PLURAL: Record<string, string> = { loaf: 'loaves', leaf: 'leaves' }
+
+/** Pluralize a shopping unit for display when the quantity isn't 1 ("2 cans",
+ *  "2 bunches") while leaving measures and invariant words alone ("2 tbsp"). */
+export function pluralizeUnit(unit: string, quantity: number): string {
+  const u = (unit || '').trim()
+  if (!u || (Number(quantity) || 0) === 1) return u
+  const low = u.toLowerCase()
+  if (NO_PLURAL.has(low)) return u
+  if (IRREGULAR_PLURAL[low]) return IRREGULAR_PLURAL[low]
+  return /(s|x|ch|sh)$/i.test(u) ? u + 'es' : u + 's'
+}
