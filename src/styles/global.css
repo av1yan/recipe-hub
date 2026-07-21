@@ -63,6 +63,10 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  /* Skeleton loading -- base fill + a lighter band that sweeps across it. */
+  --color-skeleton: #e8edf3;
+  --color-skeleton-hi: #f5f8fb;
 }
 
 /* Dark theme -- the app root gets data-theme="dark" (from the saved setting or
@@ -89,6 +93,9 @@
   --color-desk: #0a0e17;
   --color-nav-bg: rgba(15, 23, 42, 0.82);
   --color-nav-border: rgba(255, 255, 255, 0.10);
+
+  --color-skeleton: #243247;
+  --color-skeleton-hi: #33445f;
 
   color-scheme: dark;
 }
@@ -363,4 +370,24 @@ button:not(:disabled),
 button:not(:disabled):active,
 [style*="cursor: pointer"]:active {
   transform: scale(0.97);
+}
+
+/* --- Shimmer skeletons -------------------------------------------------------
+   First-load placeholders that mirror the shape of the content they stand in
+   for, so screens never flash empty states before their data lands. The base
+   and highlight are theme tokens, so the sweep reads on light and dark alike. */
+@keyframes rh-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.rh-skel {
+  background-color: var(--color-skeleton);
+  background-image: linear-gradient(90deg, transparent 20%, var(--color-skeleton-hi) 50%, transparent 80%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  border-radius: 10px;
+  animation: rh-shimmer 1.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rh-skel { animation: none; }
 }

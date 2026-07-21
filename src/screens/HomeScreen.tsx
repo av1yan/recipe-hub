@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { Plus, CalendarDays, BookOpen, X, Heart, ChevronRight, Crown, ChefHat, Lightbulb, Users } from 'lucide-react'
 import type { Screen } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
@@ -16,6 +16,9 @@ interface Props {
 const COOKBOOK_COLORS = ['#c67139', 'var(--color-primary)', '#d4a574', '#b8956a', '#a48a6e']
 
 const RECIPE_COLORS = ['#d4a574', 'var(--color-primary)', '#c67139', '#5b9acd', '#9b7ec8']
+
+/** Soft, layered card shadow — a floated, premium feel over the old flat 1px. */
+const CARD_SHADOW = '0 1px 2px rgba(15,23,42,0.04), 0 8px 20px -8px rgba(15,23,42,0.10)'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -42,16 +45,21 @@ export default function HomeScreen({ onNavigate }: Props) {
   // Which slot the add panel is filling, or null when it is closed.
   const [addingSlot, setAddingSlot] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   // Prefer the person's first name; fall back to their username.
   const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
   const initial = (displayName || user?.email || '?').charAt(0).toUpperCase()
 
   useEffect(() => {
-    recipeAPI.list().then(setRecipes).catch(() => {})
-    // Home works without cookbooks -- a failure just means an empty shelf.
-    cookbookAPI.list().then((c: any) => setCookbooks(Array.isArray(c) ? c : [])).catch(() => {})
-    loadToday()
+    // Hold the first paint on a skeleton until all three loads settle, so Home
+    // never flashes "0 recipes / No favorites" before the data actually lands.
+    // Home works without cookbooks or a plan -- a failure just means empty shelf.
+    Promise.allSettled([
+      recipeAPI.list().then(setRecipes),
+      cookbookAPI.list().then((c: any) => setCookbooks(Array.isArray(c) ? c : [])),
+      loadToday(),
+    ]).finally(() => setLoading(false))
   }, [])
 
   async function loadToday() {
@@ -119,7 +127,7 @@ export default function HomeScreen({ onNavigate }: Props) {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--color-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {/* Header */}
-        <div style={{ background: 'var(--color-card)', padding: '16px 16px 0', borderBottom: '1px solid var(--color-subtle)' }}>
+        <div style={{ background: 'linear-gradient(180deg, var(--color-primary-bg), var(--color-card) 78%)', padding: '16px 16px 0', borderBottom: '1px solid var(--color-subtle)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '12px' }}>
             <div style={{ minWidth: 0 }}>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '11px', fontWeight: '600', letterSpacing: '0.06em', margin: '0 0 2px' }}>
@@ -130,9 +138,13 @@ export default function HomeScreen({ onNavigate }: Props) {
                     the last word instead of stranding itself on its own line. */}
                 {getGreeting()}{displayName ? `,\u00A0${displayName}` : ''}{'\u00A0\u{1F44B}'}
               </h1>
-              <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
-                {recipes.length} recipe{recipes.length === 1 ? '' : 's'} · {plannedThisWeek} meal{plannedThisWeek === 1 ? '' : 's'} planned this week
-              </p>
+              {loading ? (
+                <div className="rh-skel" style={{ width: '180px', height: '13px', borderRadius: '7px', marginTop: '8px' }} />
+              ) : (
+                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
+                  {recipes.length} recipe{recipes.length === 1 ? '' : 's'} · {plannedThisWeek} meal{plannedThisWeek === 1 ? '' : 's'} planned this week
+                </p>
+              )}
             </div>
             {/* The avatar is the only way into settings from here -- a gear
                 beside it went to the same place and just split the target.
@@ -162,6 +174,7 @@ export default function HomeScreen({ onNavigate }: Props) {
         </div>
 
         <div style={{ padding: '20px 16px 0' }}>
+          {loading ? <HomeSkeleton isPro={isPro} /> : <>
           {/* Pro shortcuts, compact — one quick-action row instead of three big
               cards, so Home stays calm for people who already know the features. */}
           {isPro && (
@@ -174,9 +187,9 @@ export default function HomeScreen({ onNavigate }: Props) {
                 <button
                   key={a.label}
                   onClick={() => onNavigate(a.screen)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '14px 8px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '9px', padding: '16px 8px', background: 'linear-gradient(155deg, var(--color-card) 52%, var(--color-primary-bg))', border: '1px solid var(--color-subtle)', borderRadius: '18px', boxShadow: CARD_SHADOW, cursor: 'pointer', fontFamily: 'inherit' }}
                 >
-                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '13px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(15,23,42,0.05)' }}>
                     <a.icon size={20} color="var(--color-primary)" />
                   </div>
                   <span style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--color-text)' }}>{a.label}</span>
@@ -203,7 +216,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                   // The meal-plan API strips ingredients from its recipes, so
                   // open the full one we already loaded; the meal is the fallback.
                   onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}
-                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW, cursor: 'pointer' }}
                 >
                   <div style={{ width: '64px', height: '64px', borderRadius: '14px', background: cfg.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0, overflow: 'hidden' }}>
                     {meal.imageUrl
@@ -326,7 +339,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <div
                       key={recipe.id}
                       onClick={() => onNavigate('recipe', { recipe })}
-                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW, cursor: 'pointer' }}
                     >
                       {/* Recipe photo in the same tile the cookbook cards use, so
                           the whole Home shelf reads as one card system. */}
@@ -386,7 +399,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <div
                       key={book.id}
                       onClick={() => onNavigate('cookbook', { cookbookId: book.id })}
-                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW, cursor: 'pointer' }}
                     >
                       {/* Small tinted book tile, echoing the meal cards' icon squares
                           rather than the old full-bleed colour block. */}
@@ -421,9 +434,66 @@ export default function HomeScreen({ onNavigate }: Props) {
               </button>
             )}
           </div>
+          </>}
         </div>
       </div>
       <BottomNavigation active="home" onNavigate={onNavigate} />
+    </div>
+  )
+}
+
+/* --- First-load skeleton ----------------------------------------------------
+   Mirrors the real layout (quick actions, then the meal / favorites / cookbook
+   shelves) so the switch to content is a fill-in, not a reflow. */
+
+function Skel({ w = '100%', h, r = 10, style }: { w?: number | string; h: number; r?: number; style?: CSSProperties }) {
+  return <div className="rh-skel" style={{ width: w, height: h, borderRadius: r, ...style }} />
+}
+
+/** A card-row placeholder: tinted tile + two text lines, in the real card shell. */
+function SkelRow({ big = false }: { big?: boolean }) {
+  const s = big ? 64 : 48
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '16px', border: '1px solid var(--color-subtle)', boxShadow: CARD_SHADOW }}>
+      <Skel w={s} h={s} r={14} style={{ flexShrink: 0 }} />
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}>
+        <Skel w="60%" h={12} />
+        <Skel w="35%" h={10} />
+      </div>
+    </div>
+  )
+}
+
+function SkelLabel() {
+  return <Skel w={116} h={15} r={7} style={{ marginBottom: '12px' }} />
+}
+
+function HomeSkeleton({ isPro }: { isPro: boolean }) {
+  return (
+    <div>
+      {isPro && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '24px' }}>
+          {[0, 1, 2].map(i => <Skel key={i} h={88} r={18} />)}
+        </div>
+      )}
+
+      <SkelLabel />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
+        <SkelRow big />
+        <Skel h={42} r={12} />
+      </div>
+
+      <SkelLabel />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
+        <SkelRow />
+        <SkelRow />
+      </div>
+
+      <SkelLabel />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
+        <SkelRow />
+        <SkelRow />
+      </div>
     </div>
   )
 }
