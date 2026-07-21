@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { Search, SlidersHorizontal, X, ChevronRight } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
@@ -6,18 +6,10 @@ import { recipeAPI } from '../utils/api'
 import { getDietPrefs } from './DietPreferencesScreen'
 import { ALLERGY_OPTIONS, getAllergies, recipeHasAllergen, saveAllergies } from '../utils/allergies'
 
-const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif"
-
 const DIET_LABELS: Record<string, string> = {
   vegan: 'Vegan', vegetarian: 'Vegetarian', 'gluten-free': 'Gluten-Free',
   keto: 'Keto', paleo: 'Paleo', 'dairy-free': 'Dairy-Free',
   'nut-free': 'Nut-Free', 'low-carb': 'Low-Carb',
-}
-
-// Emoji per allergen for the Browse filter menu (allergies.ts stays presentation-free).
-const ALLERGY_EMOJI: Record<string, string> = {
-  peanuts: '🥜', 'tree-nuts': '🌰', dairy: '🥛', eggs: '🥚',
-  gluten: '🌾', soy: '🫘', shellfish: '🦐', fish: '🐟',
 }
 
 type FilterKind = 'tag' | 'cuisine' | 'mealType' | 'ingredient'
@@ -49,23 +41,50 @@ function matchesFilter(recipe: Recipe, f: ActiveFilter | null): boolean {
 }
 
 // Curated quick filters — only the ones that actually match a recipe are shown.
-const POPULAR: { label: string; emoji: string; kind: FilterKind; value: string }[] = [
-  { label: 'Vegetarian', emoji: '🥦', kind: 'tag', value: 'vegetarian' },
-  { label: 'Vegan', emoji: '🌱', kind: 'tag', value: 'vegan' },
-  { label: 'Dinner', emoji: '🍝', kind: 'mealType', value: 'dinner' },
-  { label: 'Lunch', emoji: '🥗', kind: 'mealType', value: 'lunch' },
-  { label: 'Gluten Free', emoji: '🌾', kind: 'tag', value: 'gluten-free' },
-  { label: 'Dairy-Free', emoji: '🥛', kind: 'tag', value: 'dairy-free' },
-  { label: 'Keto', emoji: '🥑', kind: 'tag', value: 'keto' },
-  { label: 'Italian', emoji: '🍕', kind: 'cuisine', value: 'Italian' },
-  { label: 'Asian', emoji: '🍜', kind: 'cuisine', value: 'Asian' },
-  { label: 'Mediterranean', emoji: '🫒', kind: 'cuisine', value: 'Mediterranean' },
+const POPULAR: { label: string; kind: FilterKind; value: string }[] = [
+  { label: 'Vegetarian', kind: 'tag', value: 'vegetarian' },
+  { label: 'Vegan', kind: 'tag', value: 'vegan' },
+  { label: 'Dinner', kind: 'mealType', value: 'dinner' },
+  { label: 'Lunch', kind: 'mealType', value: 'lunch' },
+  { label: 'Gluten Free', kind: 'tag', value: 'gluten-free' },
+  { label: 'Dairy-Free', kind: 'tag', value: 'dairy-free' },
+  { label: 'Keto', kind: 'tag', value: 'keto' },
+  { label: 'Italian', kind: 'cuisine', value: 'Italian' },
+  { label: 'Asian', kind: 'cuisine', value: 'Asian' },
+  { label: 'Mediterranean', kind: 'cuisine', value: 'Mediterranean' },
 ]
-
-const TILE_COLORS = ['#e8b4a8', '#d4a574', '#c9a582', '#b8956a', '#a48a6e']
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
+}
+
+const PAD = '0 24px'
+
+/** One list row on a hairline — typography and space, no card. */
+function rowStyle(divider: boolean): CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '15px 0',
+    borderTop: divider ? '1px solid var(--color-subtle)' : 'none',
+    cursor: 'pointer',
+  }
+}
+
+/** Minimal pill — outline by default, accent when selected. */
+function chipStyle(on: boolean): CSSProperties {
+  return {
+    padding: '7px 13px',
+    borderRadius: '999px',
+    border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'),
+    background: on ? 'var(--color-primary-bg)' : 'transparent',
+    color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  }
 }
 
 export default function BrowseScreen({ onNavigate }: Props) {
@@ -125,11 +144,11 @@ export default function BrowseScreen({ onNavigate }: Props) {
     recipes.some(r => matchesFilter(r, { kind: c.kind, value: c.value, label: c.label }))
   )
 
-  const EXPLORE: { key: FilterKind; label: string; bg: string; emoji: string; values: string[] }[] = [
-    { key: 'ingredient', label: 'Ingredients', bg: '#c9efa6', emoji: '🥕', values: ingredients },
-    { key: 'mealType', label: 'Meal type', bg: '#dbeafe', emoji: '🍽️', values: mealTypes },
-    { key: 'tag', label: 'Dietary', bg: '#fde2e4', emoji: '🌾', values: dietTags },
-    { key: 'cuisine', label: 'Cuisine', bg: '#e9d5ff', emoji: '🍜', values: cuisines },
+  const EXPLORE: { key: FilterKind; label: string; values: string[] }[] = [
+    { key: 'ingredient', label: 'Ingredients', values: ingredients },
+    { key: 'mealType', label: 'Meal type', values: mealTypes },
+    { key: 'tag', label: 'Dietary', values: dietTags },
+    { key: 'cuisine', label: 'Cuisine', values: cuisines },
   ]
 
   // Deterministic daily pick -- from recipes free of any flagged allergen, so
@@ -175,13 +194,15 @@ export default function BrowseScreen({ onNavigate }: Props) {
     { label: 'Cuisine', kind: 'cuisine' },
   ]
 
+  const filterActive = activeFilter || filterOpen
+
   const header = (
-    <header style={{ padding: '14px 16px 12px', background: 'var(--color-card)', flexShrink: 0, position: 'relative', zIndex: 30 }}>
-      <h1 style={{ fontFamily: SERIF, fontSize: '28px', fontWeight: '400', color: 'var(--color-text)', margin: '0 0 12px' }}>
+    <header style={{ padding: '20px 24px 14px', background: 'var(--color-bg)', flexShrink: 0, position: 'relative', zIndex: 30 }}>
+      <h1 style={{ fontSize: '27px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--color-text)', margin: '0 0 16px' }}>
         Discover
       </h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--color-card)', border: '1.5px solid var(--color-border)', borderRadius: '999px', padding: '11px 16px', minWidth: 0 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--color-subtle)', borderRadius: '13px', padding: '12px 14px', minWidth: 0 }}>
           <Search size={17} color="var(--color-text-muted)" />
           <input
             type="text"
@@ -197,21 +218,19 @@ export default function BrowseScreen({ onNavigate }: Props) {
           )}
         </div>
 
-        {/* Filters, merged in here from the old "Popular searches" row. */}
         {(popularChips.length > 0 || allergyChoices.length > 0) && (
           <button
             onClick={() => setFilterOpen(o => !o)}
             aria-label="Filters"
             style={{
-              position: 'relative', flexShrink: 0, width: '46px', height: '46px', borderRadius: '999px',
-              border: '1.5px solid ' + (activeFilter || filterOpen ? 'var(--color-primary)' : 'var(--color-border)'),
-              background: activeFilter || filterOpen ? 'var(--color-primary)' : 'var(--color-card)',
+              position: 'relative', flexShrink: 0, width: '46px', height: '46px', borderRadius: '13px',
+              border: 'none', background: filterActive ? 'var(--color-primary)' : 'var(--color-subtle)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             }}
           >
-            <SlidersHorizontal size={18} color={activeFilter || filterOpen ? '#fff' : 'var(--color-text-secondary)'} />
+            <SlidersHorizontal size={18} color={filterActive ? '#fff' : 'var(--color-text-secondary)'} />
             {activeFilter && !filterOpen && (
-              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: 'var(--color-card)', border: '1.5px solid var(--color-primary)' }} />
+              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: 'var(--color-primary)', border: '2px solid var(--color-bg)' }} />
             )}
           </button>
         )}
@@ -221,9 +240,9 @@ export default function BrowseScreen({ onNavigate }: Props) {
         <>
           {/* Tap-away backdrop. */}
           <div onClick={() => setFilterOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 39 }} />
-          <div style={{ position: 'absolute', top: '100%', right: '16px', marginTop: '6px', width: '250px', maxHeight: '340px', overflowY: 'auto', background: 'var(--color-card)', border: '1px solid #e8eef0', borderRadius: '14px', boxShadow: '0 8px 30px rgba(15,23,42,0.14)', zIndex: 40, padding: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>Filter by</span>
+          <div style={{ position: 'absolute', top: '100%', right: '24px', marginTop: '6px', width: '250px', maxHeight: '340px', overflowY: 'auto', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '16px', boxShadow: '0 12px 34px rgba(15,23,42,0.18)', zIndex: 40, padding: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Filter by</span>
               {activeFilter && (
                 <button onClick={() => { setActiveFilter(null); setFilterOpen(false) }} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                   Clear
@@ -234,8 +253,8 @@ export default function BrowseScreen({ onNavigate }: Props) {
               const chips = popularChips.filter(c => c.kind === group.kind)
               if (!chips.length) return null
               return (
-                <div key={group.kind} style={{ marginBottom: '12px' }}>
-                  <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 7px' }}>{group.label.toUpperCase()}</p>
+                <div key={group.kind} style={{ marginBottom: '14px' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.07em', margin: '0 0 8px' }}>{group.label.toUpperCase()}</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {chips.map(c => {
                       const on = activeFilter?.kind === c.kind && activeFilter?.value === c.value
@@ -243,9 +262,9 @@ export default function BrowseScreen({ onNavigate }: Props) {
                         <button
                           key={c.value}
                           onClick={() => { applyFilter({ kind: c.kind, value: c.value, label: c.label }); setFilterOpen(false) }}
-                          style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? 'var(--color-primary-dark)' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                          style={chipStyle(on)}
                         >
-                          <span>{c.emoji}</span> {c.label}
+                          {c.label}
                         </button>
                       )
                     })}
@@ -256,7 +275,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
 
             {allergyChoices.length > 0 && (
               <div>
-                <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.05em', margin: '0 0 7px' }}>ALLERGY</p>
+                <p style={{ fontSize: '10px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.07em', margin: '0 0 8px' }}>ALLERGY</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {allergyChoices.map(opt => {
                     const on = allergies.includes(opt.id)
@@ -264,14 +283,14 @@ export default function BrowseScreen({ onNavigate }: Props) {
                       <button
                         key={opt.id}
                         onClick={() => toggleAllergy(opt.id)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '999px', border: '1.5px solid ' + (on ? '#d1584f' : 'var(--color-border)'), background: on ? 'rgba(209,88,79,0.12)' : 'var(--color-card)', color: on ? '#d1584f' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                        style={{ padding: '7px 13px', borderRadius: '999px', border: '1px solid ' + (on ? '#d1584f' : 'var(--color-border)'), background: on ? 'rgba(209,88,79,0.12)' : 'transparent', color: on ? '#d1584f' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                       >
-                        <span>{ALLERGY_EMOJI[opt.id] || '⚠️'}</span> {opt.label}
+                        {opt.label}
                       </button>
                     )
                   })}
                 </div>
-                <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: '8px 0 0', lineHeight: 1.4 }}>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', margin: '10px 0 0', lineHeight: 1.4 }}>
                   Hides recipes that contain these.
                 </p>
               </div>
@@ -284,10 +303,18 @@ export default function BrowseScreen({ onNavigate }: Props) {
 
   if (isLoading) {
     return (
-      <div className="screen">
+      <div className="screen" style={{ background: 'var(--color-bg)' }}>
         {header}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
-          <p>Loading recipes...</p>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 0' }}>
+          <Skel h={188} r={20} />
+          <Skel w="46%" h={11} r={6} style={{ marginTop: '16px' }} />
+          <Skel w="72%" h={20} r={9} style={{ marginTop: '11px' }} />
+          <div style={{ marginTop: '34px', paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)' }}>
+            <Skel w={84} h={11} r={6} />
+          </div>
+          <SkelTextRow />
+          <SkelTextRow divider />
+          <SkelTextRow divider />
         </div>
         <BottomNavigation active="browse" onNavigate={(s) => onNavigate(s as Screen)} />
       </div>
@@ -295,21 +322,21 @@ export default function BrowseScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen" style={{ background: 'var(--color-card)' }}>
+    <div className="screen" style={{ background: 'var(--color-bg)' }}>
       {header}
 
       {dietPrefs.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'var(--color-primary-bg)', borderBottom: '1px solid var(--color-border)', overflowX: 'auto', flexShrink: 0 }}>
-          <SlidersHorizontal size={15} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 24px 8px', overflowX: 'auto', flexShrink: 0 }}>
+          <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: 'var(--color-text-muted)', flexShrink: 0 }}>DIET</span>
           <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
             {dietPrefs.map(pref => (
-              <span key={pref} style={{ flexShrink: 0, background: 'var(--color-primary)', color: '#fff', fontSize: '12px', fontWeight: '600', padding: '4px 10px', borderRadius: '999px' }}>
+              <span key={pref} style={{ flexShrink: 0, border: '1px solid var(--color-primary-border)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '600', padding: '4px 11px', borderRadius: '999px' }}>
                 {DIET_LABELS[pref] || pref}
               </span>
             ))}
           </div>
-          <button onClick={() => setDietPrefs([])} aria-label="Clear diet filters" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '3px', background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
-            <X size={13} /> Clear
+          <button onClick={() => setDietPrefs([])} aria-label="Clear diet filters" style={{ flexShrink: 0, background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
+            Clear
           </button>
         </div>
       )}
@@ -317,96 +344,76 @@ export default function BrowseScreen({ onNavigate }: Props) {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {browsing ? (
           <>
-            {/* Recipe of the day */}
+            {/* Recipe of the day — one big image, then quiet text. No card. */}
             {rotd && (
-              <div style={{ margin: '18px 16px 0', background: 'var(--color-card)', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', borderRadius: '18px', padding: '18px', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
-                <p style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: '19px', color: 'var(--color-primary)', margin: '0 0 10px' }}>
+              <div style={{ padding: '20px 24px 0', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
+                <div style={{ height: '190px', borderRadius: '20px', overflow: 'hidden', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '58px' }}>
+                  {rotd.imageUrl
+                    ? <img src={rotd.imageUrl} alt={rotd.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                    : '🍽️'}
+                </div>
+                <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-primary)', margin: '16px 0 0' }}>
                   Recipe of the day
                 </p>
-                <h2 style={{ fontFamily: SERIF, fontSize: '25px', fontWeight: '400', color: 'var(--color-text)', margin: '0 0 8px', lineHeight: 1.2 }}>
+                <h2 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--color-text)', margin: '6px 0 0', lineHeight: 1.2 }}>
                   {rotd.name}
                 </h2>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '0 0 10px' }}>
-                  {rotd.cuisine} · {(rotd.prepTime || 0) + (rotd.cookTime || 0)} min
-                  {rotd.calories ? ` · ${rotd.calories} cal` : ''}
+                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
+                  {[rotd.cuisine, `${(rotd.prepTime || 0) + (rotd.cookTime || 0)} min`, rotd.calories ? `${rotd.calories} cal` : ''].filter(Boolean).join(' · ')}
                 </p>
-                {rotd.description && (
-                  <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 14px', lineHeight: 1.5 }}>{rotd.description}</p>
-                )}
-                <div style={{ height: '170px', borderRadius: '14px', overflow: 'hidden', background: `linear-gradient(135deg, ${TILE_COLORS[0]}, ${TILE_COLORS[3]})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '58px' }}>
-                  {rotd.imageUrl ? (
-                    <img src={rotd.imageUrl} alt={rotd.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                  ) : (
-                    '🍽️'
-                  )}
-                </div>
               </div>
             )}
 
-            {/* Explore recipes by */}
-            <div style={{ padding: '22px 16px 0' }}>
-              <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-secondary)', margin: '0 0 10px' }}>Explore recipes by</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                {EXPLORE.map(cat => {
-                  const selected = exploreCat === cat.key
-                  return (
+            {/* Explore — a ruled list; each row opens its values inline. */}
+            <div style={{ padding: '34px 24px 0' }}>
+              <SectionHead title="Explore" />
+              {EXPLORE.map((cat, i) => {
+                const open = exploreCat === cat.key
+                const disabled = cat.values.length === 0
+                return (
+                  <div key={cat.key}>
                     <button
-                      key={cat.key}
-                      onClick={() => setExploreCat(selected ? null : cat.key)}
-                      disabled={cat.values.length === 0}
-                      style={{
-                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px',
-                        background: 'var(--color-card)',
-                        border: `2px solid ${selected ? 'var(--color-primary)' : 'var(--color-subtle)'}`,
-                        borderRadius: '14px', padding: '14px',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                        textAlign: 'left', cursor: cat.values.length ? 'pointer' : 'default',
-                        opacity: cat.values.length ? 1 : 0.5, fontFamily: 'inherit',
-                      }}
+                      onClick={() => setExploreCat(open ? null : cat.key)}
+                      disabled={disabled}
+                      style={{ ...rowStyle(i > 0), width: '100%', justifyContent: 'space-between', background: 'none', border: 'none', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', fontFamily: 'inherit', textAlign: 'left', opacity: disabled ? 0.4 : 1, cursor: disabled ? 'default' : 'pointer' }}
                     >
-                      {/* Emoji in a category-tinted tile, matching the app's card tiles. */}
-                      <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: cat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
-                        {cat.emoji}
-                      </div>
-                      <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text)' }}>{cat.label}</div>
+                      <span style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)' }}>{cat.label}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>{cat.values.length}</span>
+                        <ChevronRight size={16} color="var(--color-text-muted)" style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                      </span>
                     </button>
-                  )
-                })}
-              </div>
-
-              {/* Inline values for the chosen category */}
-              {exploreCat && (
-                <div style={{ marginTop: '12px', border: '1.5px solid var(--color-border)', borderRadius: '14px', padding: '12px', background: 'var(--color-subtle)' }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {(EXPLORE.find(c => c.key === exploreCat)?.values || []).map(v => (
-                      <button
-                        key={v}
-                        onClick={() => applyFilter({ kind: exploreCat, value: v, label: labelFor(exploreCat, v) })}
-                        style={{ padding: '8px 13px', background: 'var(--color-card)', border: '1.5px solid var(--color-border)', borderRadius: '999px', fontSize: '13px', fontWeight: '500', color: 'var(--color-text)', cursor: 'pointer', textTransform: exploreCat === 'mealType' ? 'capitalize' : 'none' }}
-                      >
-                        {labelFor(exploreCat, v)}
-                      </button>
-                    ))}
+                    {open && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '2px 0 16px' }}>
+                        {cat.values.map(v => (
+                          <button
+                            key={v}
+                            onClick={() => applyFilter({ kind: cat.key, value: v, label: labelFor(cat.key, v) })}
+                            style={{ ...chipStyle(false), textTransform: cat.key === 'mealType' ? 'capitalize' : 'none' }}
+                          >
+                            {labelFor(cat.key, v)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                )
+              })}
             </div>
 
             {/* All recipes */}
-            <div style={{ padding: '22px 16px 16px' }}>
-              <h3 style={{ fontFamily: SERIF, fontSize: '20px', fontWeight: '400', color: 'var(--color-text)', margin: '0 0 12px' }}>
-                All recipes
-              </h3>
+            <div style={{ padding: '34px 24px 24px' }}>
+              <SectionHead title="All recipes" />
               <RecipeList recipes={displayed} onNavigate={onNavigate} />
             </div>
           </>
         ) : (
-          <div style={{ padding: '14px 16px 16px' }}>
+          <div style={{ padding: '16px 24px 24px' }}>
             {activeFilter && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#334155', color: '#fff', fontSize: '13px', fontWeight: '600', padding: '6px 12px', borderRadius: '999px', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', padding: '5px 12px', borderRadius: '999px', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
                   {activeFilter.label}
-                  <button onClick={() => setActiveFilter(null)} aria-label="Remove filter" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                  <button onClick={() => setActiveFilter(null)} aria-label="Remove filter" style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
                     <X size={13} />
                   </button>
                 </span>
@@ -417,11 +424,10 @@ export default function BrowseScreen({ onNavigate }: Props) {
             )}
 
             {displayed.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--color-text-muted)' }}>
-                <div style={{ fontSize: '38px', marginBottom: '10px' }}>🔍</div>
-                <p style={{ fontSize: '14px', margin: '0 0 16px' }}>Nothing matches that yet.</p>
-                <button onClick={clearAll} style={{ padding: '9px 18px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '14px', fontWeight: '700' }}>
-                  Clear
+              <div style={{ textAlign: 'center', padding: '64px 0', color: 'var(--color-text-muted)' }}>
+                <p style={{ fontSize: '15px', margin: '0 0 16px' }}>Nothing matches that yet.</p>
+                <button onClick={clearAll} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Clear filters
                 </button>
               </div>
             ) : (
@@ -436,14 +442,24 @@ export default function BrowseScreen({ onNavigate }: Props) {
   )
 }
 
+/** A ruled section label: small all-caps title on a hairline. */
+function SectionHead({ title }: { title: string }) {
+  return (
+    <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)', marginBottom: '2px' }}>
+      <h2 style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>
+        {title}
+      </h2>
+    </div>
+  )
+}
+
 function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s: Screen, d?: any) => void }) {
   if (recipes.length === 0) {
     return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', padding: '24px 0', margin: 0 }}>No recipes yet.</p>
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div>
       {recipes.map((recipe, index) => {
-        const tint = TILE_COLORS[index % TILE_COLORS.length]
         const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
         const meta = [recipe.cuisine, `${time} min`, recipe.calories ? `${recipe.calories} cal` : '']
           .filter(Boolean).join(' · ')
@@ -451,26 +467,34 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
           <div
             key={recipe.id}
             onClick={() => onNavigate('recipe', { recipe })}
-            style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--color-card)', borderRadius: '14px', border: '1px solid var(--color-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' }}
+            style={rowStyle(index > 0)}
           >
-            {/* Same tinted tile the Home cards use. */}
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: tint + '2e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, overflow: 'hidden' }}>
-              {recipe.imageUrl
-                ? <img src={recipe.imageUrl} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                : '🍽️'}
-            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <h4 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {recipe.name}
               </h4>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {meta}
               </p>
             </div>
-            <ChevronRight size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
           </div>
         )
       })}
+    </div>
+  )
+}
+
+/* --- First-load skeleton ---------------------------------------------------- */
+
+function Skel({ w = '100%', h, r = 7, style }: { w?: number | string; h: number; r?: number; style?: CSSProperties }) {
+  return <div className="rh-skel" style={{ width: w, height: h, borderRadius: r, ...style }} />
+}
+
+function SkelTextRow({ divider = false }: { divider?: boolean }) {
+  return (
+    <div style={{ padding: '15px 0', borderTop: divider ? '1px solid var(--color-subtle)' : 'none' }}>
+      <Skel w="52%" h={13} />
+      <Skel w="34%" h={11} style={{ marginTop: '8px' }} />
     </div>
   )
 }
