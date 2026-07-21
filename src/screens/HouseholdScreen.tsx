@@ -345,7 +345,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                       {m.name}{m.isYou ? ' (you)' : ''}
                     </span>
                     {m.role === 'owner' && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '10px', fontWeight: '800', color: '#f4b860', background: 'rgba(244,184,96,0.16)', padding: '3px 8px', borderRadius: '999px', letterSpacing: '0.04em' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '10px', fontWeight: '800', color: 'var(--color-pro-badge)', background: 'rgba(244,184,96,0.16)', padding: '3px 8px', borderRadius: '999px', letterSpacing: '0.04em' }}>
                         <Crown size={10} /> OWNER
                       </span>
                     )}

@@ -1,7 +1,13 @@
+/* The base block is the LIGHT theme; dark overrides it further down.
+   Light-mode values are the darker ones: text and the accent both sit on a
+   near-white page here, so the airy palette has to be deep enough to actually
+   read. The brighter brand values are re-asserted for dark, where the same
+   colours sit on near-black and are already legible. */
 :root {
-  /* Brand */
-  --color-primary: #6ba356;
-  --color-primary-dark: #5a9449;
+  /* Brand — tuned so accent *text* clears 4.5:1 on the page, and white clears
+     4.5:1 on an accent fill. */
+  --color-primary: #4a7a38;
+  --color-primary-dark: #3d6530;
   --color-primary-light: #7ec063;
   --color-primary-bg: #f0f7ed;
   --color-primary-border: #c8e0bc;
@@ -10,17 +16,23 @@
   --color-warm: #c67139;
   --color-warm-light: #d4a574;
 
-  /* Text */
+  /* Text — muted/secondary are the workhorses of the ruled layout (section
+     labels, meta lines), so they carry real contrast rather than a whisper. */
   --color-text: #1e293b;
-  --color-text-secondary: #64748b;
-  --color-text-muted: #94a3b8;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+
+  /* The gold PRO badge and the amber "medium" difficulty label, dark enough
+     to read on a light page. */
+  --color-pro-badge: #6f5213;
+  --color-warn-text: #8a5f0a;
 
   /* Surfaces */
   --color-bg: #f8fafc;
   --color-card: #ffffff;
   --color-input: #f1f5f9;
   --color-subtle: #f1f5f9;
-  --color-accent: #6ba356;
+  --color-accent: #4a7a38;
   /* The area behind the phone mockup, and the translucent bottom nav. */
   --color-desk: #f5f5f5;
   --color-nav-bg: rgba(255, 255, 255, 0.82);
@@ -97,6 +109,14 @@
   --color-skeleton: #243247;
   --color-skeleton-hi: #33445f;
 
+  /* On near-black the brighter brand greens read fine — and the darkened
+     light-mode values would not, so put them back here. */
+  --color-primary: #6ba356;
+  --color-primary-dark: #5a9449;
+  --color-accent: #6ba356;
+  --color-pro-badge: #f4b860;
+  --color-warn-text: #f4b860;
+
   color-scheme: dark;
 }
 
@@ -104,12 +124,12 @@
    from the Pro state (App.tsx), the same mechanism as data-theme. Every element
    that uses the accent variables flips at once -- buttons, nav, pills, links. */
 :root[data-pro="true"] {
-  --color-primary: #bf8f2c;
-  --color-primary-dark: #9c7420;
+  --color-primary: #8a6718;
+  --color-primary-dark: #6f5213;
   --color-primary-light: #d9b356;
   --color-primary-bg: #fbf3df;
   --color-primary-border: #e8d5a0;
-  --color-accent: #bf8f2c;
+  --color-accent: #8a6718;
 }
 /* Dark + Pro: keep the gold accent but restore the translucent tints so they
    read on the dark surfaces. More specific than either single-attr rule, so it
@@ -117,6 +137,12 @@
 :root[data-theme="dark"][data-pro="true"] {
   --color-primary-bg: rgba(191, 143, 44, 0.22);
   --color-primary-border: rgba(191, 143, 44, 0.48);
+  /* Higher specificity than the light-Pro block above, so the bright gold
+     survives into dark mode. */
+  --color-primary: #bf8f2c;
+  --color-primary-dark: #9c7420;
+  --color-accent: #bf8f2c;
+  --color-pro-badge: #f4b860;
 }
 
 * {

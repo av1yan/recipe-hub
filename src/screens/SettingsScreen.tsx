@@ -650,7 +650,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             icon={<Crown size={18} color="#f4b860" />}
             label="Subscription"
             value={isPro
-              ? <span style={{ background: 'rgba(244,184,96,0.16)', color: '#f4b860', fontSize: '10px', fontWeight: '800', padding: '2.5px 7px', borderRadius: '999px', letterSpacing: '0.05em' }}>PRO</span>
+              ? <span style={{ background: 'rgba(244,184,96,0.16)', color: 'var(--color-pro-badge)', fontSize: '10px', fontWeight: '800', padding: '2.5px 7px', borderRadius: '999px', letterSpacing: '0.05em' }}>PRO</span>
               : 'Free'}
             onPress={() => setSubPage('subscription')}
             divider

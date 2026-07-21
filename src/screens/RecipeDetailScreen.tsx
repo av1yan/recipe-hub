@@ -20,7 +20,7 @@ interface Props {
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   easy: 'var(--color-primary)',
-  medium: '#f4b860',
+  medium: 'var(--color-warn-text)',
   hard: '#ef4444',
 }
 
