@@ -126,6 +126,42 @@ export const importAPI = {
   /** Returns the post's caption to lay out, not a recipe. */
   social: (url: string) => apiRequest('/recipes/import/social', { method: 'POST', body: { url } }),
   text: (text: string) => apiRequest('/recipes/import/text', { method: 'POST', body: { text } }),
+  /** Read a recipe out of a photo with Claude vision (server-side). */
+  image: (image: string, mediaType: string) =>
+    apiRequest('/recipes/import/image', { method: 'POST', body: { image, mediaType } }),
+}
+
+/**
+ * Shrinks + re-encodes an image to keep the upload small and Claude-vision
+ * friendly (its sweet spot is ~1568px on the long edge), returning bare base64
+ * plus the media type. Falls back to the raw file if canvas isn't available.
+ */
+export async function imageToBase64(file: File, maxDim = 1568): Promise<{ base64: string; mediaType: string }> {
+  const readAsDataURL = (f: Blob) => new Promise<string>((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(String(r.result))
+    r.onerror = () => reject(r.error)
+    r.readAsDataURL(f)
+  })
+  const strip = (dataUrl: string) => dataUrl.replace(/^data:[^,]+,/, '')
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height))
+    const w = Math.round(bitmap.width * scale)
+    const h = Math.round(bitmap.height * scale)
+    const canvas = document.createElement('canvas')
+    canvas.width = w; canvas.height = h
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('no 2d context')
+    ctx.drawImage(bitmap, 0, 0, w, h)
+    bitmap.close?.()
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+    return { base64: strip(dataUrl), mediaType: 'image/jpeg' }
+  } catch {
+    // Couldn't process it — send the original bytes as-is.
+    const dataUrl = await readAsDataURL(file)
+    return { base64: strip(dataUrl), mediaType: file.type || 'image/jpeg' }
+  }
 }
 
 // Recipe endpoints

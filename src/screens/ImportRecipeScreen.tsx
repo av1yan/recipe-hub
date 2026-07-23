@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronLeft, Link2, Type, Image as ImageIcon, Camera, Loader2 } from 'lucide-react'
 import type { Screen } from '../types'
-import { importAPI } from '../utils/api'
+import { importAPI, imageToBase64 } from '../utils/api'
 
 type Mode = 'web' | 'text' | 'photo' | 'social'
 
@@ -121,8 +121,23 @@ export default function ImportRecipeScreen({ mode, onNavigate, backTo = 'home', 
   const submitPhoto = async (file: File) => {
     setError('')
     setBusy('Reading the photo…')
+
+    // Primary: Claude vision, server-side — far better on a screenshot than
+    // on-device OCR. Falls through to OCR if the server has no key, returns
+    // nothing usable, or errors.
     try {
-      // Loaded on demand — the OCR engine is far too heavy for the main bundle.
+      const { base64, mediaType } = await imageToBase64(file)
+      const draft: any = await importAPI.image(base64, mediaType)
+      const usable = draft && draft.configured !== false &&
+        ((draft.name || '').trim() || draft.ingredients?.length || draft.instructions?.length)
+      if (usable) { review(draft); return }
+    } catch {
+      /* fall through to on-device OCR */
+    }
+
+    // Fallback: on-device OCR. Loaded on demand — too heavy for the main bundle.
+    setBusy('Reading the photo…')
+    try {
       const { default: Tesseract } = await import('tesseract.js')
       const { data } = await Tesseract.recognize(file, 'eng', {
         logger: (m: any) => {
