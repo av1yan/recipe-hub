@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight, Clock, CheckCircle, List, Volume2, VolumeX, ChefHat, Crown, PartyPopper } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, CheckCircle, List, Volume2, VolumeX, Crown, PartyPopper } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { getUnitPref, convertMeasurement, getTempPref, convertTempInText } from '../utils/preferences'
 import { useProPlan } from '../utils/proPlan'
@@ -57,7 +57,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
     let cancelled = false
     const acquire = async () => {
       try {
-        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+        if (isPro && 'wakeLock' in navigator && document.visibilityState === 'visible') {
           wakeRef.current = await (navigator as any).wakeLock.request('screen')
         }
       } catch { /* denied or unsupported */ }
@@ -71,7 +71,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
       try { wakeRef.current?.release?.() } catch { /* noop */ }
       try { speechSynthesis?.cancel() } catch { /* noop */ }
     }
-  }, [])
+  }, [isPro])
 
   // Read the current step aloud (toggle).
   const toggleSpeak = () => {
@@ -104,31 +104,6 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
   }
 
   if (!recipe) return null
-
-  if (!isPro) {
-    return (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
-        <div style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--color-subtle)', background: 'var(--color-bg)' }}>
-          <button onClick={() => onNavigate('recipe', { recipe })} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex' }}>
-            <ChevronLeft size={22} color="var(--color-text-secondary)" />
-          </button>
-          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>Cooking Mode</span>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ChefHat size={32} color="#fff" />
-          </div>
-          <h2 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-text)', margin: 0 }}>Guided Cooking is Pro</h2>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5, maxWidth: '300px' }}>
-            Full-screen steps, per-step timers, ingredients on tap, hands-free read-aloud, and a screen that stays awake while you cook.
-          </p>
-          <button onClick={() => onNavigate('settings')} style={{ marginTop: '6px', padding: '13px 22px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
-            <Crown size={16} color="#f4b860" /> Upgrade to Pro
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   if (totalSteps === 0) {
     return (
@@ -238,21 +213,46 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             <p style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: '800', letterSpacing: '0.1em', margin: 0 }}>
               STEP {step?.stepNumber || currentStep + 1}
             </p>
-            <button
-              onClick={toggleSpeak}
-              aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
-            </button>
+            {isPro ? (
+              <button
+                onClick={toggleSpeak}
+                aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
+              </button>
+            ) : (
+              <button
+                onClick={() => onNavigate('settings')}
+                aria-label="Read step aloud is a Pro feature"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                <Volume2 size={13} /> Read <Crown size={11} color="#f4b860" />
+              </button>
+            )}
           </div>
           <p style={{ fontSize: '22px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.6, margin: 0, letterSpacing: '-0.01em' }}>
             {stepText}
           </p>
         </div>
 
-        {/* Timer */}
-        {timerSeconds !== null && (
+        {/* Timer — interactive for Pro; a teaser for free */}
+        {timerSeconds !== null && !isPro && (
+          <div style={{ marginTop: '36px', display: 'flex', justifyContent: 'center' }}>
+            <button
+              onClick={() => onNavigate('settings')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '11px 18px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              <Clock size={15} color="var(--color-text-muted)" />
+              <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatTime(timerSeconds)}</span>
+              <span style={{ color: 'var(--color-text-muted)', fontWeight: '600' }}>step timer</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                <Crown size={12} color="#f4b860" /> Pro
+              </span>
+            </button>
+          </div>
+        )}
+        {timerSeconds !== null && isPro && (
           <div style={{ marginTop: '36px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '130px', height: '130px', borderRadius: '65px',
