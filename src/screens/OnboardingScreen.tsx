@@ -30,7 +30,7 @@ const STEPS = [
   {
     icon: '👨‍🍳',
     title: 'Cook smarter',
-    description: 'Full-screen step-by-step guides with timers. Hands-free cooking made easy.',
+    description: 'Full-screen step-by-step guides that keep you moving, mess-free.',
   },
 ]
 
