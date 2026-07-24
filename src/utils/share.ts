@@ -1,4 +1,50 @@
 /**
+ * Copy text to the clipboard. Prefers the async Clipboard API, but falls back to
+ * the legacy execCommand path for environments where the async API is blocked
+ * (document not focused, restrictive permissions policy, older browsers). The
+ * fallback runs from inside the click handler, which is where sharing is called.
+ */
+export async function copyToClipboard(text: string): Promise<boolean> {
+  const nav = typeof navigator !== 'undefined' ? navigator : undefined
+  if (nav?.clipboard?.writeText) {
+    try {
+      await nav.clipboard.writeText(text)
+      return true
+    } catch {
+      // Async API refused (NotAllowedError etc.) — try the legacy path below.
+    }
+  }
+  return legacyCopy(text)
+}
+
+// Deprecated but broadly supported: drop a hidden textarea, select it, and run
+// the copy command. Restores any prior selection so it's invisible to the user.
+function legacyCopy(text: string): boolean {
+  if (typeof document === 'undefined') return false
+  const selection = document.getSelection()
+  const saved = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.setAttribute('readonly', '')
+  ta.style.position = 'fixed'
+  ta.style.top = '-9999px'
+  ta.style.opacity = '0'
+  document.body.appendChild(ta)
+  let ok = false
+  try {
+    ta.focus()
+    ta.select()
+    ta.setSelectionRange(0, text.length)
+    ok = document.execCommand('copy')
+  } catch {
+    ok = false
+  }
+  document.body.removeChild(ta)
+  if (saved && selection) { selection.removeAllRanges(); selection.addRange(saved) }
+  return ok
+}
+
+/**
  * Share text via the native share sheet when it exists (phones), otherwise copy
  * it to the clipboard. Returns what happened so the caller can toast honestly.
  * A share sheet the person dismisses counts as done, not an error.
@@ -15,10 +61,5 @@ export async function shareText(title: string, text: string): Promise<'shared' |
       // Anything else (unsupported payload, permission) falls through to copy.
     }
   }
-  try {
-    await nav?.clipboard.writeText(text)
-    return 'copied'
-  } catch {
-    return 'failed'
-  }
+  return (await copyToClipboard(text)) ? 'copied' : 'failed'
 }
