@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Home, Search, Plus, Calendar, ShoppingCart } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 
@@ -22,6 +23,10 @@ const tabs = [
   { id: 'grocery', icon: ShoppingCart, label: 'Groceries', screen: 'grocery' },
 ]
 
+// Remembered across mounts so the indicator can slide from the previously
+// selected tab to the new one — each screen renders its own nav instance.
+let lastActiveTab: string | null = null
+
 export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
   // The panel itself lives at the app level (App renders one AddRecipeSheet);
   // the "+" just asks to open it. That's what lets Back on an import screen
@@ -29,11 +34,25 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
   const { openAddSheet } = useApp()
   const handleAdd = onAdd ?? openAddSheet
 
+  // Slide the accent indicator from the previously selected tab to this one.
+  const activeIndex = tabs.findIndex(t => t.id === active)
+  const [indicatorIndex, setIndicatorIndex] = useState(() => {
+    const from = lastActiveTab ? tabs.findIndex(t => t.id === lastActiveTab) : -1
+    return from >= 0 ? from : activeIndex
+  })
+  useEffect(() => {
+    if (activeIndex < 0) return
+    const id = requestAnimationFrame(() => setIndicatorIndex(activeIndex))
+    lastActiveTab = active
+    return () => cancelAnimationFrame(id)
+  }, [active, activeIndex])
+
   return (
     <nav style={{
       display: 'flex',
       alignItems: 'center',
       flexShrink: 0,
+      position: 'relative',
       background: solid ? 'var(--color-card)' : 'var(--color-nav-bg)',
       backdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
       WebkitBackdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
@@ -42,6 +61,18 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
       paddingBottom: '6px',
       paddingTop: '2px',
     }}>
+      {/* Single accent indicator that slides between the selected tabs. */}
+      {activeIndex >= 0 && (
+        <div
+          className="rh-nav-indicator"
+          style={{
+            position: 'absolute', top: '2px',
+            left: `calc(${((indicatorIndex + 0.5) * 100) / tabs.length}% - 10px)`,
+            width: '20px', height: '2.5px', borderRadius: '0 0 3px 3px',
+            background: 'var(--color-primary)', pointerEvents: 'none',
+          }}
+        />
+      )}
       {tabs.map((tab) => {
         const isActive = active === tab.id
         if (tab.accent) {
@@ -83,21 +114,13 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
               position: 'relative',
             }}
           >
-            {isActive && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                width: '20px',
-                height: '2.5px',
-                borderRadius: '0 0 3px 3px',
-                background: 'var(--color-primary)',
-              }} />
-            )}
-            <tab.icon
-              size={22}
-              strokeWidth={isActive ? 2.2 : 1.8}
-              color={isActive ? 'var(--color-primary)' : 'var(--color-text-muted)'}
-            />
+            <span className={isActive ? 'rh-nav-pop' : undefined} style={{ display: 'flex' }}>
+              <tab.icon
+                size={22}
+                strokeWidth={isActive ? 2.2 : 1.8}
+                color={isActive ? 'var(--color-primary)' : 'var(--color-text-muted)'}
+              />
+            </span>
             <span style={{
               fontSize: '10px',
               fontWeight: isActive ? '700' : '500',

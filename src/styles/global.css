@@ -490,3 +490,18 @@ button:not(:disabled):active,
   .rh-day-pill { transition: none; }
   .rh-day-num--active { animation: none; }
 }
+
+/* --- Bottom-nav tab selection -----------------------------------------------
+   A bolder cousin of the day pop: the selected tab's icon jumps and lifts, and
+   the accent indicator slides between tabs. */
+@keyframes rh-nav-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.rh-nav-pop { animation: rh-nav-pop 0.3s ease; }
+.rh-nav-indicator { transition: left 0.34s cubic-bezier(0.34, 1.4, 0.5, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .rh-nav-pop { animation: none; }
+  .rh-nav-indicator { transition: none; }
+}
