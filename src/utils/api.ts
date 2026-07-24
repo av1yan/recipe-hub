@@ -241,6 +241,11 @@ export const groceryAPI = {
       body: { name },
     }),
 
+  /** Read a grocery list out of a photo with Claude vision (server-side).
+      Returns { items, configured } — { configured:false } means fall back to OCR. */
+  scan: (image: string, mediaType: string) =>
+    apiRequest('/grocery-lists/scan', { method: 'POST', body: { image, mediaType } }),
+
   list: () => apiRequest('/grocery-lists'),
 
   get: (id: string) => apiRequest(`/grocery-lists/${id}`),

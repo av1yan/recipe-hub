@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Loader2, X, CalendarDays } from 'lucide-react'
 import type { Screen, GroceryList, GroceryItem } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
-import { groceryAPI, mealPlanAPI } from '../utils/api'
+import { groceryAPI, mealPlanAPI, imageToBase64 } from '../utils/api'
 import { DAY_NAMES, MEALS, getMeals, sameWeek } from './MealPlanScreen'
 import { toGroceryLine, pluralizeUnit } from '../utils/grocery'
 import { Toast, useToast } from '../components/Toast'
@@ -224,6 +224,20 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     setScanning(true)
     setScanProgress(0)
     try {
+      // Claude vision on the backend reads the note first — sturdier than
+      // on-device OCR, especially on handwriting. Falls back to Tesseract when
+      // the key isn't set, the call fails, or nothing legible came back.
+      try {
+        const { base64, mediaType } = await imageToBase64(file)
+        const res: any = await groceryAPI.scan(base64, mediaType)
+        if (res?.configured !== false && Array.isArray(res?.items) && res.items.length > 0) {
+          setScanned(res.items)
+          return
+        }
+      } catch (err) {
+        console.error('Vision scan failed, falling back to OCR:', err)
+      }
+
       const Tesseract = (await import('tesseract.js')).default
       const { data } = await Tesseract.recognize(file, 'eng', {
         logger: (m: { progress?: number }) => {
@@ -555,10 +569,16 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         <div style={{ position: 'absolute', inset: 0, background: 'var(--color-bg)', zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
           <Loader2 size={40} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
           <p style={{ fontSize: '15px', color: 'var(--color-text)', fontWeight: '600', margin: 0 }}>Reading your note…</p>
-          <div style={{ width: '200px', height: '6px', background: 'var(--color-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: 'var(--color-primary)', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
-          </div>
-          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
+          {/* The progress bar only means something for the on-device OCR path;
+              the vision call reports no increments, so show just the spinner. */}
+          {scanProgress > 0 && (
+            <>
+              <div style={{ width: '200px', height: '6px', background: 'var(--color-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: 'var(--color-primary)', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
+            </>
+          )}
           <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
         </div>
       )}
