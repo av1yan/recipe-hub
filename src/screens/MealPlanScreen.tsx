@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Trash2, CalendarDays, Check, ChevronDown, ShoppingCart, Share2 } from 'lucide-react'
+import { Trash2, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2 } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
@@ -75,7 +75,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [selectedDay, setSelectedDay] = useState<string>(() => DAY_NAMES[(new Date().getDay() + 6) % 7])
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [showWeeks, setShowWeeks] = useState(false)
+  // Expanded month grid + which month it's showing.
+  const [expanded, setExpanded] = useState(false)
+  const [monthCursor, setMonthCursor] = useState<Date>(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   const [generating, setGenerating] = useState(false)
   const [isPro] = useProPlan()
   const { toast, show } = useToast()
@@ -102,10 +104,38 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
-  // Viewing a week is free — no plan is created just by looking.
-  function openWeek(weekStart: Date) {
-    setViewWeek(weekStart)
-    setShowWeeks(false)
+  // Swipe tracking for the week strip. `swiped` guards the day tap so a swipe
+  // doesn't also register as selecting whatever day it started on.
+  const swipeX = useRef<number | null>(null)
+  const swiped = useRef(false)
+
+  // Viewing another week is a Pro perk ("Plan any week"); Free stays on the
+  // current week. Selecting a day within the shown week is always free.
+  function changeWeek(delta: number) {
+    if (!isPro) { show('Planning other weeks is a Pro feature — upgrade in Settings.', 'error'); return }
+    const ws = mondayOf(viewWeek)
+    ws.setDate(ws.getDate() + delta * 7)
+    setViewWeek(ws)
+    setConfirmDelete(false)
+  }
+
+  // Jump to a date from the expanded month grid.
+  function goToDate(date: Date) {
+    if (!isPro && !sameWeek(date, mondayOf(new Date()))) {
+      show('Planning other weeks is a Pro feature — upgrade in Settings.', 'error')
+      return
+    }
+    setViewWeek(mondayOf(date))
+    setSelectedDay(DAY_NAMES[(date.getDay() + 6) % 7])
+    setExpanded(false)
+    setConfirmDelete(false)
+  }
+
+  function toggleExpanded() {
+    setExpanded(v => {
+      if (!v) setMonthCursor(new Date(viewWeek.getFullYear(), viewWeek.getMonth(), 1))
+      return !v
+    })
     setConfirmDelete(false)
   }
 
@@ -242,6 +272,59 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     else dayRows.push({ m, meal: null })
   })
 
+  // Full month grid shown when the calendar is expanded. Page months with the
+  // chevrons; tap a date to jump to it (Pro for weeks other than this one).
+  function renderMonthGrid() {
+    const y = monthCursor.getFullYear(), m = monthCursor.getMonth()
+    const lead = (new Date(y, m, 1).getDay() + 6) % 7   // Monday-based leading blanks
+    const days = new Date(y, m + 1, 0).getDate()
+    const cells: (number | null)[] = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)]
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    const thisWeek = mondayOf(new Date())
+    const selDate = new Date(viewWeek); selDate.setDate(selDate.getDate() + DAY_NAMES.indexOf(selectedDay))
+    const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+    const navBtn: CSSProperties = { width: '30px', height: '30px', borderRadius: '9px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+    return (
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <button onClick={() => setMonthCursor(new Date(y, m - 1, 1))} aria-label="Previous month" style={navBtn}><ChevronLeft size={17} /></button>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{monthCursor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+          <button onClick={() => setMonthCursor(new Date(y, m + 1, 1))} aria-label="Next month" style={navBtn}><ChevronRight size={17} /></button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '4px' }}>
+          {DAY_SHORT.map(s => (
+            <span key={s} style={{ textAlign: 'center', fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)' }}>{s[0]}</span>
+          ))}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px' }}>
+          {cells.map((d, i) => {
+            if (d === null) return <span key={i} />
+            const date = new Date(y, m, d)
+            const isSel = sameDay(date, selDate)
+            const isToday = sameDay(date, today)
+            const locked = !isPro && !sameWeek(date, thisWeek)
+            return (
+              <button
+                key={i}
+                onClick={() => goToDate(date)}
+                style={{
+                  height: '38px', borderRadius: '10px', fontSize: '14px', fontWeight: '700',
+                  border: isToday && !isSel ? '1.5px solid var(--color-primary)' : '1.5px solid transparent',
+                  background: isSel ? 'var(--color-primary)' : 'transparent',
+                  color: isSel ? '#fff' : locked ? 'var(--color-text-muted)' : 'var(--color-text)',
+                  opacity: locked ? 0.5 : 1,
+                  cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                {d}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   const header = (title: string) => (
     <header style={{ padding: '20px 24px 14px', background: 'var(--color-bg)', flexShrink: 0 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
@@ -253,41 +336,58 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             </button>
           )}
           {currentPlan && (
-            <button onClick={() => { setConfirmDelete(v => !v); setShowWeeks(false) }} aria-label="Delete week" style={iconBtnStyle()}>
+            <button onClick={() => { setConfirmDelete(v => !v); setExpanded(false) }} aria-label="Delete week" style={iconBtnStyle()}>
               <Trash2 size={16} />
             </button>
           )}
-          <button onClick={() => { setShowWeeks(v => !v); setConfirmDelete(false) }} aria-label="Choose week" style={iconBtnStyle(showWeeks)}>
+          <button onClick={toggleExpanded} aria-label={expanded ? 'Collapse calendar' : 'Expand calendar'} style={iconBtnStyle(expanded)}>
             <CalendarDays size={17} />
           </button>
         </div>
       </div>
 
-      {/* Month for the week on show, above the day/date strip. */}
-      <div style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
-        {monthLabel}
-      </div>
+      {/* Month label — tap (or the calendar icon) to expand into a month grid. */}
+      <button
+        onClick={toggleExpanded}
+        aria-expanded={expanded}
+        aria-label={expanded ? 'Collapse calendar' : 'Expand calendar'}
+        style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', padding: 0, marginBottom: '12px', cursor: 'pointer', fontFamily: 'inherit' }}
+      >
+        <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>{monthLabel}</span>
+        <ChevronDown size={13} color="var(--color-text-muted)" style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s ease' }} />
+      </button>
 
-      {/* Day selector */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '2px' }}>
-        {DAY_SHORT.map((short, idx) => {
-          const dayName = DAY_NAMES[idx]
-          const num = getDayNumber(idx, weekStart)
-          const active = selectedDay === dayName
-          return (
-            <button
-              key={dayName}
-              onClick={() => setSelectedDay(dayName)}
-              style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
-            >
-              <span style={{ fontSize: '12px', fontWeight: '600', color: active ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>{short}</span>
-              <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? 'var(--color-primary)' : 'transparent', color: active ? '#fff' : 'var(--color-text)', transition: 'background 0.2s ease' }}>
-                {num}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      {expanded ? renderMonthGrid() : (
+        // Week strip — swipe left/right (Pro) to move between weeks.
+        <div
+          onPointerDown={e => { swipeX.current = e.clientX; swiped.current = false }}
+          onPointerUp={e => {
+            if (swipeX.current === null) return
+            const dx = e.clientX - swipeX.current
+            swipeX.current = null
+            if (Math.abs(dx) > 40) { swiped.current = true; changeWeek(dx < 0 ? 1 : -1) }
+          }}
+          style={{ display: 'flex', justifyContent: 'space-between', gap: '2px', touchAction: 'pan-y' }}
+        >
+          {DAY_SHORT.map((short, idx) => {
+            const dayName = DAY_NAMES[idx]
+            const num = getDayNumber(idx, weekStart)
+            const active = selectedDay === dayName
+            return (
+              <button
+                key={dayName}
+                onClick={() => { if (swiped.current) { swiped.current = false; return } setSelectedDay(dayName) }}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
+              >
+                <span style={{ fontSize: '12px', fontWeight: '600', color: active ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>{short}</span>
+                <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? 'var(--color-primary)' : 'transparent', color: active ? '#fff' : 'var(--color-text)', transition: 'background 0.2s ease' }}>
+                  {num}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      )}
     </header>
   )
 
@@ -312,41 +412,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       {header('Meal Plan')}
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '18px 24px 24px' }}>
-        {showWeeks && (
-          <div style={{ marginBottom: '20px', border: '1px solid var(--color-border)', borderRadius: '16px', overflow: 'hidden', background: 'var(--color-card)' }}>
-            <div style={{ padding: '11px 16px', fontSize: '11px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}>
-              JUMP TO A WEEK
-            </div>
-            {(isPro ? [-1, 0, 1, 2, 3] : [0]).map((offset, i) => {
-              const ws = mondayOf(new Date())
-              ws.setDate(ws.getDate() + offset * 7)
-              const plan = mealPlans.find(p => sameWeek(p.weekStart, ws))
-              const isCurrent = currentPlan ? sameWeek(currentPlan.weekStart, ws) : false
-              const planned = plan
-                ? DAY_NAMES.reduce((n, d) => n + MEALS.reduce((m, mt) => m + getMeals(plan, d, mt.key).length, 0), 0)
-                : 0
-              return (
-                <button
-                  key={offset}
-                  onClick={() => openWeek(ws)}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'none', border: 'none', borderTop: i === 0 ? 'none' : '1px solid var(--color-subtle)', cursor: 'pointer', textAlign: 'left' }}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)' }}>
-                      {weekLabel(ws)}
-                      {offset === 0 && <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-primary)', marginLeft: '7px' }}>THIS WEEK</span>}
-                    </div>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                      {plan ? `${planned} meal${planned === 1 ? '' : 's'} planned` : 'Nothing planned'}
-                    </div>
-                  </div>
-                  {isCurrent && <Check size={16} color="var(--color-primary)" />}
-                </button>
-              )
-            })}
-          </div>
-        )}
-
         {confirmDelete && (
           <div style={{ marginBottom: '20px', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '16px' }}>
             <p style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 4px' }}>Delete this week's plan?</p>
