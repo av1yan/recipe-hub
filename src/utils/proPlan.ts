@@ -60,9 +60,15 @@ export function startTrial() {
  * interval so an expiring trial flips the whole app back to Free on its own.
  */
 export function useProPlan(): [boolean, (value: boolean) => void] {
-  const [pro, setProState] = useState(isPro)
+  // Track the upgrade flag alongside Pro, not just the Pro boolean: converting a
+  // running trial to paid leaves isPro() true on both sides, so keying only off
+  // that boolean bails out of the update and strands the UI on the trial view.
+  const [state, setProState] = useState(() => ({ pro: isPro(), upgraded: isUpgraded() }))
   useEffect(() => {
-    const sync = () => setProState(isPro())
+    const sync = () => setProState(prev => {
+      const next = { pro: isPro(), upgraded: isUpgraded() }
+      return prev.pro === next.pro && prev.upgraded === next.upgraded ? prev : next
+    })
     window.addEventListener(EVENT, sync)
     window.addEventListener('storage', sync)
     document.addEventListener('visibilitychange', sync)
@@ -74,5 +80,5 @@ export function useProPlan(): [boolean, (value: boolean) => void] {
       clearInterval(id)
     }
   }, [])
-  return [pro, setPro]
+  return [state.pro, setPro]
 }
