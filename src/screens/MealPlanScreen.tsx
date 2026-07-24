@@ -211,6 +211,14 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const weekStart = viewWeek
   const hasMeals = !!currentPlan && DAY_NAMES.some(d => MEALS.some(m => getMeals(currentPlan, d, m.key).length > 0))
 
+  // Month(s) the shown week covers — a week can straddle two (e.g. Jul → Aug).
+  const monthLabel = (() => {
+    const end = new Date(weekStart)
+    end.setDate(end.getDate() + 6)
+    const mo = (d: Date) => d.toLocaleDateString('en-US', { month: 'long' })
+    return mo(weekStart) === mo(end) ? mo(weekStart) : `${mo(weekStart)} – ${mo(end)}`
+  })()
+
   // Nutrition for the selected day: sum one serving of each planned recipe.
   // The list plan omits the nutrition relation, so read it off the recipes
   // list (which includes it) matched by recipe id.
@@ -253,6 +261,11 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <CalendarDays size={17} />
           </button>
         </div>
+      </div>
+
+      {/* Month for the week on show, above the day/date strip. */}
+      <div style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '12px' }}>
+        {monthLabel}
       </div>
 
       {/* Day selector */}
