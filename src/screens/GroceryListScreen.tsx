@@ -111,6 +111,19 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const [isPro] = useProPlan()
   const [generating, setGenerating] = useState(false)
 
+  // Deferred item delete so a mistap can be undone: the row goes away at once,
+  // but the backend delete only fires after the undo window closes (or when the
+  // screen unmounts). undoItem drives the snackbar; pendingDelete does the work.
+  const [undoItem, setUndoItem] = useState<GroceryItem | null>(null)
+  const pendingDelete = useRef<{ item: GroceryItem; index: number; timer: ReturnType<typeof setTimeout> } | null>(null)
+
+  // If the screen goes away with a delete still pending, commit it so it isn't
+  // silently un-deleted on the next visit.
+  useEffect(() => () => {
+    const p = pendingDelete.current
+    if (p) { clearTimeout(p.timer); groceryAPI.removeItem(p.item.id).catch(() => {}); pendingDelete.current = null }
+  }, [])
+
   useEffect(() => {
     loadLists()
   }, [])
@@ -181,17 +194,41 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     }
   }
 
-  async function deleteItem(itemId: string) {
-    try {
-      await groceryAPI.removeItem(itemId)
-      setLists(lists.map(list =>
-        list.id === selectedListId
-          ? { ...list, items: list.items?.filter(item => item.id !== itemId) || [] }
-          : list
-      ))
-    } catch (error) {
-      console.error('Failed to delete item:', error)
-    }
+  // Actually remove from the backend and clear the undo. Only one delete can be
+  // pending at a time, so a second delete commits the first.
+  function commitPendingDelete() {
+    const p = pendingDelete.current
+    if (!p) return
+    clearTimeout(p.timer)
+    pendingDelete.current = null
+    setUndoItem(null)
+    groceryAPI.removeItem(p.item.id).catch(err => console.error('Failed to delete item:', err))
+  }
+
+  function deleteItem(item: GroceryItem) {
+    const items = lists.find(l => l.id === selectedListId)?.items || []
+    const index = items.findIndex(i => i.id === item.id)
+    commitPendingDelete()                          // flush any earlier pending delete
+    setLists(ls => ls.map(l =>
+      l.id === selectedListId ? { ...l, items: (l.items || []).filter(i => i.id !== item.id) } : l
+    ))
+    const timer = setTimeout(() => commitPendingDelete(), 5000)
+    pendingDelete.current = { item, index: index < 0 ? items.length : index, timer }
+    setUndoItem(item)
+  }
+
+  function undoDelete() {
+    const p = pendingDelete.current
+    if (!p) return
+    clearTimeout(p.timer)
+    pendingDelete.current = null
+    setUndoItem(null)
+    setLists(ls => ls.map(l => {
+      if (l.id !== selectedListId) return l
+      const items = (l.items || []).slice()
+      if (!items.some(i => i.id === p.item.id)) items.splice(Math.min(p.index, items.length), 0, p.item)
+      return { ...l, items }
+    }))
   }
 
   // ─── Photo scan ────────────────────────────────────────────────────────────
@@ -535,7 +572,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                           )}
                         </div>
                         <button
-                          onClick={() => deleteItem(item.id)}
+                          onClick={() => deleteItem(item)}
                           aria-label={`Delete ${item.name}`}
                           style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                         >
@@ -659,6 +696,20 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         </div>
       )}
 
+      {/* Undo snackbar for a just-deleted item. */}
+      {undoItem && (
+        <div style={{ position: 'absolute', bottom: '84px', left: '16px', right: '16px', zIndex: 100, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '100%', background: '#334155', color: '#fff', padding: '8px 8px 8px 18px', borderRadius: '999px', boxShadow: '0 10px 28px rgba(0,0,0,0.3)', pointerEvents: 'auto' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Removed {undoItem.name}</span>
+            <button
+              onClick={undoDelete}
+              style={{ flexShrink: 0, background: 'rgba(244,184,96,0.16)', border: 'none', color: '#f4b860', fontSize: '13.5px', fontWeight: '800', cursor: 'pointer', fontFamily: 'inherit', padding: '7px 14px', borderRadius: '999px' }}
+            >
+              Undo
+            </button>
+          </div>
+        </div>
+      )}
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
       <BottomNavigation active="grocery" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
