@@ -372,25 +372,33 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               swipeX.current = null
               if (Math.abs(dx) > 40) { swiped.current = true; changeWeek(dx < 0 ? 1 : -1) }
             }}
-            style={{ flex: 1, display: 'flex', justifyContent: 'space-between', gap: '2px', touchAction: 'pan-y' }}
+            style={{ flex: 1, position: 'relative', touchAction: 'pan-y' }}
           >
-            {DAY_SHORT.map((short, idx) => {
-              const dayName = DAY_NAMES[idx]
-              const num = getDayNumber(idx, weekStart)
-              const active = selectedDay === dayName
-              return (
-                <button
-                  key={dayName}
-                  onClick={() => { if (swiped.current) { swiped.current = false; return } setSelectedDay(dayName) }}
-                  style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
-                >
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: active ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>{short}</span>
-                  <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? 'var(--color-primary)' : 'transparent', color: active ? '#fff' : 'var(--color-text)', transition: 'background 0.2s ease' }}>
-                    {num}
-                  </span>
-                </button>
-              )
-            })}
+            {/* One accent pill that flows to the selected day (sits behind the
+                numbers). Column centres are (i + 0.5)/7 of the width. */}
+            <div
+              className="rh-day-pill"
+              style={{ position: 'absolute', top: '24px', left: `calc(${((DAY_NAMES.indexOf(selectedDay) + 0.5) * 100) / 7}% - 17px)`, width: '34px', height: '34px', borderRadius: '17px', background: 'var(--color-primary)', pointerEvents: 'none' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              {DAY_SHORT.map((short, idx) => {
+                const dayName = DAY_NAMES[idx]
+                const num = getDayNumber(idx, weekStart)
+                const active = selectedDay === dayName
+                return (
+                  <button
+                    key={dayName}
+                    onClick={() => { if (swiped.current) { swiped.current = false; return } setSelectedDay(dayName) }}
+                    style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
+                  >
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: active ? 'var(--color-primary)' : 'var(--color-text-muted)', transition: 'color 0.2s ease' }}>{short}</span>
+                    <span className={active ? 'rh-day-num--active' : undefined} style={{ width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', color: active ? '#fff' : 'var(--color-text)', transition: 'color 0.2s ease', position: 'relative' }}>
+                      {num}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
           <button onClick={() => changeWeek(1)} aria-label="Next week" style={weekNav}><ChevronRight size={18} /></button>
         </div>

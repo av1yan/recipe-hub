@@ -471,3 +471,22 @@ button:not(:disabled):active,
 @media (prefers-reduced-motion: reduce) {
   .rh-skel { animation: none; }
 }
+
+/* --- Week-strip date selection ----------------------------------------------
+   The accent pill slides ("flows") to the tapped day while its number gives a
+   little scale pop. The slide uses a gentle overshoot so it feels springy. */
+.rh-day-pill {
+  transition: left 0.34s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+@keyframes rh-day-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.32); }
+  100% { transform: scale(1); }
+}
+.rh-day-num--active {
+  animation: rh-day-pop 0.34s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rh-day-pill { transition: none; }
+  .rh-day-num--active { animation: none; }
+}
