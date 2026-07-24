@@ -11,12 +11,14 @@ export const FREE_COOKBOOK_LIMIT = 1
 
 export const TRIAL_DAYS = 3
 const DAY_MS = 24 * 60 * 60 * 1000
+const HOUR_MS = 60 * 60 * 1000
 const TRIAL_MS = TRIAL_DAYS * DAY_MS
 
 export interface TrialInfo {
   active: boolean
   msLeft: number
   daysLeft: number
+  hoursLeft: number
   used: boolean
 }
 
@@ -24,9 +26,30 @@ export interface TrialInfo {
 export function getTrialInfo(): TrialInfo {
   const startedAt = Number(localStorage.getItem(TRIAL_KEY))
   const used = localStorage.getItem(TRIAL_USED_KEY) === 'true'
-  if (!startedAt || !Number.isFinite(startedAt)) return { active: false, msLeft: 0, daysLeft: 0, used }
+  if (!startedAt || !Number.isFinite(startedAt)) return { active: false, msLeft: 0, daysLeft: 0, hoursLeft: 0, used }
   const msLeft = Math.max(0, startedAt + TRIAL_MS - Date.now())
-  return { active: msLeft > 0, msLeft, daysLeft: Math.max(1, Math.ceil(msLeft / DAY_MS)), used }
+  return {
+    active: msLeft > 0,
+    msLeft,
+    daysLeft: Math.max(1, Math.ceil(msLeft / DAY_MS)),
+    hoursLeft: Math.max(1, Math.ceil(msLeft / HOUR_MS)),
+    used,
+  }
+}
+
+/**
+ * How much of the trial is left, as a label. Switches to hours for the final
+ * day so it doesn't read "1 day left" for the whole last 24 hours.
+ *   long:  "2 days left" · "5 hours left" · "1 hour left"
+ *   short: "2d left" · "5h left"  (for the compact badge)
+ */
+export function trialTimeLeft(info: TrialInfo, style: 'long' | 'short' = 'long'): string {
+  const underADay = info.msLeft < DAY_MS
+  const n = underADay ? info.hoursLeft : info.daysLeft
+  const unit = underADay ? 'hour' : 'day'
+  return style === 'short'
+    ? `${n}${unit[0]} left`
+    : `${n} ${unit}${n === 1 ? '' : 's'} left`
 }
 
 /** True if the account was explicitly upgraded (not just on a trial). */

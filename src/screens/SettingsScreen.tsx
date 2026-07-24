@@ -8,7 +8,7 @@ import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
 import { authAPI } from '../utils/api'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
-import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT, startTrial, getTrialInfo, isUpgraded, TRIAL_DAYS } from '../utils/proPlan'
+import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT, startTrial, getTrialInfo, isUpgraded, TRIAL_DAYS, trialTimeLeft } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref } from '../utils/preferences'
@@ -274,12 +274,12 @@ function Subscription({ onBack }: { onBack: () => void }) {
             </div>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', padding: '5px 11px', borderRadius: '999px', flexShrink: 0 }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
-              {onTrial ? `Trial · ${trial.daysLeft}d left` : 'Active'}
+              {onTrial ? `Trial · ${trialTimeLeft(trial, 'short')}` : 'Active'}
             </span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '7px 0 0', lineHeight: 1.45 }}>
             {onTrial
-              ? `Free trial — ${trial.daysLeft} day${trial.daysLeft === 1 ? '' : 's'} left, then it reverts to Free.`
+              ? `Free trial — ${trialTimeLeft(trial)}, then it reverts to Free.`
               : isPro
                 ? 'Pro is on — every feature below is unlocked.'
                 : 'Everything you need to save and cook your own recipes.'}
