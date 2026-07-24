@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Trash2, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2 } from 'lucide-react'
+import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2 } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
@@ -63,6 +63,12 @@ function iconBtnStyle(active = false): CSSProperties {
     color: active ? '#fff' : 'var(--color-text-secondary)',
     border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
   }
+}
+
+/** Quiet prev/next chevron flanking the week strip. */
+const weekNav: CSSProperties = {
+  background: 'none', border: 'none', cursor: 'pointer', padding: '4px', flexShrink: 0,
+  display: 'flex', alignItems: 'center', color: 'var(--color-text-muted)',
 }
 
 export default function MealPlanScreen({ onNavigate }: Props) {
@@ -340,9 +346,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               <Trash2 size={16} />
             </button>
           )}
-          <button onClick={toggleExpanded} aria-label={expanded ? 'Collapse calendar' : 'Expand calendar'} style={iconBtnStyle(expanded)}>
-            <CalendarDays size={17} />
-          </button>
         </div>
       </div>
 
@@ -358,34 +361,38 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       </button>
 
       {expanded ? renderMonthGrid() : (
-        // Week strip — swipe left/right (Pro) to move between weeks.
-        <div
-          onPointerDown={e => { swipeX.current = e.clientX; swiped.current = false }}
-          onPointerUp={e => {
-            if (swipeX.current === null) return
-            const dx = e.clientX - swipeX.current
-            swipeX.current = null
-            if (Math.abs(dx) > 40) { swiped.current = true; changeWeek(dx < 0 ? 1 : -1) }
-          }}
-          style={{ display: 'flex', justifyContent: 'space-between', gap: '2px', touchAction: 'pan-y' }}
-        >
-          {DAY_SHORT.map((short, idx) => {
-            const dayName = DAY_NAMES[idx]
-            const num = getDayNumber(idx, weekStart)
-            const active = selectedDay === dayName
-            return (
-              <button
-                key={dayName}
-                onClick={() => { if (swiped.current) { swiped.current = false; return } setSelectedDay(dayName) }}
-                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
-              >
-                <span style={{ fontSize: '12px', fontWeight: '600', color: active ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>{short}</span>
-                <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? 'var(--color-primary)' : 'transparent', color: active ? '#fff' : 'var(--color-text)', transition: 'background 0.2s ease' }}>
-                  {num}
-                </span>
-              </button>
-            )
-          })}
+        // Week strip — chevrons or swipe (Pro) to move between weeks.
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+          <button onClick={() => changeWeek(-1)} aria-label="Previous week" style={weekNav}><ChevronLeft size={18} /></button>
+          <div
+            onPointerDown={e => { swipeX.current = e.clientX; swiped.current = false }}
+            onPointerUp={e => {
+              if (swipeX.current === null) return
+              const dx = e.clientX - swipeX.current
+              swipeX.current = null
+              if (Math.abs(dx) > 40) { swiped.current = true; changeWeek(dx < 0 ? 1 : -1) }
+            }}
+            style={{ flex: 1, display: 'flex', justifyContent: 'space-between', gap: '2px', touchAction: 'pan-y' }}
+          >
+            {DAY_SHORT.map((short, idx) => {
+              const dayName = DAY_NAMES[idx]
+              const num = getDayNumber(idx, weekStart)
+              const active = selectedDay === dayName
+              return (
+                <button
+                  key={dayName}
+                  onClick={() => { if (swiped.current) { swiped.current = false; return } setSelectedDay(dayName) }}
+                  style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '7px', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
+                >
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: active ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>{short}</span>
+                  <span style={{ width: '34px', height: '34px', borderRadius: '17px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', background: active ? 'var(--color-primary)' : 'transparent', color: active ? '#fff' : 'var(--color-text)', transition: 'background 0.2s ease' }}>
+                    {num}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          <button onClick={() => changeWeek(1)} aria-label="Next week" style={weekNav}><ChevronRight size={18} /></button>
         </div>
       )}
     </header>
