@@ -40,18 +40,30 @@ function rowStyle(divider: boolean): CSSProperties {
   }
 }
 
+// Kept across mounts so returning to Home (from a favorite, cookbook, etc.)
+// paints the last-known content instantly instead of flashing the skeleton and
+// refetching from scratch. The mount effect still refreshes it silently.
+let homeCache: {
+  recipes: any[]
+  cookbooks: any[]
+  todayMeals: { meal: any; cfg: typeof MEALS[number] }[]
+  plannedThisWeek: number
+  planId: string | null
+} | null = null
+
 export default function HomeScreen({ onNavigate }: Props) {
   const { user } = useApp()
   const [isPro] = useProPlan()
-  const [recipes, setRecipes] = useState<any[]>([])
-  const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>([])
-  const [plannedThisWeek, setPlannedThisWeek] = useState(0)
-  const [cookbooks, setCookbooks] = useState<any[]>([])
-  const [planId, setPlanId] = useState<string | null>(null)
+  const [recipes, setRecipes] = useState<any[]>(homeCache?.recipes ?? [])
+  const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>(homeCache?.todayMeals ?? [])
+  const [plannedThisWeek, setPlannedThisWeek] = useState(homeCache?.plannedThisWeek ?? 0)
+  const [cookbooks, setCookbooks] = useState<any[]>(homeCache?.cookbooks ?? [])
+  const [planId, setPlanId] = useState<string | null>(homeCache?.planId ?? null)
   // Which slot the add panel is filling, or null when it is closed.
   const [addingSlot, setAddingSlot] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [loading, setLoading] = useState(true)
+  // Only hold on the skeleton the first time; after that we have cached content.
+  const [loading, setLoading] = useState(!homeCache)
 
   // Prefer the person's first name; fall back to their username.
   const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
@@ -67,6 +79,11 @@ export default function HomeScreen({ onNavigate }: Props) {
       loadToday(),
     ]).finally(() => setLoading(false))
   }, [])
+
+  // Keep the cross-mount cache in step with the latest data.
+  useEffect(() => {
+    homeCache = { recipes, cookbooks, todayMeals, plannedThisWeek, planId }
+  }, [recipes, cookbooks, todayMeals, plannedThisWeek, planId])
 
   async function loadToday() {
     try {
