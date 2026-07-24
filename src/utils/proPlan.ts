@@ -64,9 +64,10 @@ export function isPro(): boolean {
 
 export function setPro(value: boolean) {
   localStorage.setItem(KEY, value ? 'true' : 'false')
-  // Switching back to Free also ends any running trial, so Pro doesn't silently
-  // stay on because of a trial the user didn't mean to keep.
-  if (!value) localStorage.removeItem(TRIAL_KEY)
+  // A running trial is left untouched on purpose: dropping the paid plan doesn't
+  // cut a free trial short -- it rides out its remaining days and reverts to Free
+  // on its own. (The subscription screen only offers this switch to upgraded
+  // users, so a trial-only user won't hit this path.)
   window.dispatchEvent(new Event(EVENT))
 }
 

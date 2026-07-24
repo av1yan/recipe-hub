@@ -310,8 +310,10 @@ function Subscription({ onBack }: { onBack: () => void }) {
           </button>
         )}
 
-        {/* On Pro: downgrade gets its own quiet tile, not buried in an upsell. */}
-        {isPro && (
+        {/* Upgraded (paid) only: downgrade gets its own quiet tile. Trials aren't
+            offered this -- there's no card to cancel and the trial reverts to
+            Free on its own, so switching mid-trial would only forfeit free days. */}
+        {isPro && !onTrial && (
           <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px 18px', border: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>Switch back to Free</div>
