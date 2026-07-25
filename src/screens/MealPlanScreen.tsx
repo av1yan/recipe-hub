@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2 } from 'lucide-react'
+import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2, Clock } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { Toast, useToast } from '../components/Toast'
+import { FrameOverlay } from '../components/FrameOverlay'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
 import { getCalorieGoal, getMacroGoals } from '../utils/goals'
@@ -43,6 +44,28 @@ function weekLabel(weekStart: Date): string {
   return mo(end) !== mo(weekStart)
     ? `${mo(weekStart)} ${weekStart.getDate()} – ${mo(end)} ${end.getDate()}`
     : `${mo(weekStart)} ${weekStart.getDate()} – ${end.getDate()}`
+}
+
+// Recipes picked recently, most-recent-first, so the picker can float them to
+// the top (the same handful of recipes gets planned across many days).
+const RECENT_KEY = 'rh-recent-recipes'
+function loadRecent(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]')
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
+  } catch { return [] }
+}
+function pushRecent(id: string): string[] {
+  const next = [id, ...loadRecent().filter(x => x !== id)].slice(0, 8)
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)) } catch { /* private mode */ }
+  return next
+}
+
+// How the backend folds grocery lines together: same name (case/space-insensitive)
+// and same unit. Mirror it here to preview which lines are new vs. a top-up, and
+// to find the merged row again when undoing.
+function groceryKey(name: string, unit: string): string {
+  return `${(name || '').trim().toLowerCase()}|${(unit || '').trim().toLowerCase()}`
 }
 
 // Returns the recipe(s) planned for a given day + meal type as an array.
@@ -88,6 +111,27 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const { toast, show } = useToast()
   const goalCal = getCalorieGoal()
   const macroGoals = getMacroGoals()
+
+  // Recently-picked recipes (floated to the top of the picker).
+  const [recentIds, setRecentIds] = useState<string[]>(() => loadRecent())
+
+  // Long-press on a filled meal opens a move/copy sheet targeting another day.
+  const [moveState, setMoveState] = useState<{ meal: any; mealType: string; fromDay: string } | null>(null)
+  const [moving, setMoving] = useState(false)
+
+  // "Add this week to Groceries" now previews the change before committing, and
+  // leaves an undo behind so a merge that topped up existing lines can be rolled
+  // back. `preview` holds what the confirm card shows + everything commit needs.
+  const [preview, setPreview] = useState<{
+    newCount: number; updatedCount: number; lines: any[]; listId: string | null;
+    before: Map<string, { id: string; qty: number }>; keys: string[]
+  } | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [undoLabel, setUndoLabel] = useState<string | null>(null)
+  const undoData = useRef<{ before: Map<string, { id: string; qty: number }>; keys: string[]; listId: string } | null>(null)
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => { if (undoTimer.current) clearTimeout(undoTimer.current) }, [])
 
   useEffect(() => {
     loadData()
@@ -169,9 +213,36 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         planId = plan.id
       }
       await mealPlanAPI.addMeal(planId, recipeId, selectedDay, mealType)
+      setRecentIds(pushRecent(recipeId))
       await loadData(false)
     } catch (error) {
       console.error('Failed to add meal to plan:', error)
+    }
+  }
+
+  // Move (or copy) a planned meal to another day this week. There's no move
+  // endpoint, so compose it: add on the target day, then drop the original
+  // unless we're copying. Same week => same plan, which already exists (it has
+  // this meal in it).
+  async function doMoveCopy(targetDay: string, copy: boolean) {
+    if (!moveState || moving) return
+    const { meal, mealType } = moveState
+    const recipeId = meal.recipeId ?? meal.id
+    const planId = currentPlan?.id
+    if (!planId || !recipeId) { setMoveState(null); return }
+    setMoving(true)
+    try {
+      await mealPlanAPI.addMeal(planId, recipeId, targetDay, mealType)
+      if (!copy && meal.mealId) await mealPlanAPI.removeMeal(meal.mealId)
+      setRecentIds(pushRecent(recipeId))
+      await loadData(false)
+      show(`${copy ? 'Copied' : 'Moved'} to ${targetDay}`)
+    } catch (error) {
+      console.error('Failed to move meal:', error)
+      show('Could not update the plan', 'error')
+    } finally {
+      setMoving(false)
+      setMoveState(null)
     }
   }
 
@@ -186,12 +257,14 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
   // Pro feature: pull every ingredient from the week's planned meals into the
   // grocery list. The list endpoint omits ingredients, so re-fetch the plan by
-  // id (that one includes them); the backend already merges repeats by name+unit.
-  async function addWeekToGroceries() {
-    if (generating) return
+  // id (that one includes them). Rather than commit straight away — the backend
+  // silently tops up existing lines' quantities — work out the change first and
+  // surface it for confirmation.
+  async function openGroceryPreview() {
+    if (previewing || generating) return
     if (!isPro) { show('Auto grocery lists are a Pro feature — upgrade in Settings.', 'error'); return }
     if (!currentPlan) { show('Plan some meals this week first.', 'error'); return }
-    setGenerating(true)
+    setPreviewing(true)
     try {
       const full: any = await mealPlanAPI.get(currentPlan.id)
       const ingredients: any[] = []
@@ -206,16 +279,66 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       if (lines.length === 0) { show('No ingredients in this week’s plan yet.', 'error'); return }
 
       const lists: any = await groceryAPI.list()
-      let list = Array.isArray(lists) ? lists[0] : lists
-      if (!list?.id) list = await groceryAPI.create('Groceries')
-      await Promise.all(lines.map(l => groceryAPI.addItem(list.id, l)))
+      const list = Array.isArray(lists) ? lists[0] : lists
+      // Snapshot the unchecked lines already on the list — those are what a merge
+      // would top up (a checked "already bought" line starts a fresh row instead).
+      const before = new Map<string, { id: string; qty: number }>()
+      ;(list?.items || []).forEach((i: any) => {
+        if (!i.checked) before.set(groceryKey(i.name, i.unit), { id: i.id, qty: i.quantity })
+      })
+      const keys = [...new Set(lines.map(l => groceryKey(l.name, l.unit)))]
+      let newCount = 0, updatedCount = 0
+      keys.forEach(k => { before.has(k) ? updatedCount++ : newCount++ })
+      setPreview({ newCount, updatedCount, lines, listId: list?.id ?? null, before, keys })
+    } catch {
+      show('Could not check your grocery list', 'error')
+    } finally {
+      setPreviewing(false)
+    }
+  }
 
-      const unique = new Set(lines.map(l => `${l.name.toLowerCase()}|${l.unit.toLowerCase()}`)).size
-      show(`Added ${unique} ingredient${unique === 1 ? '' : 's'} to your grocery list`)
+  async function commitGroceryAdd() {
+    if (!preview || generating) return
+    setGenerating(true)
+    try {
+      let listId = preview.listId
+      if (!listId) { const created: any = await groceryAPI.create('Groceries'); listId = created.id }
+      await Promise.all(preview.lines.map(l => groceryAPI.addItem(listId!, l)))
+      undoData.current = { before: preview.before, keys: preview.keys, listId: listId! }
+      const total = preview.newCount + preview.updatedCount
+      setPreview(null)
+      setUndoLabel(`Added ${total} item${total === 1 ? '' : 's'} to groceries`)
+      if (undoTimer.current) clearTimeout(undoTimer.current)
+      undoTimer.current = setTimeout(() => { setUndoLabel(null); undoData.current = null }, 6000)
     } catch {
       show('Could not build your grocery list', 'error')
     } finally {
       setGenerating(false)
+    }
+  }
+
+  // Undo the last add: newly-created lines get deleted, topped-up lines get their
+  // original quantity set back (the merge bumped them by a delta we don't track,
+  // so restore the snapshot outright).
+  async function undoGroceryAdd() {
+    const d = undoData.current
+    if (!d) return
+    if (undoTimer.current) clearTimeout(undoTimer.current)
+    setUndoLabel(null)
+    undoData.current = null
+    try {
+      const full: any = await groceryAPI.get(d.listId)
+      const items: any[] = full?.items || []
+      for (const k of d.keys) {
+        const cur = items.find(i => !i.checked && groceryKey(i.name, i.unit) === k)
+        if (!cur) continue
+        const b = d.before.get(k)
+        if (b) await groceryAPI.setItemQuantity(cur.id, b.qty)
+        else await groceryAPI.removeItem(cur.id)
+      }
+      show('Reverted the grocery changes')
+    } catch {
+      show('Could not undo', 'error')
     }
   }
 
@@ -440,25 +563,53 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </div>
         )}
 
-        {/* Pro only: build the week's grocery list from the plan in one tap. */}
-        {hasMeals && isPro && (
+        {/* Pro only: build the week's grocery list from the plan. Tapping it
+            previews the change (new vs. topped-up) before anything is written. */}
+        {hasMeals && isPro && (preview ? (
+          <div style={{ marginBottom: '22px', borderRadius: '14px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', padding: '15px 16px' }}>
+            <p style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--color-primary-dark)', margin: '0 0 3px' }}>Add this week to Groceries</p>
+            <p style={{ fontSize: '12.5px', color: 'var(--color-primary-dark)', opacity: 0.85, margin: '0 0 13px', lineHeight: 1.5 }}>
+              {preview.newCount === 0 && preview.updatedCount === 0
+                ? 'Nothing new to add.'
+                : [
+                    preview.newCount > 0 ? `${preview.newCount} new item${preview.newCount === 1 ? '' : 's'}` : '',
+                    preview.updatedCount > 0 ? `${preview.updatedCount} topped up` : '',
+                  ].filter(Boolean).join(' · ')}
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setPreview(null)} style={{ flex: 1, padding: '11px', borderRadius: '11px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                Cancel
+              </button>
+              <button
+                onClick={commitGroceryAdd}
+                disabled={generating || (preview.newCount === 0 && preview.updatedCount === 0)}
+                style={{ flex: 1.4, padding: '11px', borderRadius: '11px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: generating || (preview.newCount === 0 && preview.updatedCount === 0) ? 0.6 : 1, fontFamily: 'inherit' }}
+              >
+                {generating ? 'Adding…' : `Add ${preview.newCount + preview.updatedCount} item${preview.newCount + preview.updatedCount === 1 ? '' : 's'}`}
+              </button>
+            </div>
+          </div>
+        ) : (
           <button
-            onClick={addWeekToGroceries}
-            disabled={generating}
+            onClick={openGroceryPreview}
+            disabled={previewing}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               padding: '13px', marginBottom: '22px', borderRadius: '12px',
               background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)',
-              fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer',
-              fontFamily: 'inherit', opacity: generating ? 0.7 : 1,
+              fontSize: '14px', fontWeight: '700', cursor: previewing ? 'default' : 'pointer',
+              fontFamily: 'inherit', opacity: previewing ? 0.7 : 1,
             }}
           >
-            <ShoppingCart size={16} /> {generating ? 'Adding to groceries…' : 'Add this week to Groceries'}
+            <ShoppingCart size={16} /> {previewing ? 'Checking…' : 'Add this week to Groceries'}
           </button>
-        )}
+        ))}
 
-        {/* Pro only: the selected day's nutrition, summed from the planned recipes. */}
+        {/* Pro only: the selected day's nutrition, summed from the planned recipes.
+            Wrapped so it grows in smoothly — adding the day's first meal used to
+            snap it in and shove the rows below out from under a finger. */}
         {dayHasMeals && isPro && (
+          <Reveal>
           <div style={{ background: 'var(--color-subtle)', borderRadius: '16px', padding: '16px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Nutrition</span>
@@ -482,6 +633,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               </div>
             </div>
           </div>
+          </Reveal>
         )}
 
         {/* The day's meals as one ruled list — each row is its own recipe
@@ -493,41 +645,86 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           const filled = !!meal
           const servings = meal?.servings || 1
           const canPick = recipes.length > 0
-          return (
-            <RecipePicker key={`${m.key}-${i}`} recipes={recipes} meal={m} current={meal?.recipeId} onPick={(id) => addMealToPlan(id, m.key)}>
-              {(open) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', cursor: canPick ? 'pointer' : 'default' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.05em' }}>{m.label.toUpperCase()}</p>
-                    {filled ? (
-                      <>
-                        <h4 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
-                        <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
-                          {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
-                        </p>
-                      </>
-                    ) : (
-                      <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
-                        {recipes.length === 0 ? 'No recipes yet — add some first' : `Add a ${m.label.toLowerCase()} recipe`}
-                      </p>
-                    )}
-                  </div>
-                  {filled && (
-                    <button
-                      onClick={e => { e.stopPropagation(); meal.mealId && removeMeal(meal.mealId) }}
-                      aria-label={`Remove ${meal.name}`}
-                      style={{ flexShrink: 0, width: '28px', height: '28px', borderRadius: '14px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                    >
-                      <Trash2 size={15} color="var(--color-text-muted)" />
-                    </button>
-                  )}
-                  {canPick && <ChevronDown size={17} color="var(--color-text-muted)" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />}
-                </div>
+          // The row content, shared by both the plain (empty) and swipeable
+          // (filled) wrappers. `open` drives the chevron rotation.
+          const rowContent = (open: boolean) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', cursor: canPick ? 'pointer' : 'default' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.05em' }}>{m.label.toUpperCase()}</p>
+                {filled ? (
+                  <>
+                    <h4 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
+                    <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
+                      {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
+                    {recipes.length === 0 ? 'No recipes yet — add some first' : `Add a ${m.label.toLowerCase()} recipe`}
+                  </p>
+                )}
+              </div>
+              {filled && (
+                <button
+                  onClick={e => { e.stopPropagation(); meal.mealId && removeMeal(meal.mealId) }}
+                  aria-label={`Remove ${meal.name}`}
+                  style={{ flexShrink: 0, width: '28px', height: '28px', borderRadius: '14px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                >
+                  <Trash2 size={15} color="var(--color-text-muted)" />
+                </button>
               )}
+              {canPick && <ChevronDown size={17} color="var(--color-text-muted)" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />}
+            </div>
+          )
+          // Filled rows: swipe left to remove, long-press to move/copy, tap to
+          // swap. Empty rows: just tap to fill.
+          return filled ? (
+            <SwipeableMealRow
+              key={`${m.key}-${i}`}
+              recipes={recipes}
+              recentIds={recentIds}
+              m={m}
+              meal={meal}
+              onSwap={(id) => addMealToPlan(id, m.key)}
+              onRemove={() => { if (meal.mealId) removeMeal(meal.mealId) }}
+              onLongPress={() => setMoveState({ meal, mealType: m.key, fromDay: selectedDay })}
+            >
+              {rowContent}
+            </SwipeableMealRow>
+          ) : (
+            <RecipePicker key={`${m.key}-${i}`} recipes={recipes} recentIds={recentIds} meal={m} onPick={(id) => addMealToPlan(id, m.key)}>
+              {rowContent}
             </RecipePicker>
           )
         })}
       </div>
+
+      {/* Long-press → move or copy a planned meal to another day this week. */}
+      {moveState && (
+        <MoveCopySheet
+          weekStart={weekStart}
+          fromDay={moveState.fromDay}
+          mealName={moveState.meal.name}
+          busy={moving}
+          onChoose={doMoveCopy}
+          onClose={() => setMoveState(null)}
+        />
+      )}
+
+      {/* Undo the last grocery add (delete new lines, restore topped-up ones). */}
+      {undoLabel && (
+        <div style={{ position: 'absolute', bottom: '84px', left: '16px', right: '16px', zIndex: 100, display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '100%', background: '#334155', color: '#fff', padding: '8px 8px 8px 18px', borderRadius: '999px', boxShadow: '0 10px 28px rgba(0,0,0,0.3)', pointerEvents: 'auto' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{undoLabel}</span>
+            <button
+              onClick={undoGroceryAdd}
+              style={{ flexShrink: 0, background: 'rgba(244,184,96,0.16)', border: 'none', color: '#f4b860', fontSize: '13.5px', fontWeight: '800', cursor: 'pointer', fontFamily: 'inherit', padding: '7px 14px', borderRadius: '999px' }}
+            >
+              Undo
+            </button>
+          </div>
+        </div>
+      )}
 
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
     </div>
@@ -553,12 +750,13 @@ function MacroStat({ color, label, grams, goal }: { color: string; label: string
  * instead of the browser's native <select>. Click-outside closes it; the
  * current recipe (for a swap) is ticked.
  */
-function RecipePicker({ recipes, meal, current, onPick, children }: {
+function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentIds = [] }: {
   recipes: Recipe[]
   meal: typeof MEALS[number]
   current?: string
   onPick: (recipeId: string) => void
   children: (open: boolean) => React.ReactNode
+  recentIds?: string[]
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -573,6 +771,43 @@ function RecipePicker({ recipes, meal, current, onPick, children }: {
     return () => document.removeEventListener('mousedown', onDoc)
   }, [open])
 
+  // Float recently-picked recipes to the top; the rest follow in their normal
+  // order. Only sections the list when there's actually a recent one to show.
+  const recent = recentIds.map(id => recipes.find(r => r.id === id)).filter((r): r is Recipe => !!r)
+  const recentSet = new Set(recent.map(r => r.id))
+  const rest = recipes.filter(r => !recentSet.has(r.id))
+
+  const row = (r: Recipe, first: boolean) => {
+    const selected = current === r.id
+    return (
+      <button
+        key={r.id}
+        onClick={() => { onPick(r.id); setOpen(false) }}
+        onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = 'var(--color-subtle)' }}
+        onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = 'transparent' }}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+          padding: '12px 14px', background: selected ? 'var(--color-subtle)' : 'transparent',
+          border: 'none', borderTop: first ? 'none' : '1px solid var(--color-subtle)',
+          cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
+          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, `${(r.prepTime || 0) + (r.cookTime || 0)} min`].filter(Boolean).join(' · ')}</div>
+        </div>
+        {selected && <Check size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />}
+      </button>
+    )
+  }
+
+  const sectionLabel = (text: string, withClock: boolean, divider: boolean) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px 5px', borderTop: divider ? '1px solid var(--color-subtle)' : 'none' }}>
+      {withClock && <Clock size={11} color="var(--color-text-muted)" />}
+      <span style={{ fontSize: '10.5px', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>{text}</span>
+    </div>
+  )
+
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <div onClick={() => { if (!disabled) setOpen(o => !o) }}>
@@ -585,32 +820,194 @@ function RecipePicker({ recipes, meal, current, onPick, children }: {
           borderRadius: '14px', boxShadow: '0 14px 34px rgba(15,23,42,0.2)',
           overflow: 'hidden', maxHeight: '272px', overflowY: 'auto',
         }}>
-          {recipes.map((r, i) => {
-            const selected = current === r.id
-            return (
-              <button
-                key={r.id}
-                onClick={() => { onPick(r.id); setOpen(false) }}
-                onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = 'var(--color-subtle)' }}
-                onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = 'transparent' }}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
-                  padding: '12px 14px', background: selected ? 'var(--color-subtle)' : 'transparent',
-                  border: 'none', borderTop: i === 0 ? 'none' : '1px solid var(--color-subtle)',
-                  cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, `${(r.prepTime || 0) + (r.cookTime || 0)} min`].filter(Boolean).join(' · ')}</div>
-                </div>
-                {selected && <Check size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />}
-              </button>
-            )
-          })}
+          {recent.length > 0 ? (
+            <>
+              {sectionLabel('Recent', true, false)}
+              {recent.map((r, i) => row(r, i === 0))}
+              {rest.length > 0 && sectionLabel('All recipes', false, true)}
+              {rest.map((r, i) => row(r, i === 0))}
+            </>
+          ) : (
+            recipes.map((r, i) => row(r, i === 0))
+          )}
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * Grows its child in from zero height on mount (grid-rows 0fr -> 1fr) instead of
+ * snapping it into place. Stays mounted as long as it's rendered, so it only
+ * animates when it first appears — switching between two days that both have
+ * meals just updates the numbers inside, no re-animation.
+ */
+function Reveal({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setOpen(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+  return (
+    <div className={`rh-reveal${open ? ' rh-reveal--open' : ''}`}>
+      <div>{children}</div>
+    </div>
+  )
+}
+
+/**
+ * A filled meal row you can act on with a gesture: swipe left to remove,
+ * long-press to move/copy to another day, or tap to swap the recipe (the picker
+ * underneath). One pointer stream decides which: a horizontal drag past a small
+ * threshold is a swipe, a still press is a long-press, anything vertical is left
+ * to the list's own scroll. `gestured` swallows the click a gesture would
+ * otherwise fire, so a swipe never also toggles the picker open.
+ */
+function SwipeableMealRow({ recipes, recentIds, m, meal, onSwap, onRemove, onLongPress, children }: {
+  recipes: Recipe[]
+  recentIds: string[]
+  m: typeof MEALS[number]
+  meal: any
+  onSwap: (id: string) => void
+  onRemove: () => void
+  onLongPress: () => void
+  children: (open: boolean) => React.ReactNode
+}) {
+  const [dx, setDx] = useState(0)
+  const [animate, setAnimate] = useState(true)
+  const start = useRef<{ x: number; y: number } | null>(null)
+  const axis = useRef<'none' | 'x' | 'y'>('none')
+  const gestured = useRef(false)
+  const lp = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const canSwipe = !!meal?.mealId
+
+  const clearLP = () => { if (lp.current) { clearTimeout(lp.current); lp.current = null } }
+
+  const onDown = (e: React.PointerEvent) => {
+    if (e.button && e.button !== 0) return
+    start.current = { x: e.clientX, y: e.clientY }
+    axis.current = 'none'
+    gestured.current = false
+    setAnimate(false)
+    clearLP()
+    lp.current = setTimeout(() => {
+      if (axis.current === 'none') { gestured.current = true; clearLP(); navigator.vibrate?.(12); onLongPress() }
+    }, 450)
+  }
+  const onMove = (e: React.PointerEvent) => {
+    if (!start.current) return
+    const dX = e.clientX - start.current.x
+    const dY = e.clientY - start.current.y
+    if (axis.current === 'none') {
+      if (Math.abs(dX) > 8 && Math.abs(dX) > Math.abs(dY)) {
+        axis.current = 'x'
+        try { (e.currentTarget as Element).setPointerCapture(e.pointerId) } catch { /* ignore */ }
+      } else if (Math.abs(dY) > 8) {
+        axis.current = 'y'
+        clearLP()
+      }
+    }
+    if (axis.current === 'x') {
+      clearLP()
+      gestured.current = true
+      setDx(dX < 0 ? Math.max(dX, -160) : Math.min(dX * 0.25, 24))
+    }
+  }
+  const finish = (e: React.PointerEvent) => {
+    clearLP()
+    const s = start.current
+    start.current = null
+    if (axis.current === 'x' && s) {
+      const dX = e.clientX - s.x
+      setAnimate(true)
+      if (canSwipe && dX <= -70) { setDx(-380); onRemove() }
+      else setDx(0)
+    }
+    axis.current = 'none'
+  }
+  // Capture-phase: runs before the picker's own onClick, so a just-finished
+  // gesture can cancel the click without the picker toggling.
+  const swallow = (e: React.MouseEvent) => { if (gestured.current) { e.stopPropagation(); gestured.current = false } }
+
+  return (
+    <div className="rh-swipe-row" onClickCapture={swallow}>
+      <div aria-hidden style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '7px', paddingRight: '6px', color: '#dc2626', opacity: dx < -6 ? 1 : 0, transition: 'opacity 0.15s ease', pointerEvents: 'none' }}>
+        <Trash2 size={16} />
+        <span style={{ fontSize: '13px', fontWeight: '700' }}>Remove</span>
+      </div>
+      <div
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={finish}
+        onPointerCancel={finish}
+        style={{ position: 'relative', background: 'var(--color-bg)', transform: `translateX(${dx}px)`, transition: animate ? 'transform 0.22s ease' : 'none', touchAction: 'pan-y' }}
+      >
+        <RecipePicker recipes={recipes} recentIds={recentIds} meal={m} current={meal?.recipeId ?? meal?.id} onPick={onSwap}>
+          {children}
+        </RecipePicker>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Bottom sheet for moving or copying a planned meal to another day this week.
+ * Portalled to the frame so it covers the nav. Move drops the original; Copy
+ * leaves it. The source day is dimmed and inert.
+ */
+function MoveCopySheet({ weekStart, fromDay, mealName, busy, onChoose, onClose }: {
+  weekStart: Date
+  fromDay: string
+  mealName: string
+  busy: boolean
+  onChoose: (targetDay: string, copy: boolean) => void
+  onClose: () => void
+}) {
+  const [copy, setCopy] = useState(false)
+  return (
+    <FrameOverlay>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, zIndex: 120, background: 'rgba(15,23,42,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+        <div onClick={e => e.stopPropagation()} style={{ background: 'var(--color-card)', borderTopLeftRadius: '22px', borderTopRightRadius: '22px', padding: '18px 20px 22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '15px' }}>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>{copy ? 'Copy to' : 'Move to'}</p>
+              <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{mealName}</p>
+            </div>
+            <div style={{ display: 'flex', background: 'var(--color-subtle)', borderRadius: '10px', padding: '3px', flexShrink: 0 }}>
+              {([['Move', false], ['Copy', true]] as const).map(([label, val]) => (
+                <button
+                  key={label}
+                  onClick={() => setCopy(val)}
+                  style={{ padding: '6px 13px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: '700', background: copy === val ? 'var(--color-card)' : 'transparent', color: copy === val ? 'var(--color-text)' : 'var(--color-text-muted)', boxShadow: copy === val ? '0 1px 3px rgba(0,0,0,0.14)' : 'none' }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+            {DAY_NAMES.map((day, idx) => {
+              const date = new Date(weekStart); date.setDate(date.getDate() + idx)
+              const isFrom = day === fromDay
+              return (
+                <button
+                  key={day}
+                  disabled={isFrom || busy}
+                  onClick={() => onChoose(day, copy)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '9px 0', borderRadius: '12px', border: 'none', cursor: isFrom ? 'default' : 'pointer', fontFamily: 'inherit', background: isFrom ? 'transparent' : 'var(--color-subtle)', opacity: isFrom || busy ? 0.4 : 1 }}
+                >
+                  <span style={{ fontSize: '10.5px', fontWeight: '700', color: 'var(--color-text-muted)' }}>{DAY_SHORT[idx][0]}</span>
+                  <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{date.getDate()}</span>
+                </button>
+              )
+            })}
+          </div>
+          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', textAlign: 'center', margin: '13px 0 0' }}>
+            {busy ? 'Updating…' : `Pick a day to ${copy ? 'copy' : 'move'} ${fromDay}'s ${mealName.length > 18 ? 'meal' : mealName}`}
+          </p>
+        </div>
+      </div>
+    </FrameOverlay>
   )
 }
 

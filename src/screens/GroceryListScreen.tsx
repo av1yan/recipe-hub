@@ -5,6 +5,7 @@ import { groceryAPI, mealPlanAPI, imageToBase64 } from '../utils/api'
 import { DAY_NAMES, MEALS, getMeals, sameWeek } from './MealPlanScreen'
 import { toGroceryLine, pluralizeUnit } from '../utils/grocery'
 import { Toast, useToast } from '../components/Toast'
+import { FrameOverlay } from '../components/FrameOverlay'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 
@@ -601,6 +602,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
       {/* Scanning overlay */}
       {scanning && (
+        <FrameOverlay>
         <div style={{ position: 'absolute', inset: 0, background: 'var(--color-bg)', zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
           <Loader2 size={40} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
           <p style={{ fontSize: '15px', color: 'var(--color-text)', fontWeight: '600', margin: 0 }}>Reading your note…</p>
@@ -616,10 +618,12 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           )}
           <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
         </div>
+        </FrameOverlay>
       )}
 
       {/* Review overlay */}
       {scanned && (
+        <FrameOverlay>
         <div style={{ position: 'absolute', inset: 0, background: 'var(--color-bg)', zIndex: 20, display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button onClick={() => setScanned(null)} aria-label="Cancel scan" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
@@ -662,10 +666,12 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             </button>
           </div>
         </div>
+        </FrameOverlay>
       )}
 
       {/* Scan source chooser — camera or existing photo. */}
       {pickerOpen && (
+        <FrameOverlay>
         <div
           onClick={() => setPickerOpen(false)}
           style={{ position: 'absolute', inset: 0, zIndex: 40, background: 'rgba(15,23,42,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
@@ -692,6 +698,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             </button>
           </div>
         </div>
+        </FrameOverlay>
       )}
 
       {/* Undo snackbar for a just-deleted item. */}

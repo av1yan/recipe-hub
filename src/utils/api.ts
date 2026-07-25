@@ -262,6 +262,14 @@ export const groceryAPI = {
       body: { checked },
     }),
 
+  /** Set an item's quantity outright (not a delta). Used to undo a merge that
+      bumped an existing line's amount. */
+  setItemQuantity: (itemId: string, quantity: number) =>
+    apiRequest(`/grocery-lists/items/${itemId}`, {
+      method: 'PUT',
+      body: { quantity },
+    }),
+
   removeItem: (itemId: string) =>
     apiRequest(`/grocery-lists/items/${itemId}`, {
       method: 'DELETE',
