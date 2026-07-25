@@ -219,6 +219,29 @@
   .phone-statusbar { display: none; }
 }
 
+/* Native builds always fill the device — no desktop phone-mock, at any size.
+   The frame stays full-height; a max-width keeps the phone-first, single-column
+   UI in a comfortable centered column on iPad instead of stretching across a
+   13" display. On iPhone the device is narrower than the cap, so this is just
+   the full-bleed layout. */
+:root[data-native="true"] .phone-desk {
+  padding: 0;
+  align-items: stretch;
+  background: var(--color-bg);
+}
+:root[data-native="true"] .phone-frame {
+  width: 100%;
+  max-width: 760px;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0 auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+:root[data-native="true"] .phone-statusbar { display: none; }
+
 * {
   margin: 0;
   padding: 0;
