@@ -331,6 +331,17 @@ export default function App() {
     setScreen(localStorage.getItem('onboardingCompleted') ? 'home' : 'onboarding')
   }
 
+  // Native Google runs in the system browser and hands our JWT back through the
+  // deep link (see oauthNative). It's already our token, so trade it for a
+  // profile and land exactly where the Apple and web OAuth paths do.
+  const handleOAuthToken = async (token: string) => {
+    setAuthToken(token)
+    const profile = await authAPI.getProfile()
+    setUser(profile)
+    if (resumePendingShare()) return
+    setScreen(localStorage.getItem('onboardingCompleted') ? 'home' : 'onboarding')
+  }
+
   const handleSignOut = () => {
     clearAuthToken()
     setUser(null)
@@ -355,7 +366,7 @@ export default function App() {
       case 'splash':
         return <SplashScreen onNavigate={handleNavigation} />
       case 'signin':
-        return <SignInScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onAppleNative={handleAppleNative} onNavigate={handleNavigation} />
+        return <SignInScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onAppleNative={handleAppleNative} onOAuthToken={handleOAuthToken} onNavigate={handleNavigation} />
       case 'forgot-password':
         return <PasswordResetScreen mode="request" onNavigate={handleNavigation} />
       case 'reset-password':

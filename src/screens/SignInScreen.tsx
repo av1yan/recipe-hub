@@ -4,11 +4,13 @@ import { Capacitor } from '@capacitor/core'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
 import type { Screen } from '../types'
 import { authAPI, oauthStartUrl } from '../utils/api'
+import { signInWithProviderNative } from '../utils/oauthNative'
 
 interface Props {
   onSignIn: (email: string, password: string) => Promise<void>
   onSignUp: (email: string, name: string, password: string) => Promise<void>
   onAppleNative: (identityToken: string, name?: string) => Promise<void>
+  onOAuthToken: (token: string) => Promise<void>
   onNavigate: (screen: Screen) => void
 }
 
@@ -17,7 +19,7 @@ interface Props {
 // button runs Apple's own sheet instead of navigating out.
 const isNative = Capacitor.isNativePlatform()
 
-export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onNavigate }: Props) {
+export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAuthToken, onNavigate }: Props) {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
@@ -87,6 +89,23 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onNavi
       const msg = String(err?.message ?? err?.code ?? '')
       if (/cancel/i.test(msg) || msg.includes('1001')) return
       setError('Apple sign-in failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Native Google: Google blocks its consent screen inside a WebView, so run the
+  // flow in the system browser and take the token back through the deep link.
+  const handleGoogleNative = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      const result = await signInWithProviderNative('google')
+      if ('token' in result) await onOAuthToken(result.token)
+      else if ('error' in result) setError(result.error)
+      // A cancelled browser is not a failure -- leave the form as it was.
+    } catch {
+      setError('Google sign-in failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -266,33 +285,65 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onNavi
             <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
           </div>
 
-          <button
-            type="button"
-            onClick={handleAppleNative}
-            disabled={loading}
-            // var(--color-text)/var(--color-bg) resolve to Apple's black button on
-            // a light theme and its white button on a dark one -- both HIG variants.
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '13px 16px',
-              border: 'none',
-              background: 'var(--color-text)',
-              color: 'var(--color-bg)',
-              borderRadius: '12px',
-              fontSize: '15px',
-              fontWeight: '600',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-              fontFamily: 'inherit',
-            }}
-          >
-            <AppleIcon color="var(--color-bg)" />
-            Sign in with Apple
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Google runs in the system browser and returns via the deep link.
+                Only offered when the API reports the credentials are configured. */}
+            {providers.google && (
+              <button
+                type="button"
+                onClick={handleGoogleNative}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '13px 16px',
+                  border: '1px solid var(--color-border)',
+                  background: 'var(--color-bg)',
+                  color: 'var(--color-text)',
+                  borderRadius: '12px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.7 : 1,
+                  fontFamily: 'inherit',
+                }}
+              >
+                <GoogleIcon />
+                Sign in with Google
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleAppleNative}
+              disabled={loading}
+              // var(--color-text)/var(--color-bg) resolve to Apple's black button on
+              // a light theme and its white button on a dark one -- both HIG variants.
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '13px 16px',
+                border: 'none',
+                background: 'var(--color-text)',
+                color: 'var(--color-bg)',
+                borderRadius: '12px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1,
+                fontFamily: 'inherit',
+              }}
+            >
+              <AppleIcon color="var(--color-bg)" />
+              Sign in with Apple
+            </button>
+          </div>
         </>
       ) : (
         /* Web: a provider with no credentials configured would be a dead button,

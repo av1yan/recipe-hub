@@ -50,5 +50,15 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- Deep link the OAuth system-browser sign-in returns through. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.reciphub.app</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
