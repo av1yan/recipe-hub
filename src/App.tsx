@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { App as CapacitorApp } from '@capacitor/app'
 import { AppProvider } from './context/AppContext'
 import SplashScreen from './screens/SplashScreen'
 import SignInScreen from './screens/SignInScreen'
@@ -243,6 +244,45 @@ export default function App() {
     setAddSheetOrigin(screen)
     setAddSheetOpen(true)
   }
+
+  // Maps the current screen to its back destination, mirroring each screen's own
+  // back control. Drives the Android hardware back button so it walks the app's
+  // navigation instead of exiting from wherever you are.
+  const goBack = () => {
+    if (addSheetOpen) { setAddSheetOpen(false); return }
+    switch (screen) {
+      case 'recipe':        return handleNavigation(recipeOrigin)
+      case 'cooking-mode':  return handleNavigation('recipe')
+      case 'add-recipe':    return handleNavigation(addRecipeOrigin, { openAddSheet: addRecipeFromPanel })
+      case 'import-web':
+      case 'import-text':
+      case 'import-photo':
+      case 'import-social': return handleNavigation(addSheetOrigin, { openAddSheet: true })
+      case 'cookbook':      return handleNavigation('cookbooks')
+      case 'browse':
+      case 'meal-plan':
+      case 'grocery':
+      case 'cookbooks':
+      case 'favorites':
+      case 'pantry':
+      case 'insights':
+      case 'household':
+      case 'settings':      return handleNavigation('home')
+      // At the root (or a pre-app screen) let the OS take it — minimize/exit.
+      default:              CapacitorApp.exitApp().catch(() => {})
+    }
+  }
+
+  // The listener is registered once; a ref keeps it calling the latest goBack
+  // rather than a closure captured at mount with stale screen/origin state.
+  const goBackRef = useRef(goBack)
+  goBackRef.current = goBack
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    let remove: (() => void) | undefined
+    CapacitorApp.addListener('backButton', () => goBackRef.current()).then(h => { remove = () => h.remove() })
+    return () => remove?.()
+  }, [])
 
   // `loading` gates the whole app behind a splash, so it must stay reserved for
   // the initial auth check. Toggling it here unmounted the sign-in form
