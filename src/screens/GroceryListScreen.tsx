@@ -429,7 +429,10 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div className="screen" style={{ position: 'relative', background: 'var(--color-bg)' }}>
+    // No position:relative here: the bottom snackbar/toast (bottom: 84px) should
+    // anchor to the phone frame so they clear the persistent nav, same as every
+    // other screen. The full-screen scan overlays portal to the frame themselves.
+    <div className="screen" style={{ background: 'var(--color-bg)' }}>
       {hiddenFileInputs}
 
       <header style={{ padding: '20px 24px 14px', background: 'var(--color-bg)', flexShrink: 0 }}>
