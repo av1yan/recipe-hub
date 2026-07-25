@@ -18,6 +18,39 @@ function getGreeting() {
   return 'Good evening'
 }
 
+// A little wink under the greeting. A fresh one each time Home opens keeps the
+// landing feeling alive.
+const JOKES = [
+  "You're basically a chef who occasionally orders takeout.",
+  'Warning: prolonged use may cause spontaneous deliciousness.',
+  'Preheating your ambitions to 375°…',
+  "Chop chop — greatness won't marinate itself.",
+  '9 out of 10 spatulas recommend you.',
+  'Plot twist: the snacks were the real recipe all along.',
+  'You plus a wooden spoon: unstoppable.',
+  'Rumor has it your kitchen has a Michelin star.',
+  'May your pans be nonstick and your snacks be plentiful.',
+  'Breaking: local legend spotted near the stove.',
+  "Life's short. Lick the spoon.",
+  'Season everything. Especially the vibes.',
+  'Your taste buds filed a formal thank-you note.',
+  'Whisk it. Whisk it real good.',
+  'Garlic makes everything 40% better. It’s basically science.',
+  'Hungry? Same. Let’s fix that.',
+  'One recipe away from full foodie-influencer status.',
+  'Some call it dinner. We call it a masterpiece.',
+]
+
+// Pick a joke, avoiding an immediate repeat across mounts within the session.
+let lastJokeIdx = -1
+function pickJoke() {
+  if (JOKES.length < 2) return JOKES[0]
+  let i = lastJokeIdx
+  while (i === lastJokeIdx) i = Math.floor(Math.random() * JOKES.length)
+  lastJokeIdx = i
+  return JOKES[i]
+}
+
 function getDateLabel() {
   const d = new Date()
   const day = d.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase()
@@ -61,6 +94,8 @@ export default function HomeScreen({ onNavigate }: Props) {
   const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>(cache?.todayMeals ?? [])
   const [plannedThisWeek, setPlannedThisWeek] = useState(cache?.plannedThisWeek ?? 0)
   const [cookbooks, setCookbooks] = useState<any[]>(cache?.cookbooks ?? [])
+  // One quirky line per Home open (stable for this mount).
+  const [joke] = useState(pickJoke)
   const [planId, setPlanId] = useState<string | null>(cache?.planId ?? null)
   // Which slot the add panel is filling, or null when it is closed.
   const [addingSlot, setAddingSlot] = useState<string | null>(null)
@@ -181,10 +216,14 @@ export default function HomeScreen({ onNavigate }: Props) {
           <h1 style={{ fontSize: '27px', fontWeight: '700', color: 'var(--color-text)', margin: 0, lineHeight: 1.15, letterSpacing: '-0.02em' }}>
             {getGreeting()}{displayName ? `, ${displayName}` : ''}{' \u{1F44B}'}
           </h1>
+          {/* A fresh quirky one-liner each time Home opens. */}
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: '9px 0 0', lineHeight: 1.45 }}>
+            {joke}
+          </p>
           {loading ? (
-            <div className="rh-skel" style={{ width: '96px', height: '12px', borderRadius: '6px', marginTop: '10px' }} />
+            <div className="rh-skel" style={{ width: '80px', height: '10px', borderRadius: '6px', marginTop: '6px' }} />
           ) : (
-            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '8px 0 0' }}>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 0' }}>
               {recipes.length} recipe{recipes.length === 1 ? '' : 's'}{plannedThisWeek > 0 ? ` · ${plannedThisWeek} planned this week` : ''}
             </p>
           )}
