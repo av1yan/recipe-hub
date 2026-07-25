@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">recipHub</string>
+    <string name="title_activity_main">recipHub</string>
+    <string name="package_name">com.reciphub.app</string>
+    <string name="custom_url_scheme">com.reciphub.app</string>
+</resources>

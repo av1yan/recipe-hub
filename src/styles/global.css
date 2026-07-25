@@ -291,6 +291,10 @@ img {
   flex-direction: column;
   background: var(--color-bg);
   overflow: hidden;
+  /* Clear the notch / Dynamic Island on a real device. env() is 0 in the
+     desktop mock (and needs viewport-fit=cover, which index.html sets), so the
+     phone-frame preview is unaffected. */
+  padding-top: env(safe-area-inset-top);
 }
 
 .screen {

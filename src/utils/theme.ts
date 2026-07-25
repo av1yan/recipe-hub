@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
+
 export type Theme = 'light' | 'dark'
 
 const KEY = 'theme'
@@ -19,6 +22,12 @@ export function activeTheme(): Theme {
 
 function apply(theme: Theme) {
   document.documentElement.setAttribute('data-theme', theme)
+  // Keep the native status-bar icons legible against the app background: light
+  // icons (Style.Dark) on the dark theme, dark icons (Style.Light) on light.
+  // No-op on the web build.
+  if (Capacitor.isNativePlatform()) {
+    StatusBar.setStyle({ style: theme === 'dark' ? Style.Dark : Style.Light }).catch(() => {})
+  }
 }
 
 /** Called once at startup, before the app paints, so there's no light flash. */
