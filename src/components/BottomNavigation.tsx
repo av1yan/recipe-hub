@@ -43,9 +43,11 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
       WebkitBackdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
       borderTop: '0.5px solid var(--color-nav-border)',
       boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.04)',
-      // Extend the bar's background into the home-indicator area on a real
-      // device (env() is 0 in the browser/desktop preview).
-      paddingBottom: 'calc(6px + env(safe-area-inset-bottom))',
+      // Clear the home indicator. env() is the right value on devices that
+      // report it, but some Capacitor/WKWebView configs resolve it to 0 even on
+      // devices that have an indicator, which clips the labels; floor it so the
+      // bar always has real clearance.
+      paddingBottom: 'max(calc(6px + env(safe-area-inset-bottom)), 26px)',
       paddingTop: '2px',
     }}>
       {/* Accent indicator that slides between tabs (persistent nav → it flows). */}
