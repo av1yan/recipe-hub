@@ -42,8 +42,10 @@ function rowStyle(divider: boolean): CSSProperties {
 
 // Kept across mounts so returning to Home (from a favorite, cookbook, etc.)
 // paints the last-known content instantly instead of flashing the skeleton and
-// refetching from scratch. The mount effect still refreshes it silently.
+// refetching from scratch. Keyed by user id so a logout + login as someone else
+// never seeds the next person's Home from the previous person's data.
 let homeCache: {
+  userId: string
   recipes: any[]
   cookbooks: any[]
   todayMeals: { meal: any; cfg: typeof MEALS[number] }[]
@@ -54,16 +56,18 @@ let homeCache: {
 export default function HomeScreen({ onNavigate }: Props) {
   const { user } = useApp()
   const [isPro] = useProPlan()
-  const [recipes, setRecipes] = useState<any[]>(homeCache?.recipes ?? [])
-  const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>(homeCache?.todayMeals ?? [])
-  const [plannedThisWeek, setPlannedThisWeek] = useState(homeCache?.plannedThisWeek ?? 0)
-  const [cookbooks, setCookbooks] = useState<any[]>(homeCache?.cookbooks ?? [])
-  const [planId, setPlanId] = useState<string | null>(homeCache?.planId ?? null)
+  // Only trust the cache when it belongs to the person currently signed in.
+  const cache = homeCache && user?.id && homeCache.userId === user.id ? homeCache : null
+  const [recipes, setRecipes] = useState<any[]>(cache?.recipes ?? [])
+  const [todayMeals, setTodayMeals] = useState<{ meal: any; cfg: typeof MEALS[number] }[]>(cache?.todayMeals ?? [])
+  const [plannedThisWeek, setPlannedThisWeek] = useState(cache?.plannedThisWeek ?? 0)
+  const [cookbooks, setCookbooks] = useState<any[]>(cache?.cookbooks ?? [])
+  const [planId, setPlanId] = useState<string | null>(cache?.planId ?? null)
   // Which slot the add panel is filling, or null when it is closed.
   const [addingSlot, setAddingSlot] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   // Only hold on the skeleton the first time; after that we have cached content.
-  const [loading, setLoading] = useState(!homeCache)
+  const [loading, setLoading] = useState(!cache)
 
   // Prefer the person's first name; fall back to their username.
   const displayName = (user?.name || '').trim().split(/\s+/)[0] || user?.username || ''
@@ -80,10 +84,11 @@ export default function HomeScreen({ onNavigate }: Props) {
     ]).finally(() => setLoading(false))
   }, [])
 
-  // Keep the cross-mount cache in step with the latest data.
+  // Keep the cross-mount cache in step with the latest data, tagged with whose
+  // it is so it's only reused for the same signed-in person.
   useEffect(() => {
-    homeCache = { recipes, cookbooks, todayMeals, plannedThisWeek, planId }
-  }, [recipes, cookbooks, todayMeals, plannedThisWeek, planId])
+    if (user?.id) homeCache = { userId: user.id, recipes, cookbooks, todayMeals, plannedThisWeek, planId }
+  }, [user?.id, recipes, cookbooks, todayMeals, plannedThisWeek, planId])
 
   async function loadToday() {
     try {
