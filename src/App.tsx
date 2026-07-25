@@ -225,6 +225,18 @@ export default function App() {
     if (!resumePendingShare()) setScreen('onboarding')
   }
 
+  // Native Sign in with Apple: SignInScreen ran Apple's sheet and holds a
+  // verified identity token. Trade it for our JWT and land the same way an
+  // OAuth redirect does -- home for a returning person, onboarding for a new one
+  // (we can't tell which from the token, so onboardingCompleted decides).
+  const handleAppleNative = async (identityToken: string, name?: string) => {
+    const response = await authAPI.appleNative(identityToken, name)
+    setAuthToken(response.token)
+    setUser(response.user)
+    if (resumePendingShare()) return
+    setScreen(localStorage.getItem('onboardingCompleted') ? 'home' : 'onboarding')
+  }
+
   const handleSignOut = () => {
     clearAuthToken()
     setUser(null)
@@ -249,7 +261,7 @@ export default function App() {
       case 'splash':
         return <SplashScreen onNavigate={handleNavigation} />
       case 'signin':
-        return <SignInScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onNavigate={handleNavigation} />
+        return <SignInScreen onSignIn={handleSignIn} onSignUp={handleSignUp} onAppleNative={handleAppleNative} onNavigate={handleNavigation} />
       case 'forgot-password':
         return <PasswordResetScreen mode="request" onNavigate={handleNavigation} />
       case 'reset-password':

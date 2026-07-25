@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Mail, Lock, AtSign, ChefHat } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
+import { SignInWithApple } from '@capacitor-community/apple-sign-in'
 import type { Screen } from '../types'
 import { authAPI, oauthStartUrl } from '../utils/api'
 
 interface Props {
   onSignIn: (email: string, password: string) => Promise<void>
   onSignUp: (email: string, name: string, password: string) => Promise<void>
+  onAppleNative: (identityToken: string, name?: string) => Promise<void>
   onNavigate: (screen: Screen) => void
 }
 
-export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) {
+// On iOS, App Store review requires the platform-native Sign in with Apple
+// sheet -- the web redirect flow won't pass in a WebView -- so the native
+// button runs Apple's own sheet instead of navigating out.
+const isNative = Capacitor.isNativePlatform()
+
+export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onNavigate }: Props) {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
@@ -54,6 +62,31 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAppleNative = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      const { response } = await SignInWithApple.authorize({
+        // Ignored by the native iOS sheet (it uses the app's bundle id); still
+        // required by the plugin's type and used by its web/Android fallback.
+        clientId: 'com.reciphub.app',
+        redirectURI: 'https://recipe-hub-orcin-ten.vercel.app',
+        scopes: 'name email',
+      })
+      if (!response?.identityToken) throw new Error('missing-token')
+      // Apple only sends the name on the first authorization; join what's there.
+      const name = [response.givenName, response.familyName].filter(Boolean).join(' ').trim()
+      await onAppleNative(response.identityToken, name || undefined)
+    } catch (err: any) {
+      // A cancelled sheet (ASAuthorizationError.canceled = 1001) isn't a failure.
+      const msg = String(err?.message ?? err?.code ?? '')
+      if (/cancel/i.test(msg) || msg.includes('1001')) return
+      setError('Apple sign-in failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -222,9 +255,10 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
         <strong style={{ color: 'var(--color-primary)' }}>{isSignUp ? 'Sign in' : 'Sign up'}</strong>
       </button>
 
-      {/* A provider with no credentials configured would be a button that
-          cannot work, so only offer the ones the API reports as ready. */}
-      {(providers.google || providers.apple) && (
+      {/* iOS: the native Sign in with Apple sheet. It needs no server-side Apple
+          credentials -- the app gets a signed token Apple's public keys verify --
+          so it's always offered on device, unlike the web providers below. */}
+      {isNative ? (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
@@ -232,15 +266,55 @@ export default function SignInScreen({ onSignIn, onSignUp, onNavigate }: Props) 
             <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
-            {providers.google && (
-              <OAuthButton provider="google" label="Google" icon={<GoogleIcon />} />
-            )}
-            {providers.apple && (
-              <OAuthButton provider="apple" label="Apple" icon={<AppleIcon />} />
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={handleAppleNative}
+            disabled={loading}
+            // var(--color-text)/var(--color-bg) resolve to Apple's black button on
+            // a light theme and its white button on a dark one -- both HIG variants.
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '13px 16px',
+              border: 'none',
+              background: 'var(--color-text)',
+              color: 'var(--color-bg)',
+              borderRadius: '12px',
+              fontSize: '15px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
+              fontFamily: 'inherit',
+            }}
+          >
+            <AppleIcon color="var(--color-bg)" />
+            Sign in with Apple
+          </button>
         </>
+      ) : (
+        /* Web: a provider with no credentials configured would be a dead button,
+           so only offer the ones the API reports as ready. */
+        (providers.google || providers.apple) && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+              <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontWeight: '500' }}>or</span>
+              <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {providers.google && (
+                <OAuthButton provider="google" label="Google" icon={<GoogleIcon />} />
+              )}
+              {providers.apple && (
+                <OAuthButton provider="apple" label="Apple" icon={<AppleIcon />} />
+              )}
+            </div>
+          </>
+        )
       )}
     </div>
   )
@@ -287,9 +361,9 @@ function GoogleIcon() {
   )
 }
 
-function AppleIcon() {
+function AppleIcon({ color = 'var(--color-text)' }: { color?: string }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 384 512" aria-hidden="true" fill="var(--color-text)">
+    <svg width="16" height="16" viewBox="0 0 384 512" aria-hidden="true" fill={color}>
       <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
   )

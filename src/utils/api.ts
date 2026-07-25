@@ -111,6 +111,18 @@ export const authAPI = {
   /** Which OAuth providers the API has credentials for, e.g. { google: true }. */
   oauthProviders: () => apiRequest('/auth/oauth/providers', { requiresAuth: false }),
 
+  /**
+   * Native Sign in with Apple. The iOS app already ran Apple's sheet and holds a
+   * signed identity token; the server verifies it and returns `{ user, token }`.
+   * `name` is only present on a person's first-ever authorization.
+   */
+  appleNative: (identityToken: string, name?: string) =>
+    apiRequest('/auth/apple/native', {
+      method: 'POST',
+      body: { identityToken, name },
+      requiresAuth: false,
+    }),
+
   getProfile: () => apiRequest('/auth/profile'),
 
   updateProfile: (data: { name?: string; username?: string }) =>
