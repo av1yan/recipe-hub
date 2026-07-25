@@ -124,11 +124,13 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   // back. `preview` holds what the confirm card shows + everything commit needs.
   const [preview, setPreview] = useState<{
     newCount: number; updatedCount: number; lines: any[]; listId: string | null;
-    before: Map<string, { id: string; qty: number }>; keys: string[]
+    beforeById: Map<string, number>
   } | null>(null)
   const [previewing, setPreviewing] = useState(false)
   const [undoLabel, setUndoLabel] = useState<string | null>(null)
-  const undoData = useRef<{ before: Map<string, { id: string; qty: number }>; keys: string[]; listId: string } | null>(null)
+  // Undo restores by item id, not by name+unit — a list can hold two rows that
+  // share a name+unit, and a key-based undo would restore the wrong one.
+  const undoData = useRef<{ beforeById: Map<string, number>; listId: string } | null>(null)
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => () => { if (undoTimer.current) clearTimeout(undoTimer.current) }, [])
@@ -280,16 +282,18 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
       const lists: any = await groceryAPI.list()
       const list = Array.isArray(lists) ? lists[0] : lists
-      // Snapshot the unchecked lines already on the list — those are what a merge
-      // would top up (a checked "already bought" line starts a fresh row instead).
-      const before = new Map<string, { id: string; qty: number }>()
-      ;(list?.items || []).forEach((i: any) => {
-        if (!i.checked) before.set(groceryKey(i.name, i.unit), { id: i.id, qty: i.quantity })
-      })
+      const items: any[] = list?.items || []
+      // For undo: every current item's quantity, keyed by id (id-based so it's
+      // safe against duplicate name+unit rows). For the preview counts: which
+      // name+unit keys already exist unchecked — those a merge would top up
+      // (a checked "already bought" line starts a fresh row instead).
+      const beforeById = new Map<string, number>()
+      items.forEach(i => beforeById.set(i.id, i.quantity))
+      const beforeKeys = new Set(items.filter(i => !i.checked).map(i => groceryKey(i.name, i.unit)))
       const keys = [...new Set(lines.map(l => groceryKey(l.name, l.unit)))]
       let newCount = 0, updatedCount = 0
-      keys.forEach(k => { before.has(k) ? updatedCount++ : newCount++ })
-      setPreview({ newCount, updatedCount, lines, listId: list?.id ?? null, before, keys })
+      keys.forEach(k => { beforeKeys.has(k) ? updatedCount++ : newCount++ })
+      setPreview({ newCount, updatedCount, lines, listId: list?.id ?? null, beforeById })
     } catch {
       show('Could not check your grocery list', 'error')
     } finally {
@@ -304,7 +308,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       let listId = preview.listId
       if (!listId) { const created: any = await groceryAPI.create('Groceries'); listId = created.id }
       await Promise.all(preview.lines.map(l => groceryAPI.addItem(listId!, l)))
-      undoData.current = { before: preview.before, keys: preview.keys, listId: listId! }
+      undoData.current = { beforeById: preview.beforeById, listId: listId! }
       const total = preview.newCount + preview.updatedCount
       setPreview(null)
       setUndoLabel(`Added ${total} item${total === 1 ? '' : 's'} to groceries`)
@@ -329,12 +333,15 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     try {
       const full: any = await groceryAPI.get(d.listId)
       const items: any[] = full?.items || []
-      for (const k of d.keys) {
-        const cur = items.find(i => !i.checked && groceryKey(i.name, i.unit) === k)
-        if (!cur) continue
-        const b = d.before.get(k)
-        if (b) await groceryAPI.setItemQuantity(cur.id, b.qty)
-        else await groceryAPI.removeItem(cur.id)
+      // Restore each pre-existing item to its snapshot quantity; delete anything
+      // the commit newly created (its id won't be in the snapshot).
+      for (const it of items) {
+        if (d.beforeById.has(it.id)) {
+          const q = d.beforeById.get(it.id)!
+          if (it.quantity !== q) await groceryAPI.setItemQuantity(it.id, q)
+        } else {
+          await groceryAPI.removeItem(it.id)
+        }
       }
       show('Reverted the grocery changes')
     } catch {
