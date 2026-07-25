@@ -21,6 +21,7 @@ import RecipeDetailScreen from './screens/RecipeDetailScreen'
 import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import { AddRecipeSheet } from './components/AddRecipeSheet'
+import { BottomNavigation } from './components/BottomNavigation'
 import { setAuthToken, clearAuthToken, getAuthToken, authAPI } from './utils/api'
 import { useProPlan } from './utils/proPlan'
 import type { Screen, User, Recipe } from './types'
@@ -41,6 +42,21 @@ function parseSharedImport(search: string): { screen: Screen; value: string } | 
   }
   const body = [title, text].filter(Boolean).join('\n').trim()
   return body.length >= 12 ? { screen: 'import-text', value: body } : null
+}
+
+// Screens that show the bottom nav, mapped to which regular tab is lit. A
+// present key means "show the nav here"; '' means no tab is highlighted (detail
+// screens). The 'recipe' entry is a placeholder — the render lights the tab the
+// recipe was opened from.
+const NAV_ACTIVE: Record<string, string> = {
+  home: 'home',
+  browse: 'browse',
+  'meal-plan': 'meal-plan',
+  grocery: 'grocery',
+  recipe: 'browse',
+  cookbook: '',
+  favorites: '',
+  'add-recipe': 'add',
 }
 
 export default function App() {
@@ -295,9 +311,19 @@ export default function App() {
             <span>📶 🔋</span>
           </div>
           {/* App content */}
-          <div className="app-container" style={{ flex: 1, overflowY: 'auto' }}>
+          <div className="app-container" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {renderScreen()}
           </div>
+          {/* One persistent nav for the whole app — it stays mounted across
+              screens, so its selection indicator can flow between tabs. Shown
+              only on the tabbed screens; which regular tab is lit is derived
+              from the current screen (a recipe lights the tab it came from). */}
+          {(NAV_ACTIVE[screen] !== undefined) && (
+            <BottomNavigation
+              active={screen === 'recipe' ? (recipeOrigin === 'home' ? 'home' : 'browse') : NAV_ACTIVE[screen]}
+              onNavigate={handleNavigation}
+            />
+          )}
           {/* One panel for the whole app, overlaying the current screen. */}
           <AddRecipeSheet open={addSheetOpen} onClose={() => setAddSheetOpen(false)} onNavigate={handleNavigation} />
         </div>

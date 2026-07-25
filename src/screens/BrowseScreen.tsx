@@ -1,7 +1,6 @@
 import { useState, useEffect, type CSSProperties } from 'react'
 import { Search, SlidersHorizontal, X, ChevronRight } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI } from '../utils/api'
 import { getDietPrefs } from './DietPreferencesScreen'
 import { ALLERGY_OPTIONS, getAllergies, recipeHasAllergen, saveAllergies } from '../utils/allergies'
@@ -316,7 +315,6 @@ export default function BrowseScreen({ onNavigate }: Props) {
           <SkelTextRow divider />
           <SkelTextRow divider />
         </div>
-        <BottomNavigation active="browse" onNavigate={(s) => onNavigate(s as Screen)} />
       </div>
     )
   }
@@ -437,7 +435,6 @@ export default function BrowseScreen({ onNavigate }: Props) {
         )}
       </div>
 
-      <BottomNavigation active="browse" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
 }

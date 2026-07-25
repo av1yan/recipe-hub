@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Trash2, Plus, Check, Camera, Image as ImageIcon, Share2, Loader2, X, CalendarDays } from 'lucide-react'
 import type { Screen, GroceryList, GroceryItem } from '../types'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { groceryAPI, mealPlanAPI, imageToBase64 } from '../utils/api'
 import { DAY_NAMES, MEALS, getMeals, sameWeek } from './MealPlanScreen'
 import { toGroceryLine, pluralizeUnit } from '../utils/grocery'
@@ -424,7 +423,6 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             </div>
           ))}
         </div>
-        <BottomNavigation active="grocery" onNavigate={(s) => onNavigate(s as Screen)} />
       </div>
     )
   }
@@ -711,7 +709,6 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         </div>
       )}
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
-      <BottomNavigation active="grocery" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
 }

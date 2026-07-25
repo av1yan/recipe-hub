@@ -1,7 +1,6 @@
 import { useState, useEffect, type CSSProperties } from 'react'
 import { Plus, X, Crown, ChefHat, Lightbulb, Users } from 'lucide-react'
 import type { Screen } from '../types'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
 import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
@@ -352,7 +351,6 @@ export default function HomeScreen({ onNavigate }: Props) {
         </div>
         <div style={{ height: '24px' }} />
       </div>
-      <BottomNavigation active="home" onNavigate={onNavigate} />
     </div>
   )
 }

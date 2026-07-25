@@ -29,11 +29,15 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
   const { openAddSheet } = useApp()
   const handleAdd = onAdd ?? openAddSheet
 
+  // Index of the active *regular* tab (never the accent "+"); -1 = none.
+  const activeIndex = tabs.findIndex(t => t.id === active && !t.accent)
+
   return (
     <nav style={{
       display: 'flex',
       alignItems: 'center',
       flexShrink: 0,
+      position: 'relative',
       background: solid ? 'var(--color-card)' : 'var(--color-nav-bg)',
       backdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
       WebkitBackdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
@@ -42,6 +46,18 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
       paddingBottom: '6px',
       paddingTop: '2px',
     }}>
+      {/* Accent indicator that slides between tabs (persistent nav → it flows). */}
+      {activeIndex >= 0 && (
+        <div
+          className="rh-nav-pill"
+          style={{
+            position: 'absolute', top: '2px',
+            left: `calc(${((activeIndex + 0.5) * 100) / tabs.length}% - 10px)`,
+            width: '20px', height: '2.5px', borderRadius: '0 0 3px 3px',
+            background: 'var(--color-primary)', pointerEvents: 'none',
+          }}
+        />
+      )}
       {tabs.map((tab) => {
         const isActive = active === tab.id
         if (tab.accent) {
@@ -80,24 +96,15 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
               gap: '3px',
               color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
               transition: 'color 0.2s ease',
-              position: 'relative',
             }}
           >
-            {isActive && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                width: '20px',
-                height: '2.5px',
-                borderRadius: '0 0 3px 3px',
-                background: 'var(--color-primary)',
-              }} />
-            )}
-            <tab.icon
-              size={22}
-              strokeWidth={isActive ? 2.2 : 1.8}
-              color={isActive ? 'var(--color-primary)' : 'var(--color-text-muted)'}
-            />
+            <span className={isActive ? 'rh-nav-pop' : undefined} style={{ display: 'flex' }}>
+              <tab.icon
+                size={22}
+                strokeWidth={isActive ? 2.2 : 1.8}
+                color={isActive ? 'var(--color-primary)' : 'var(--color-text-muted)'}
+              />
+            </span>
             <span style={{
               fontSize: '10px',
               fontWeight: isActive ? '700' : '500',

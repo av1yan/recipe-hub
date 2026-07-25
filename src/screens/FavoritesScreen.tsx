@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Heart } from 'lucide-react'
 import type { Screen } from '../types'
 import { recipeAPI } from '../utils/api'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
 
 interface Props {
@@ -127,7 +126,6 @@ export default function FavoritesScreen({ onNavigate }: Props) {
       </div>
 
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
-      <BottomNavigation active="" onNavigate={onNavigate} />
     </div>
   )
 }

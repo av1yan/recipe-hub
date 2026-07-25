@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2 } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
@@ -417,7 +416,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           <SkelMealRow divider />
           <SkelMealRow divider />
         </div>
-        <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
       </div>
     )
   }
@@ -532,7 +530,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       </div>
 
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
-      <BottomNavigation active="meal-plan" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
 }

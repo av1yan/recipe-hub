@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, BookOpen, X, Plus, Check } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { cookbookAPI, recipeAPI } from '../utils/api'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { Toast, useToast } from '../components/Toast'
 
 interface Props {
@@ -214,7 +213,6 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
       )}
 
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
-      <BottomNavigation active="" onNavigate={onNavigate} />
     </div>
   )
 }

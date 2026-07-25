@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Check, Plus, X, Camera } from 'lucide-react'
 import type { Screen } from '../types'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, cookbookAPI } from '../utils/api'
 import { DIET_OPTIONS } from './DietPreferencesScreen'
 import { Toast, useToast } from '../components/Toast'
@@ -515,7 +514,6 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
       </div>
 
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="150px" />}
-      <BottomNavigation active="add" onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
 }

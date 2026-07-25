@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles, BookmarkPlus, Check } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
-import { BottomNavigation } from '../components/BottomNavigation'
 import { recipeAPI, groceryAPI, mealPlanAPI, insightsAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
 import { DAY_NAMES, MEALS, sameWeek, mondayOf, getMeals } from './MealPlanScreen'
@@ -144,7 +143,6 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
           <p>Recipe not found</p>
         </div>
-        <BottomNavigation active={backTo === 'home' ? 'home' : 'browse'} onNavigate={(s) => onNavigate(s as Screen)} />
       </div>
     )
   }
@@ -587,7 +585,6 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
 
       </div>
       {toast && <Toast message={toast.message} tone={toast.tone} bottom="84px" />}
-      <BottomNavigation active={backTo === 'home' ? 'home' : 'browse'} onNavigate={(s) => onNavigate(s as Screen)} />
     </div>
   )
 }
