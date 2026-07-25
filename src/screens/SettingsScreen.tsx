@@ -288,14 +288,11 @@ function Subscription({ onBack }: { onBack: () => void }) {
           {isPro && (
             <div style={{ marginTop: '12px', borderTop: '1px solid var(--color-subtle)', paddingTop: '12px' }}>
               <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '10px' }}>Included</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {PRO_FEATURES.map(f => (
-                  <div key={f.title} style={{ display: 'flex', alignItems: 'flex-start', gap: '9px' }}>
-                    <Check size={15} color="var(--color-primary)" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--color-text)', lineHeight: 1.25 }}>{f.title}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: 1.35, marginTop: '1px' }}>{f.desc}</div>
-                    </div>
+                  <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                    <Check size={15} color="var(--color-primary)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--color-text)', lineHeight: 1.2 }}>{f.title}</span>
                   </div>
                 ))}
               </div>
