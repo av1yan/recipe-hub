@@ -28,6 +28,37 @@ import { useProPlan } from './utils/proPlan'
 import { initPurchases } from './utils/purchases'
 import type { Screen, User, Recipe } from './types'
 
+/** Reactive CSS media-query match. */
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia(query).matches
+  )
+  useEffect(() => {
+    const mql = window.matchMedia(query)
+    const sync = () => setMatches(mql.matches)
+    sync()
+    mql.addEventListener('change', sync)
+    // Some environments don't fire the matchMedia change on every rotation;
+    // resize/orientationchange are a reliable belt-and-suspenders.
+    window.addEventListener('resize', sync)
+    window.addEventListener('orientationchange', sync)
+    return () => {
+      mql.removeEventListener('change', sync)
+      window.removeEventListener('resize', sync)
+      window.removeEventListener('orientationchange', sync)
+    }
+  }, [query])
+  return matches
+}
+
+// A native shell (real app, or ?native preview) shows a left sidebar rail
+// instead of the bottom bar once it's wide and landscape -- the tablet pattern.
+// data-native is stamped by main.tsx before the first render, so read it at
+// render time (a module-load read would run before that and be stale).
+function isNativeShell(): boolean {
+  return typeof document !== 'undefined' && document.documentElement.getAttribute('data-native') === 'true'
+}
+
 // A shared link/text from the OS share sheet arrives as ?title=&text=&url= on
 // the start URL (the manifest's share_target). Work out what to import and which
 // import screen to open. A URL wins; social hosts route to the social importer.
@@ -89,6 +120,9 @@ export default function App() {
   const [addSheetOrigin, setAddSheetOrigin] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
   const [isProActive, setProPlan] = useProPlan()
+  // Left sidebar rail instead of the bottom bar on a wide, landscape native shell.
+  const wideLandscape = useMediaQuery('(orientation: landscape) and (min-width: 768px)')
+  const sidebar = isNativeShell() && wideLandscape
   // A recipe shared into the app via the OS share sheet, waiting to be imported.
   const [sharedImport, setSharedImport] = useState<{ screen: Screen; value: string } | null>(null)
 
@@ -331,31 +365,38 @@ export default function App() {
     }
   }
 
+  const showNav = NAV_ACTIVE[screen] !== undefined
+  const navEl = (
+    <BottomNavigation
+      active={screen === 'recipe' ? (recipeOrigin === 'home' ? 'home' : 'browse') : NAV_ACTIVE[screen]}
+      onNavigate={handleNavigation}
+      sidebar={sidebar}
+    />
+  )
+
   return (
     <AppProvider user={user} openAddSheet={openAddSheet}>
       {/* Sizing/responsive rules live in global.css so the frame can collapse to
           full-bleed on a real phone -- see .phone-desk / .phone-frame. */}
       <div className="phone-desk">
-        <div className="phone-frame">
+        <div className="phone-frame" data-sidebar={sidebar ? 'true' : undefined}>
           {/* Status bar — the mock one, hidden on a real device. */}
           <div className="phone-statusbar">
             <span>9:41</span>
             <span>📶 🔋</span>
           </div>
+          {/* One persistent nav for the whole app — it stays mounted across
+              screens, so its selection indicator can flow between tabs. Shown
+              only on the tabbed screens; which regular tab is lit is derived
+              from the current screen (a recipe lights the tab it came from). On a
+              wide landscape shell it renders as a left rail (before the content),
+              otherwise as the bottom bar (after it). */}
+          {sidebar && showNav && navEl}
           {/* App content */}
           <div className="app-container" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {renderScreen()}
           </div>
-          {/* One persistent nav for the whole app — it stays mounted across
-              screens, so its selection indicator can flow between tabs. Shown
-              only on the tabbed screens; which regular tab is lit is derived
-              from the current screen (a recipe lights the tab it came from). */}
-          {(NAV_ACTIVE[screen] !== undefined) && (
-            <BottomNavigation
-              active={screen === 'recipe' ? (recipeOrigin === 'home' ? 'home' : 'browse') : NAV_ACTIVE[screen]}
-              onNavigate={handleNavigation}
-            />
-          )}
+          {!sidebar && showNav && navEl}
           {/* One panel for the whole app, overlaying the current screen. */}
           <AddRecipeSheet open={addSheetOpen} onClose={() => setAddSheetOpen(false)} onNavigate={handleNavigation} />
         </div>

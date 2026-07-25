@@ -12,6 +12,10 @@ interface Props {
       the home nav's blur composites two backdrop-filter layers at the same
       spot, which shimmers/jolts on touch. Solid removes that. */
   solid?: boolean
+  /** Render as a left vertical rail instead of a bottom bar. Used on wide
+      landscape (iPad), where a bottom bar wastes vertical space and a left
+      sidebar is the native tablet pattern. */
+  sidebar?: boolean
 }
 
 const tabs = [
@@ -22,7 +26,7 @@ const tabs = [
   { id: 'grocery', icon: ShoppingCart, label: 'Groceries', screen: 'grocery' },
 ]
 
-export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
+export function BottomNavigation({ active, onNavigate, onAdd, solid, sidebar = false }: Props) {
   // The panel itself lives at the app level (App renders one AddRecipeSheet);
   // the "+" just asks to open it. That's what lets Back on an import screen
   // bring the panel back rather than only ever landing on Home.
@@ -32,15 +36,93 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid }: Props) {
   // Index of the active *regular* tab (never the accent "+"); -1 = none.
   const activeIndex = tabs.findIndex(t => t.id === active && !t.accent)
 
+  const navBg = solid ? 'var(--color-card)' : 'var(--color-nav-bg)'
+  const blur = solid ? 'none' : 'saturate(180%) blur(24px)'
+
+  if (sidebar) {
+    return (
+      <nav style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        flexShrink: 0,
+        width: '96px',
+        background: navBg,
+        backdropFilter: blur,
+        WebkitBackdropFilter: blur,
+        borderRight: '0.5px solid var(--color-nav-border)',
+        // Clear the notch/home-indicator on the leading edge and top; floor the
+        // bottom like the bar does since env() can read 0 in the WebView.
+        paddingTop: 'calc(14px + env(safe-area-inset-top))',
+        paddingBottom: 'max(calc(10px + env(safe-area-inset-bottom)), 20px)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        gap: '4px',
+      }}>
+        {tabs.map((tab) => {
+          const isActive = active === tab.id
+          if (tab.accent) {
+            return (
+              <button
+                key={tab.id}
+                onClick={handleAdd}
+                aria-label="Add a recipe"
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  justifyContent: 'center', padding: '10px 0',
+                  border: 'none', background: 'none', cursor: 'pointer',
+                }}
+              >
+                <div style={{
+                  width: '46px', height: '46px', borderRadius: '15px',
+                  background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(107, 163, 86, 0.4)',
+                }}>
+                  <Plus size={22} color="#fff" strokeWidth={2.5} />
+                </div>
+              </button>
+            )
+          }
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onNavigate(tab.screen)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', gap: '5px',
+                margin: '0 10px', padding: '12px 0', borderRadius: '16px',
+                border: 'none', cursor: 'pointer',
+                background: isActive ? 'var(--color-primary-bg)' : 'transparent',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                transition: 'background 0.2s ease, color 0.2s ease',
+              }}
+            >
+              <span className={isActive ? 'rh-nav-pop' : undefined} style={{ display: 'flex' }}>
+                <tab.icon
+                  size={23}
+                  strokeWidth={isActive ? 2.2 : 1.8}
+                  color={isActive ? 'var(--color-primary)' : 'var(--color-text-muted)'}
+                />
+              </span>
+              <span style={{ fontSize: '10.5px', fontWeight: isActive ? '700' : '500', letterSpacing: '0.01em' }}>
+                {tab.label}
+              </span>
+            </button>
+          )
+        })}
+      </nav>
+    )
+  }
+
   return (
     <nav style={{
       display: 'flex',
       alignItems: 'center',
       flexShrink: 0,
       position: 'relative',
-      background: solid ? 'var(--color-card)' : 'var(--color-nav-bg)',
-      backdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
-      WebkitBackdropFilter: solid ? 'none' : 'saturate(180%) blur(24px)',
+      background: navBg,
+      backdropFilter: blur,
+      WebkitBackdropFilter: blur,
       borderTop: '0.5px solid var(--color-nav-border)',
       boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.04)',
       // Clear the home indicator. env() is the right value on devices that

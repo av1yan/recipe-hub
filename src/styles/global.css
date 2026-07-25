@@ -242,6 +242,24 @@
 }
 :root[data-native="true"] .phone-statusbar { display: none; }
 
+/* Wide landscape (iPad): lay the shell out as [ left rail | content ] instead
+   of [ content / bottom bar ]. App.tsx sets data-sidebar and puts the rail first
+   in the DOM, so a row direction is all the CSS needs. The content is no longer
+   the narrow centered column -- it gets the full remaining width. */
+:root[data-native="true"] .phone-frame[data-sidebar="true"] {
+  flex-direction: row;
+  max-width: none;
+}
+/* Keep the (still single-column) screens readable in the wide content area
+   rather than stretching a phone layout across the whole display. Screens use
+   different root elements, so target whatever the content root is. */
+:root[data-native="true"] .phone-frame[data-sidebar="true"] .app-container > * {
+  width: 100%;
+  max-width: 840px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 * {
   margin: 0;
   padding: 0;
