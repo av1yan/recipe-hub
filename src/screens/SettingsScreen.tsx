@@ -4,9 +4,11 @@ import {
   SlidersHorizontal, HelpCircle,
   UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf, Sun, Moon,
 } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
 import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
-import { authAPI } from '../utils/api'
+import { authAPI, subscriptionAPI } from '../utils/api'
+import { purchaseMonthly, restorePurchases, getMonthlyPrice } from '../utils/purchases'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
 import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT, startTrial, getTrialInfo, isUpgraded, TRIAL_DAYS, trialTimeLeft } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
@@ -255,7 +257,46 @@ function Subscription({ onBack }: { onBack: () => void }) {
   // Which way in the person is looking at. Once the trial is spent there is only
   // one path, so the tabs collapse and this is forced to the paid plan.
   const [plan, setPlan] = useState<'trial' | 'monthly'>('trial')
-  const showTrial = !trial.used && plan === 'trial'
+
+  // On a native build the store owns billing: no client-side free trial, the
+  // price comes from StoreKit, and purchases go through Apple. The web keeps its
+  // original localStorage plan so the demo/PWA behaves exactly as before.
+  const isNative = Capacitor.isNativePlatform()
+  const showTrial = !isNative && !trial.used && plan === 'trial'
+  const [busy, setBusy] = useState(false)
+  const [subError, setSubError] = useState('')
+  const [price, setPrice] = useState<string | null>(null)
+  const priceLabel = price ?? '$4.99'
+
+  useEffect(() => {
+    if (isNative) getMonthlyPrice().then(setPrice).catch(() => {})
+  }, [isNative])
+
+  // Web keeps the instant flip; native runs the App Store sheet and then trusts
+  // the server's verified verdict over StoreKit's local view.
+  const doPurchase = async () => {
+    if (!isNative) { setPro(true); return }
+    setSubError(''); setBusy(true)
+    try {
+      if (await purchaseMonthly() === 'cancelled') return
+      try { setPro(Boolean((await subscriptionAPI.refresh()).isPro)) } catch { setPro(true) }
+    } catch (e) {
+      setSubError(e instanceof Error ? e.message : 'The purchase could not be completed.')
+    } finally { setBusy(false) }
+  }
+
+  const doRestore = async () => {
+    setSubError(''); setBusy(true)
+    try {
+      await restorePurchases()
+      if ((await subscriptionAPI.refresh()).isPro) setPro(true)
+      else setSubError('No active subscription was found to restore.')
+    } catch (e) {
+      setSubError(e instanceof Error ? e.message : 'Could not restore purchases.')
+    } finally { setBusy(false) }
+  }
+
+  const openManage = () => window.open('https://apps.apple.com/account/subscriptions', '_blank')
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
@@ -303,11 +344,17 @@ function Subscription({ onBack }: { onBack: () => void }) {
         {/* On a trial: one tap to convert before it ends. */}
         {onTrial && (
           <button
-            onClick={() => setPro(true)}
-            style={{ width: '100%', marginBottom: '10px', padding: '13px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+            onClick={doPurchase}
+            disabled={busy}
+            style={{ width: '100%', marginBottom: '10px', padding: '13px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1, fontFamily: 'inherit' }}
           >
-            Keep Pro after the trial — $4.99/mo
+            {busy ? 'Processing…' : `Keep Pro after the trial — ${priceLabel}/mo`}
           </button>
+        )}
+        {onTrial && subError && (
+          <p style={{ margin: '0 0 10px', textAlign: 'center', fontSize: '12.5px', fontWeight: '600', color: 'var(--color-error)', background: 'var(--color-error-bg)', borderRadius: '10px', padding: '9px 12px' }}>
+            {subError}
+          </p>
         )}
 
         {/* Upgraded (paid) only: downgrade gets its own quiet tile. Trials aren't
@@ -316,11 +363,15 @@ function Subscription({ onBack }: { onBack: () => void }) {
         {isPro && !onTrial && (
           <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px 18px', border: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>Switch back to Free</div>
-              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px', lineHeight: 1.4 }}>Keep your recipes; lose the Pro features.</div>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>
+                {isNative ? 'Manage subscription' : 'Switch back to Free'}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px', lineHeight: 1.4 }}>
+                {isNative ? 'Renews monthly. Cancel anytime in the App Store.' : 'Keep your recipes; lose the Pro features.'}
+              </div>
             </div>
-            <button onClick={() => setPro(false)} style={{ flexShrink: 0, padding: '9px 15px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
-              Switch
+            <button onClick={() => (isNative ? openManage() : setPro(false))} style={{ flexShrink: 0, padding: '9px 15px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+              {isNative ? 'Manage' : 'Switch'}
             </button>
           </div>
         )}
@@ -347,7 +398,7 @@ function Subscription({ onBack }: { onBack: () => void }) {
                 own fine print -- the trial's "no card needed" line used to sit
                 under the upgrade button, where it read as a promise about the
                 paid plan. */}
-            {!trial.used && (
+            {!isNative && !trial.used && (
               <div style={{ display: 'flex', gap: '3px', background: 'rgba(255,255,255,0.18)', borderRadius: '999px', padding: '3px', marginTop: '14px' }}>
                 {([
                   { key: 'trial' as const, label: `${TRIAL_DAYS}-day free trial` },
@@ -372,18 +423,39 @@ function Subscription({ onBack }: { onBack: () => void }) {
             )}
 
             <button
-              onClick={() => { if (showTrial) startTrial(); else setPro(true) }}
-              style={{ marginTop: trial.used ? '14px' : '10px', width: '100%', padding: '12px', background: '#fff', color: 'var(--color-primary-dark)', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              onClick={() => { if (showTrial) startTrial(); else doPurchase() }}
+              disabled={busy}
+              style={{ marginTop: (isNative || trial.used) ? '14px' : '10px', width: '100%', padding: '12px', background: '#fff', color: 'var(--color-primary-dark)', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1, fontFamily: 'inherit' }}
             >
-              {showTrial ? `Start ${TRIAL_DAYS}-day free trial` : 'Upgrade for $4.99/mo'}
+              {showTrial
+                ? `Start ${TRIAL_DAYS}-day free trial`
+                : isNative
+                  ? (busy ? 'Processing…' : `Subscribe — ${priceLabel}/mo`)
+                  : 'Upgrade for $4.99/mo'}
             </button>
             <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.85)' }}>
-              {showTrial
-                ? `No card needed · reverts to Free after ${TRIAL_DAYS} days.`
-                : trial.used
-                  ? 'Your free trial has ended · cancel anytime.'
-                  : 'Billed monthly · cancel anytime.'}
+              {isNative
+                ? 'Auto-renews monthly · cancel anytime in the App Store.'
+                : showTrial
+                  ? `No card needed · reverts to Free after ${TRIAL_DAYS} days.`
+                  : trial.used
+                    ? 'Your free trial has ended · cancel anytime.'
+                    : 'Billed monthly · cancel anytime.'}
             </p>
+            {subError && (
+              <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '12px', fontWeight: '600', color: '#fff', background: 'rgba(0,0,0,0.18)', borderRadius: '8px', padding: '7px 10px' }}>
+                {subError}
+              </p>
+            )}
+            {isNative && (
+              <button
+                onClick={doRestore}
+                disabled={busy}
+                style={{ marginTop: '10px', width: '100%', padding: '4px', background: 'transparent', color: 'rgba(255,255,255,0.9)', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
+              >
+                Restore purchases
+              </button>
+            )}
           </div>
         )}
       </div>

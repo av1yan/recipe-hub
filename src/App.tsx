@@ -22,8 +22,10 @@ import CookingModeScreen from './screens/CookingModeScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import { AddRecipeSheet } from './components/AddRecipeSheet'
 import { BottomNavigation } from './components/BottomNavigation'
-import { setAuthToken, clearAuthToken, getAuthToken, authAPI } from './utils/api'
+import { Capacitor } from '@capacitor/core'
+import { setAuthToken, clearAuthToken, getAuthToken, authAPI, subscriptionAPI } from './utils/api'
 import { useProPlan } from './utils/proPlan'
+import { initPurchases } from './utils/purchases'
 import type { Screen, User, Recipe } from './types'
 
 // A shared link/text from the OS share sheet arrives as ?title=&text=&url= on
@@ -86,7 +88,7 @@ export default function App() {
   // The screen the panel was opened over, so an import Back returns there.
   const [addSheetOrigin, setAddSheetOrigin] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
-  const [isProActive] = useProPlan()
+  const [isProActive, setProPlan] = useProPlan()
   // A recipe shared into the app via the OS share sheet, waiting to be imported.
   const [sharedImport, setSharedImport] = useState<{ screen: Screen; value: string } | null>(null)
 
@@ -95,6 +97,24 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-pro', isProActive ? 'true' : 'false')
   }, [isProActive])
+
+  // Native only: bind RevenueCat to this account and let the server's verified
+  // subscription drive Pro, so entitlement can't be forged in localStorage. The
+  // web app is deliberately left alone -- it keeps its own local plan/trial.
+  useEffect(() => {
+    if (!user?.id || !Capacitor.isNativePlatform()) return
+    let cancelled = false
+    ;(async () => {
+      await initPurchases(user.id)
+      try {
+        const state = await subscriptionAPI.refresh()
+        if (!cancelled) setProPlan(Boolean(state?.isPro))
+      } catch {
+        // Offline or store not configured yet: leave the current plan as-is.
+      }
+    })()
+    return () => { cancelled = true }
+  }, [user?.id])
 
   // Check for existing auth token on load
   useEffect(() => {

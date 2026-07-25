@@ -132,6 +132,16 @@ export const authAPI = {
     }),
 }
 
+export const subscriptionAPI = {
+  /**
+   * Ask the server to re-verify this account's subscription against RevenueCat
+   * and return the authoritative result. Called after a purchase/restore and on
+   * native launch.
+   */
+  refresh: (): Promise<{ isPro: boolean; proExpiresAt: string | null }> =>
+    apiRequest('/subscription/refresh', { method: 'POST' }),
+}
+
 // Import endpoints — both return a draft to review; neither saves anything.
 export const importAPI = {
   url: (url: string) => apiRequest('/recipes/import/url', { method: 'POST', body: { url } }),

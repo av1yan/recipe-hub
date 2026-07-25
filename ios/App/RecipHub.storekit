@@ -1,0 +1,47 @@
+{
+  "identifier" : "38DF8EA2-4B7B-4AE3-A60F-F80FD2AE7FE6",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : "0",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "54296AF2-45B7-4435-8142-FEE4FB011D1C",
+      "localizations" : [],
+      "name" : "recipHub Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "593BD8B2-5713-4D13-BAF0-509CBA5D59E2",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Everything unlocked: unlimited recipes & cookbooks, insights, household sharing.",
+              "displayName" : "recipHub Pro",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.reciphub.app.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Monthly",
+          "subscriptionGroupID" : "54296AF2-45B7-4435-8142-FEE4FB011D1C",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
