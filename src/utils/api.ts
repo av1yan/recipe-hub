@@ -250,6 +250,9 @@ export const groceryAPI = {
 
   get: (id: string) => apiRequest(`/grocery-lists/${id}`),
 
+  /** Delete a whole list (its items go with it). */
+  deleteList: (id: string) => apiRequest(`/grocery-lists/${id}`, { method: 'DELETE' }),
+
   addItem: (listId: string, item: any) =>
     apiRequest(`/grocery-lists/${listId}/items`, {
       method: 'POST',

@@ -110,6 +110,9 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const { toast, show } = useToast()
   const [isPro] = useProPlan()
   const [generating, setGenerating] = useState(false)
+  // Confirm-then-delete for the whole list.
+  const [confirmDeleteList, setConfirmDeleteList] = useState(false)
+  const [deletingList, setDeletingList] = useState(false)
 
   // Deferred item delete so a mistap can be undone: the row goes away at once,
   // but the backend delete only fires after the undo window closes (or when the
@@ -152,6 +155,26 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       setNewListName('')
     } catch (error) {
       console.error('Failed to create list:', error)
+    }
+  }
+
+  // Delete the whole list. Falls back to the next list, or the empty state (which
+  // offers to create one) if it was the last.
+  async function deleteSelectedList() {
+    if (!selectedListId || deletingList) return
+    setDeletingList(true)
+    try {
+      await groceryAPI.deleteList(selectedListId)
+      const remaining = lists.filter(l => l.id !== selectedListId)
+      setLists(remaining)
+      setSelectedListId(remaining[0]?.id ?? null)
+      setConfirmDeleteList(false)
+      show('List deleted')
+    } catch (error) {
+      console.error('Failed to delete list:', error)
+      show('Could not delete the list', 'error')
+    } finally {
+      setDeletingList(false)
     }
   }
 
@@ -597,11 +620,42 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     </div>
                   )}
                 </div>
+
+                {/* Delete the whole list — works for any list count; deleting the
+                    last one drops to the empty state, which offers to create one. */}
+                <button
+                  onClick={() => setConfirmDeleteList(true)}
+                  style={{ alignSelf: 'center', marginTop: '28px', display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 16px', background: 'none', border: 'none', color: '#dc2626', fontSize: '13.5px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: 0.9 }}
+                >
+                  <Trash2 size={14} /> Delete list
+                </button>
               </>
             )}
           </>
         )}
       </div>
+
+      {/* Confirm deleting the whole list. */}
+      {confirmDeleteList && selectedList && (
+        <FrameOverlay>
+          <div onClick={() => setConfirmDeleteList(false)} style={{ position: 'absolute', inset: 0, zIndex: 120, background: 'rgba(15,23,42,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: 'var(--color-card)', borderTopLeftRadius: '22px', borderTopRightRadius: '22px', padding: '20px 20px 24px' }}>
+              <p style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 6px' }}>Delete “{selectedList.name}”?</p>
+              <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: '0 0 18px', lineHeight: 1.5 }}>
+                This removes the list and its {selectedList.items?.length || 0} item{(selectedList.items?.length || 0) === 1 ? '' : 's'}. It can’t be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => setConfirmDeleteList(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Cancel
+                </button>
+                <button onClick={deleteSelectedList} disabled={deletingList} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: '#dc2626', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: deletingList ? 0.6 : 1, fontFamily: 'inherit' }}>
+                  {deletingList ? 'Deleting…' : 'Delete list'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </FrameOverlay>
+      )}
 
       {/* Scanning overlay */}
       {scanning && (
