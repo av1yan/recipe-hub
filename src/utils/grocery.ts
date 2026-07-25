@@ -41,14 +41,24 @@ const NO_PLURAL = new Set([
   'tsp', 'tbsp', 'fl oz', 'floz',
 ])
 const IRREGULAR_PLURAL: Record<string, string> = { loaf: 'loaves', leaf: 'leaves' }
+// Singular units that end in "s" and take "es" (glass -> glasses). Without this
+// list, an "s" ending is read as already-plural and left alone.
+const ES_SINGULAR = new Set(['glass', 'class', 'gas'])
 
 /** Pluralize a shopping unit for display when the quantity isn't 1 ("2 cans",
- *  "2 bunches") while leaving measures and invariant words alone ("2 tbsp"). */
+ *  "2 bunches") while leaving measures and invariant words alone ("2 tbsp").
+ *  Idempotent for already-plural units — "balls" stays "balls", not "ballses". */
 export function pluralizeUnit(unit: string, quantity: number): string {
   const u = (unit || '').trim()
   if (!u || (Number(quantity) || 0) === 1) return u
   const low = u.toLowerCase()
   if (NO_PLURAL.has(low)) return u
   if (IRREGULAR_PLURAL[low]) return IRREGULAR_PLURAL[low]
-  return /(s|x|ch|sh)$/i.test(u) ? u + 'es' : u + 's'
+  // box -> boxes, inch -> inches, dish -> dishes (these base forms are never
+  // already plural).
+  if (/(x|ch|sh)$/i.test(u)) return u + 'es'
+  // Already ends in "s": treat as plural and leave it (balls, cups, boxes),
+  // unless it's a singular "s"-word that needs "es".
+  if (/s$/i.test(u)) return ES_SINGULAR.has(low) ? u + 'es' : u
+  return u + 's'
 }
