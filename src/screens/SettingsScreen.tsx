@@ -10,7 +10,7 @@ import { Toast, useToast } from '../components/Toast'
 import { authAPI, subscriptionAPI } from '../utils/api'
 import { purchaseMonthly, restorePurchases, getMonthlyPrice } from '../utils/purchases'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
-import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT, startTrial, getTrialInfo, isUpgraded, TRIAL_DAYS, trialTimeLeft } from '../utils/proPlan'
+import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT, startTrial, getTrialInfo, isUpgraded, TRIAL_DAYS, trialTimeLeft, clearLocalPlan } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref } from '../utils/preferences'
@@ -112,7 +112,7 @@ function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean })
 
 // ─── Sub-pages ────────────────────────────────────────────────────────────────
 
-function AccountPage({ onBack }: { onBack: () => void }) {
+function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () => void }) {
   // Profile — loaded from the real account
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
@@ -124,7 +124,11 @@ function AccountPage({ onBack }: { onBack: () => void }) {
   const [newPw, setNewPw] = useState('')
   const [confirm, setConfirm] = useState('')
   const [pwSaved, setPwSaved] = useState(false)
+  const [pwError, setPwError] = useState('')
+  const [pwBusy, setPwBusy] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+  const [deleteBusy, setDeleteBusy] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     authAPI.getProfile()
@@ -148,10 +152,36 @@ function AccountPage({ onBack }: { onBack: () => void }) {
       setProfileError(err instanceof Error ? err.message : 'Could not save profile')
     }
   }
-  const savePassword = () => {
-    if (!current || !newPw || newPw !== confirm) return
-    setPwSaved(true); setCurrent(''); setNewPw(''); setConfirm('')
-    setTimeout(() => setPwSaved(false), 2500)
+  const savePassword = async () => {
+    setPwError('')
+    if (!current || !newPw) { setPwError('Fill in your current and new password'); return }
+    if (newPw.length < 8) { setPwError('New password must be at least 8 characters'); return }
+    if (newPw !== confirm) { setPwError('New passwords do not match'); return }
+    setPwBusy(true)
+    try {
+      await authAPI.changePassword(current, newPw)
+      setPwSaved(true); setCurrent(''); setNewPw(''); setConfirm('')
+      setTimeout(() => setPwSaved(false), 2500)
+    } catch (err) {
+      setPwError(err instanceof Error ? err.message : 'Could not change password')
+    } finally {
+      setPwBusy(false)
+    }
+  }
+
+  const deleteAccount = async () => {
+    setDeleteError(''); setDeleteBusy(true)
+    try {
+      await authAPI.deleteAccount()
+      // The account is gone server-side; drop every local trace and return to
+      // sign-in. Clearing the plan keys stops a stale Pro/trial leaking to the
+      // next person who signs in on this device.
+      clearLocalPlan()
+      onSignOut()
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete account')
+      setDeleteBusy(false)
+    }
   }
 
   const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '11px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
@@ -211,6 +241,7 @@ function AccountPage({ onBack }: { onBack: () => void }) {
               <input value={val} onChange={e => set(e.target.value)} type="password" placeholder="••••••••" style={inputStyle} />
             </div>
           ))}
+          {pwError && <p style={{ fontSize: '13px', color: '#ef4444', margin: 0 }}>{pwError}</p>}
           <SaveButton onClick={savePassword} saved={pwSaved} />
         </div>
 
@@ -226,8 +257,13 @@ function AccountPage({ onBack }: { onBack: () => void }) {
           {showDelete && (
             <div style={{ padding: '0 16px 16px', borderTop: '1px solid var(--color-subtle)', background: 'var(--color-card)' }}>
               <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '12px 0' }}>This will permanently delete your account and all your recipes. This cannot be undone.</p>
-              <button style={{ width: '100%', padding: '12px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
-                Permanently Delete Account
+              {deleteError && <p style={{ fontSize: '13px', color: '#ef4444', margin: '0 0 12px' }}>{deleteError}</p>}
+              <button
+                onClick={deleteAccount}
+                disabled={deleteBusy}
+                style={{ width: '100%', padding: '12px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: deleteBusy ? 'default' : 'pointer', opacity: deleteBusy ? 0.7 : 1 }}
+              >
+                {deleteBusy ? 'Deleting…' : 'Permanently Delete Account'}
               </button>
             </div>
           )}
@@ -704,7 +740,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   const [theme, setThemeState] = useState<Theme>(activeTheme())
   const chooseTheme = (t: Theme) => { setTheme(t); setThemeState(t) }
 
-  if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} />
+  if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} onSignOut={onSignOut} />
   if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} />
   if (subPage === 'help') return <HelpPage onBack={() => setSubPage(null)} />

@@ -71,6 +71,17 @@ export function setPro(value: boolean) {
   window.dispatchEvent(new Event(EVENT))
 }
 
+/**
+ * Wipe every local plan/trial trace. Used on account deletion so the next person
+ * to sign in on this device doesn't inherit a stale Pro or a spent trial.
+ */
+export function clearLocalPlan() {
+  localStorage.removeItem(KEY)
+  localStorage.removeItem(TRIAL_KEY)
+  localStorage.removeItem(TRIAL_USED_KEY)
+  window.dispatchEvent(new Event(EVENT))
+}
+
 /** Begin the one-time 3-day free trial (unlocks Pro until it expires). */
 export function startTrial() {
   localStorage.setItem(TRIAL_KEY, String(Date.now()))

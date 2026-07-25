@@ -130,6 +130,15 @@ export const authAPI = {
       method: 'PUT',
       body: data,
     }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    apiRequest('/auth/change-password', {
+      method: 'POST',
+      body: { currentPassword, newPassword },
+    }),
+
+  /** Permanently deletes the account and all its data server-side. */
+  deleteAccount: () => apiRequest('/auth/account', { method: 'DELETE' }),
 }
 
 export const subscriptionAPI = {
