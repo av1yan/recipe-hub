@@ -8,6 +8,8 @@ import { Toast, useToast } from '../components/Toast'
 import { FrameOverlay } from '../components/FrameOverlay'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
+import { Capacitor } from '@capacitor/core'
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -109,6 +111,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const { toast, show } = useToast()
   const [isPro] = useProPlan()
+  const isNative = Capacitor.isNativePlatform()
   const [generating, setGenerating] = useState(false)
   // Confirm-then-delete for the whole list.
   const [confirmDeleteList, setConfirmDeleteList] = useState(false)
@@ -277,18 +280,16 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     else show(res === 'copied' ? 'List copied to clipboard' : 'List shared')
   }
 
-  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = '' // allow re-selecting the same file later
-    if (!file) return
+  // The scan pipeline. Claude vision on the backend reads the note first —
+  // sturdier than on-device OCR, especially on handwriting. Falls back to
+  // Tesseract when the key isn't set, the call fails, or nothing legible came
+  // back. `ocrInput` is what Tesseract reads: a File on web, a data URL from the
+  // native camera.
+  async function runScan(base64: string, mediaType: string, ocrInput: File | string) {
     setScanning(true)
     setScanProgress(0)
     try {
-      // Claude vision on the backend reads the note first — sturdier than
-      // on-device OCR, especially on handwriting. Falls back to Tesseract when
-      // the key isn't set, the call fails, or nothing legible came back.
       try {
-        const { base64, mediaType } = await imageToBase64(file)
         const res: any = await groceryAPI.scan(base64, mediaType)
         if (res?.configured !== false && Array.isArray(res?.items) && res.items.length > 0) {
           setScanned(res.items)
@@ -299,7 +300,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       }
 
       const Tesseract = (await import('tesseract.js')).default
-      const { data } = await Tesseract.recognize(file, 'eng', {
+      const { data } = await Tesseract.recognize(ocrInput, 'eng', {
         logger: (m: { progress?: number }) => {
           if (typeof m.progress === 'number') setScanProgress(m.progress)
         },
@@ -315,6 +316,33 @@ export default function GroceryListScreen({ onNavigate }: Props) {
       show('Could not read the photo', 'error')
     } finally {
       setScanning(false)
+    }
+  }
+
+  // Web: a photo chosen via the hidden <input type=file> (opens the OS camera or
+  // picker in a mobile browser).
+  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+    const { base64, mediaType } = await imageToBase64(file)
+    await runScan(base64, mediaType, file)
+  }
+
+  // Native app: the real camera / photo library via Capacitor.
+  async function nativeScan(source: CameraSource) {
+    try {
+      const photo = await CapCamera.getPhoto({ source, resultType: CameraResultType.Base64, quality: 85, correctOrientation: true })
+      const b64 = photo.base64String
+      if (!b64) return
+      const mediaType = `image/${photo.format || 'jpeg'}`
+      await runScan(b64, mediaType, `data:${mediaType};base64,${b64}`)
+    } catch (err) {
+      // Cancelling the picker isn't an error.
+      if (!/cancel/i.test((err as { message?: string })?.message ?? '')) {
+        console.error('Camera error:', err)
+        show('Could not open the camera', 'error')
+      }
     }
   }
 
@@ -736,13 +764,13 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           <div onClick={e => e.stopPropagation()} style={{ background: 'var(--color-card)', borderTopLeftRadius: '20px', borderTopRightRadius: '20px', padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <p style={{ margin: '2px 0 6px', fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', textAlign: 'center' }}>Scan a grocery note</p>
             <button
-              onClick={() => { setPickerOpen(false); cameraRef.current?.click() }}
+              onClick={() => { setPickerOpen(false); isNative ? nativeScan(CameraSource.Camera) : cameraRef.current?.click() }}
               style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}
             >
               <Camera size={17} /> Take a photo
             </button>
             <button
-              onClick={() => { setPickerOpen(false); libraryRef.current?.click() }}
+              onClick={() => { setPickerOpen(false); isNative ? nativeScan(CameraSource.Photos) : libraryRef.current?.click() }}
               style={{ width: '100%', padding: '13px', borderRadius: '12px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text)', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}
             >
               <ImageIcon size={17} /> Choose from library

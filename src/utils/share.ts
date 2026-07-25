@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core'
+import { Share } from '@capacitor/share'
+
 /**
  * Copy text to the clipboard. Prefers the async Clipboard API, but falls back to
  * the legacy execCommand path for environments where the async API is blocked
@@ -50,6 +53,17 @@ function legacyCopy(text: string): boolean {
  * A share sheet the person dismisses counts as done, not an error.
  */
 export async function shareText(title: string, text: string): Promise<'shared' | 'copied' | 'failed'> {
+  // Native app: the real OS share sheet.
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await Share.share({ title, text })
+      return 'shared'
+    } catch (err) {
+      // Dismissing the sheet isn't an error — count it as done, don't then copy.
+      if (/cancel/i.test((err as { message?: string })?.message ?? '')) return 'shared'
+      // Any real failure falls through to the clipboard path below.
+    }
+  }
   const nav = typeof navigator !== 'undefined' ? navigator : undefined
   if (nav?.share) {
     try {

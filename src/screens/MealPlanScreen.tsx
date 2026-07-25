@@ -8,6 +8,7 @@ import { toGroceryLine } from '../utils/grocery'
 import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
+import { tapHaptic } from '../utils/haptics'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -898,7 +899,7 @@ function SwipeableMealRow({ recipes, recentIds, m, meal, onSwap, onRemove, onLon
     setAnimate(false)
     clearLP()
     lp.current = setTimeout(() => {
-      if (axis.current === 'none') { gestured.current = true; clearLP(); navigator.vibrate?.(12); onLongPress() }
+      if (axis.current === 'none') { gestured.current = true; clearLP(); tapHaptic('medium'); onLongPress() }
     }, 450)
   }
   const onMove = (e: React.PointerEvent) => {
@@ -927,7 +928,7 @@ function SwipeableMealRow({ recipes, recentIds, m, meal, onSwap, onRemove, onLon
     if (axis.current === 'x' && s) {
       const dX = e.clientX - s.x
       setAnimate(true)
-      if (canSwipe && dX <= -70) { setDx(-380); onRemove() }
+      if (canSwipe && dX <= -70) { tapHaptic('light'); setDx(-380); onRemove() }
       else setDx(0)
     }
     axis.current = 'none'

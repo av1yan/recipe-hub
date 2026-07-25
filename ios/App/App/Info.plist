@@ -4,6 +4,10 @@
 <dict>
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>recipHub uses the camera to scan your grocery notes and recipes into your lists.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>recipHub reads the photo you pick so it can scan a grocery note or recipe.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
