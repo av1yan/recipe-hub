@@ -1,9 +1,10 @@
 // RevenueCat / StoreKit purchase flow, isolated behind a small wrapper.
 //
 // Everything here is a no-op unless we're on a native build *and* a RevenueCat
-// public key was baked in at build time (VITE_REVENUECAT_IOS_KEY). That keeps
-// the web app and any un-keyed build fully functional -- the Subscription screen
-// just degrades to "not available yet" instead of throwing.
+// public key for that store was baked in at build time (VITE_REVENUECAT_IOS_KEY
+// on iOS, VITE_REVENUECAT_ANDROID_KEY on Android). That keeps the web app and any
+// un-keyed build fully functional -- the Subscription screen just degrades to
+// "not available yet" instead of throwing.
 //
 // The SDK is imported lazily so the native module never loads on the web.
 
@@ -12,14 +13,32 @@ import { Capacitor } from '@capacitor/core'
 // The entitlement identifier configured in the RevenueCat dashboard; must match
 // the backend's expectation.
 const ENTITLEMENT = 'pro'
+
+// RevenueCat public SDK keys are per store: an Apple key on iOS, a Google key on
+// Android. Both are baked in at build time; we configure the SDK with whichever
+// one matches the platform this build runs on. Web (and any other platform) has
+// neither, so purchases stay unavailable there.
 const IOS_KEY = (import.meta.env.VITE_REVENUECAT_IOS_KEY as string | undefined)?.trim() || ''
+const ANDROID_KEY = (import.meta.env.VITE_REVENUECAT_ANDROID_KEY as string | undefined)?.trim() || ''
+
+/** The RevenueCat public key for this build's store, or '' on web / unkeyed builds. */
+function platformKey(): string {
+  switch (Capacitor.getPlatform()) {
+    case 'ios':
+      return IOS_KEY
+    case 'android':
+      return ANDROID_KEY
+    default:
+      return ''
+  }
+}
 
 let mod: typeof import('@revenuecat/purchases-capacitor') | null = null
 let configuredFor: string | null = null
 
 /** True only when a real purchase can be attempted on this build. */
 export function purchasesAvailable(): boolean {
-  return Capacitor.isNativePlatform() && Boolean(IOS_KEY)
+  return Capacitor.isNativePlatform() && Boolean(platformKey())
 }
 
 async function sdk() {
@@ -37,7 +56,7 @@ export async function initPurchases(userId: string): Promise<void> {
   const { Purchases, LOG_LEVEL } = await sdk()
   try {
     if (configuredFor === null) {
-      await Purchases.configure({ apiKey: IOS_KEY, appUserID: userId })
+      await Purchases.configure({ apiKey: platformKey(), appUserID: userId })
       await Purchases.setLogLevel({ level: LOG_LEVEL.ERROR }).catch(() => {})
     } else {
       await Purchases.logIn({ appUserID: userId })
