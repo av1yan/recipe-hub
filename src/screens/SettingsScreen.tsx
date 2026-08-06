@@ -494,6 +494,24 @@ function Subscription({ onBack }: { onBack: () => void }) {
             )}
           </div>
         )}
+
+        {/* App Store guideline 3.1.2 requires functional Terms of Use (EULA) and
+            Privacy Policy links on the subscription screen for everyone — not just
+            the pre-purchase upsell card (a subscriber sees the manage tile above). */}
+        <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'center', gap: '18px' }}>
+          <button
+            onClick={() => window.open('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/', '_blank')}
+            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 }}
+          >
+            Terms of Use
+          </button>
+          <button
+            onClick={() => window.open('https://recipe-hub-orcin-ten.vercel.app/privacy-policy.html', '_blank')}
+            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 }}
+          >
+            Privacy Policy
+          </button>
+        </div>
       </div>
     </div>
   )
