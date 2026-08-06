@@ -18,6 +18,10 @@ interface Props {
 // sheet -- the web redirect flow won't pass in a WebView -- so the native
 // button runs Apple's own sheet instead of navigating out.
 const isNative = Capacitor.isNativePlatform()
+// That sheet (@capacitor-community/apple-sign-in) is iOS-only: Android has no
+// Apple Services ID configured, so calling it there just errors. Gate the
+// Apple button to iOS -- Android shows only Google + email.
+const isIOS = Capacitor.getPlatform() === 'ios'
 
 export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAuthToken, onNavigate }: Props) {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -274,77 +278,84 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
         <strong style={{ color: 'var(--color-primary)' }}>{isSignUp ? 'Sign in' : 'Sign up'}</strong>
       </button>
 
-      {/* iOS: the native Sign in with Apple sheet. It needs no server-side Apple
-          credentials -- the app gets a signed token Apple's public keys verify --
-          so it's always offered on device, unlike the web providers below. */}
+      {/* Native providers. Google runs in the system browser on any platform;
+          the Apple sheet is iOS-only (see isIOS). Skip the whole block -- divider
+          included -- when neither is available, so Android never shows a lone "or". */}
       {isNative ? (
-        <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
-            <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontWeight: '500' }}>or</span>
-            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
-          </div>
+        (providers.google || isIOS) && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+              <span style={{ color: 'var(--color-text-muted)', fontSize: '13px', fontWeight: '500' }}>or</span>
+              <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+            </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {/* Google runs in the system browser and returns via the deep link.
-                Only offered when the API reports the credentials are configured. */}
-            {providers.google && (
-              <button
-                type="button"
-                onClick={handleGoogleNative}
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '13px 16px',
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-bg)',
-                  color: 'var(--color-text)',
-                  borderRadius: '12px',
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.7 : 1,
-                  fontFamily: 'inherit',
-                }}
-              >
-                <GoogleIcon />
-                Sign in with Google
-              </button>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Google runs in the system browser and returns via the deep link.
+                  Only offered when the API reports the credentials are configured. */}
+              {providers.google && (
+                <button
+                  type="button"
+                  onClick={handleGoogleNative}
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '13px 16px',
+                    border: '1px solid var(--color-border)',
+                    background: 'var(--color-bg)',
+                    color: 'var(--color-text)',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.7 : 1,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  <GoogleIcon />
+                  Sign in with Google
+                </button>
+              )}
 
-            <button
-              type="button"
-              onClick={handleAppleNative}
-              disabled={loading}
-              // var(--color-text)/var(--color-bg) resolve to Apple's black button on
-              // a light theme and its white button on a dark one -- both HIG variants.
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '13px 16px',
-                border: 'none',
-                background: 'var(--color-text)',
-                color: 'var(--color-bg)',
-                borderRadius: '12px',
-                fontSize: '15px',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1,
-                fontFamily: 'inherit',
-              }}
-            >
-              <AppleIcon color="var(--color-bg)" />
-              Sign in with Apple
-            </button>
-          </div>
-        </>
+              {/* The native Apple sheet needs no server-side Apple credentials --
+                  the app gets a signed token Apple's public keys verify -- but the
+                  plugin only implements it on iOS, so it's gated there. */}
+              {isIOS && (
+                <button
+                  type="button"
+                  onClick={handleAppleNative}
+                  disabled={loading}
+                  // var(--color-text)/var(--color-bg) resolve to Apple's black button on
+                  // a light theme and its white button on a dark one -- both HIG variants.
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '13px 16px',
+                    border: 'none',
+                    background: 'var(--color-text)',
+                    color: 'var(--color-bg)',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.7 : 1,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  <AppleIcon color="var(--color-bg)" />
+                  Sign in with Apple
+                </button>
+              )}
+            </div>
+          </>
+        )
       ) : (
         /* Web: a provider with no credentials configured would be a dead button,
            so only offer the ones the API reports as ready. */
