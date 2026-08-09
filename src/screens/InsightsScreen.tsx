@@ -210,6 +210,16 @@ export default function InsightsScreen({ onNavigate }: Props) {
             )}
           </div>
         )}
+
+        {!loading && insights.length > 0 && (
+          <p style={{ margin: '16px 0 0', fontSize: '10.5px', lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
+            Insights use estimated nutrition for general reference, not medical advice. Source:{' '}
+            <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>
+              USDA FoodData Central
+            </a>
+            .
+          </p>
+        )}
       </div>
 
       <style>{`.rh-spin { animation: rh-rot 1s linear infinite } @keyframes rh-rot { to { transform: rotate(360deg) } }`}</style>

@@ -640,6 +640,14 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 <MacroStat color="var(--color-primary)" label="Fat" grams={dayNutrition.fat} goal={macroGoals.fat} />
               </div>
             </div>
+            {/* 1.4.1 citation — same estimated recipe data, summed. */}
+            <p style={{ margin: '12px 0 0', fontSize: '10.5px', lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
+              Estimated totals for general reference; not medical advice. Source:{' '}
+              <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>
+                USDA FoodData Central
+              </a>
+              .
+            </p>
           </div>
           </Reveal>
         )}

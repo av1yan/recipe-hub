@@ -561,6 +561,21 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                   <MacroRow color="var(--color-primary)" label="Fat" grams={recipe.nutrition.fat} />
                 </div>
               </div>
+              {/* App Store guideline 1.4.1 (Physical Harm) requires health/nutrition
+                  figures to cite a source. These values are estimates, so we say so
+                  and link to an authoritative reference the user can easily find. */}
+              <p style={{ margin: '14px 0 0', fontSize: '10.5px', lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
+                Estimated per serving for general reference; actual values vary with ingredients and preparation. Not medical advice. Source:{' '}
+                <a
+                  href="https://fdc.nal.usda.gov/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}
+                >
+                  USDA FoodData Central
+                </a>
+                .
+              </p>
             </div>
           </div>
         )}
