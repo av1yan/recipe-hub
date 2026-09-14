@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles, BookmarkPlus, Check } from 'lucide-react'
+import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles, BookmarkPlus, Check, Info } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { recipeAPI, groceryAPI, mealPlanAPI, insightsAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
@@ -562,20 +562,23 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                 </div>
               </div>
               {/* App Store guideline 1.4.1 (Physical Harm) requires health/nutrition
-                  figures to cite a source. These values are estimates, so we say so
-                  and link to an authoritative reference the user can easily find. */}
-              <p style={{ margin: '14px 0 0', fontSize: '10.5px', lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
-                Estimated per serving for general reference; actual values vary with ingredients and preparation. Not medical advice. Source:{' '}
-                <a
-                  href="https://fdc.nal.usda.gov/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}
-                >
-                  USDA FoodData Central
-                </a>
-                .
-              </p>
+                  figures to cite a source, prominently enough for a user to actually
+                  notice — a boxed callout with an icon, not fine print. */}
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '14px', padding: '10px 12px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px' }}>
+                <Info size={14} color="var(--color-primary-dark)" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <p style={{ margin: 0, fontSize: '12.5px', lineHeight: 1.5, color: 'var(--color-primary-dark)' }}>
+                  Estimated per serving for general reference — actual values vary with ingredients and preparation. Not medical advice. Source:{' '}
+                  <a
+                    href="https://fdc.nal.usda.gov/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'var(--color-primary-dark)', textDecoration: 'underline', fontWeight: 600 }}
+                  >
+                    USDA FoodData Central
+                  </a>
+                  .
+                </p>
+              </div>
             </div>
           </div>
         )}

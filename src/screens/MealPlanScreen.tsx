@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2, Clock } from 'lucide-react'
+import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2, Clock, Info } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { Toast, useToast } from '../components/Toast'
 import { FrameOverlay } from '../components/FrameOverlay'
@@ -640,14 +640,18 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 <MacroStat color="var(--color-primary)" label="Fat" grams={dayNutrition.fat} goal={macroGoals.fat} />
               </div>
             </div>
-            {/* 1.4.1 citation — same estimated recipe data, summed. */}
-            <p style={{ margin: '12px 0 0', fontSize: '10.5px', lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
-              Estimated totals for general reference; not medical advice. Source:{' '}
-              <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>
-                USDA FoodData Central
-              </a>
-              .
-            </p>
+            {/* 1.4.1 citation — same estimated recipe data, summed. Boxed with an
+                icon so it's actually noticeable, not fine print under the bars. */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '12px', padding: '10px 12px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px' }}>
+              <Info size={14} color="var(--color-primary-dark)" style={{ flexShrink: 0, marginTop: '1px' }} />
+              <p style={{ margin: 0, fontSize: '12.5px', lineHeight: 1.5, color: 'var(--color-primary-dark)' }}>
+                Estimated totals for general reference — not medical advice. Source:{' '}
+                <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary-dark)', textDecoration: 'underline', fontWeight: 600 }}>
+                  USDA FoodData Central
+                </a>
+                .
+              </p>
+            </div>
           </div>
           </Reveal>
         )}

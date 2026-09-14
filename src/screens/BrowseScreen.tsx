@@ -1,5 +1,5 @@
 import { useState, useEffect, type CSSProperties } from 'react'
-import { Search, SlidersHorizontal, X, ChevronRight } from 'lucide-react'
+import { Search, SlidersHorizontal, X, ChevronRight, Info } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { recipeAPI } from '../utils/api'
 import { getDietPrefs } from './DietPreferencesScreen'
@@ -454,6 +454,7 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
   if (recipes.length === 0) {
     return <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px', padding: '24px 0', margin: 0 }}>No recipes yet.</p>
   }
+  const hasCalories = recipes.some(r => r.calories)
   return (
     <div>
       {recipes.map((recipe, index) => {
@@ -477,6 +478,20 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
           </div>
         )
       })}
+      {/* App Store guideline 1.4.1: calorie counts here are estimates, so cite
+          a source wherever they're shown — boxed and visible, not fine print. */}
+      {hasCalories && (
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '14px', padding: '10px 12px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px' }}>
+          <Info size={14} color="var(--color-primary-dark)" style={{ flexShrink: 0, marginTop: '1px' }} />
+          <p style={{ margin: 0, fontSize: '12.5px', lineHeight: 1.5, color: 'var(--color-primary-dark)' }}>
+            Calorie counts are estimates for general reference — not medical advice. Source:{' '}
+            <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary-dark)', textDecoration: 'underline', fontWeight: 600 }}>
+              USDA FoodData Central
+            </a>
+            .
+          </p>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, type CSSProperties } from 'react'
-import { ArrowLeft, Crown, Sparkles, Loader2, Lightbulb } from 'lucide-react'
+import { ArrowLeft, Crown, Sparkles, Loader2, Lightbulb, Info } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { mealPlanAPI, recipeAPI, insightsAPI } from '../utils/api'
 import { getPantry } from '../utils/pantry'
@@ -212,13 +212,16 @@ export default function InsightsScreen({ onNavigate }: Props) {
         )}
 
         {!loading && insights.length > 0 && (
-          <p style={{ margin: '16px 0 0', fontSize: '10.5px', lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
-            Insights use estimated nutrition for general reference, not medical advice. Source:{' '}
-            <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'underline' }}>
-              USDA FoodData Central
-            </a>
-            .
-          </p>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '16px', padding: '10px 12px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px' }}>
+            <Info size={14} color="var(--color-primary-dark)" style={{ flexShrink: 0, marginTop: '1px' }} />
+            <p style={{ margin: 0, fontSize: '12.5px', lineHeight: 1.5, color: 'var(--color-primary-dark)' }}>
+              Insights use estimated nutrition for general reference — not medical advice. Source:{' '}
+              <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary-dark)', textDecoration: 'underline', fontWeight: 600 }}>
+                USDA FoodData Central
+              </a>
+              .
+            </p>
+          </div>
         )}
       </div>
 
