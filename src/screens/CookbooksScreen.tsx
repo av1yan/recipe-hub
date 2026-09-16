@@ -11,7 +11,7 @@ interface Props {
 const fieldStyle = {
   width: '100%', padding: '11px 13px', borderRadius: '11px', border: 'none',
   background: 'var(--color-subtle)', color: 'var(--color-text)',
-  fontSize: '14px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const,
+  fontSize: '16px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const,
 }
 
 export default function CookbooksScreen({ onNavigate }: Props) {

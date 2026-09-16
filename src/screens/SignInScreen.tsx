@@ -156,7 +156,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                fontSize: '15px',
+                fontSize: '16px',
                 border: 'none',
                 borderRadius: '12px',
                 background: 'var(--color-subtle)',
@@ -190,7 +190,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
               style={{
                 width: '100%',
                 padding: '12px 14px 12px 40px',
-                fontSize: '15px',
+                fontSize: '16px',
                 border: 'none',
                 borderRadius: '12px',
                 background: 'var(--color-subtle)',
@@ -216,7 +216,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
               style={{
                 width: '100%',
                 padding: '12px 14px 12px 40px',
-                fontSize: '15px',
+                fontSize: '16px',
                 border: 'none',
                 borderRadius: '12px',
                 background: 'var(--color-subtle)',

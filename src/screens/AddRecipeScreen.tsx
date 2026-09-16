@@ -58,7 +58,7 @@ type InstructionRow = { text: string; duration: string }
 
 const rowInput: React.CSSProperties = {
   padding: '10px 12px', borderRadius: '11px', border: 'none',
-  fontSize: '14px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none',
+  fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none',
   boxSizing: 'border-box', fontFamily: 'inherit', width: '100%',
 }
 

@@ -184,7 +184,7 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
     }
   }
 
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '11px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
+  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '11px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   const labelStyle: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
   const cardStyle: React.CSSProperties = { background: 'var(--color-subtle)', borderRadius: '16px', padding: '16px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }
 

@@ -274,7 +274,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                 value={createName}
                 onChange={e => setCreateName(e.target.value)}
                 placeholder="Family name (e.g. The Smiths)"
-                style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit', marginBottom: '10px' }}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit', marginBottom: '10px' }}
               />
               <button onClick={createFamily} disabled={busy} style={{ width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit' }}>
                 Create family
@@ -292,7 +292,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                   onKeyDown={e => { if (e.key === 'Enter') joinFamily() }}
                   placeholder="Invite code"
                   autoCapitalize="characters"
-                  style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', letterSpacing: '0.12em', fontWeight: '700', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
+                  style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '16px', letterSpacing: '0.12em', fontWeight: '700', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
                 />
                 <button onClick={joinFamily} disabled={busy || !joinCode.trim()} style={{ flexShrink: 0, padding: '0 18px', borderRadius: '12px', border: 'none', background: joinCode.trim() ? 'var(--color-primary)' : 'var(--color-subtle)', color: joinCode.trim() ? '#fff' : 'var(--color-text-muted)', fontSize: '14px', fontWeight: '700', cursor: busy || !joinCode.trim() ? 'default' : 'pointer', fontFamily: 'inherit' }}>
                   Join
@@ -370,7 +370,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                 onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addItem() }}
                 placeholder="Add to the shared list…"
-                style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
+                style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
               />
               <button onClick={addItem} aria-label="Add item" style={{ flexShrink: 0, width: '46px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                 <Plus size={20} />

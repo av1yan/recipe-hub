@@ -208,7 +208,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
             placeholder="What would you like to cook?"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '15px', color: 'var(--color-text)', fontFamily: 'inherit', minWidth: 0 }}
+            style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: '16px', color: 'var(--color-text)', fontFamily: 'inherit', minWidth: 0 }}
           />
           {q && (
             <button onClick={() => setSearchTerm('')} aria-label="Clear search" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: 'var(--color-text-muted)' }}>

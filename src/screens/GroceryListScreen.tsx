@@ -89,7 +89,7 @@ function iconBtnStyle(active = false): CSSProperties {
 const fieldStyle: CSSProperties = {
   padding: '11px 13px', borderRadius: '11px', border: 'none',
   background: 'var(--color-subtle)', color: 'var(--color-text)',
-  fontSize: '14px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+  fontSize: '16px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
 }
 
 export default function GroceryListScreen({ onNavigate }: Props) {

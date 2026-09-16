@@ -279,7 +279,7 @@ export default function PantryScreen({ onNavigate }: Props) {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') addFromInput() }}
             placeholder="Add an ingredient you have…"
-            style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '15px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
+            style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
           />
           <button onClick={addFromInput} aria-label="Add to pantry" style={{ flexShrink: 0, width: '46px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <Plus size={20} />
