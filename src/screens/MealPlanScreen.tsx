@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2, Clock, Info } from 'lucide-react'
+import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2, Clock, Info, Plus } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
 import { Toast, useToast } from '../components/Toast'
 import { FrameOverlay } from '../components/FrameOverlay'
@@ -665,10 +665,13 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           const filled = !!meal
           const servings = meal?.servings || 1
           const canPick = recipes.length > 0
+          // Empty rows are always tappable: with recipes, tap opens the picker;
+          // with none, tap sends the user to add one instead of doing nothing.
+          const rowClickable = !filled || canPick
           // The row content, shared by both the plain (empty) and swipeable
           // (filled) wrappers. `open` drives the chevron rotation.
           const rowContent = (open: boolean) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', cursor: canPick ? 'pointer' : 'default' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', cursor: rowClickable ? 'pointer' : 'default' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.05em' }}>{m.label.toUpperCase()}</p>
                 {filled ? (
@@ -693,6 +696,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   <Trash2 size={15} color="var(--color-text-muted)" />
                 </button>
               )}
+              {!filled && !canPick && <Plus size={17} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />}
               {canPick && <ChevronDown size={17} color="var(--color-text-muted)" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />}
             </div>
           )
@@ -712,7 +716,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               {rowContent}
             </SwipeableMealRow>
           ) : (
-            <RecipePicker key={`${m.key}-${i}`} recipes={recipes} recentIds={recentIds} meal={m} onPick={(id) => addMealToPlan(id, m.key)}>
+            <RecipePicker key={`${m.key}-${i}`} recipes={recipes} recentIds={recentIds} meal={m} onPick={(id) => addMealToPlan(id, m.key)} onNoRecipes={() => onNavigate('add-recipe')}>
               {rowContent}
             </RecipePicker>
           )
@@ -770,13 +774,14 @@ function MacroStat({ color, label, grams, goal }: { color: string; label: string
  * instead of the browser's native <select>. Click-outside closes it; the
  * current recipe (for a swap) is ticked.
  */
-function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentIds = [] }: {
+function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentIds = [], onNoRecipes }: {
   recipes: Recipe[]
   meal: typeof MEALS[number]
   current?: string
   onPick: (recipeId: string) => void
   children: (open: boolean) => React.ReactNode
   recentIds?: string[]
+  onNoRecipes?: () => void
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -830,7 +835,7 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <div onClick={() => { if (!disabled) setOpen(o => !o) }}>
+      <div onClick={() => { disabled ? onNoRecipes?.() : setOpen(o => !o) }}>
         {children(open)}
       </div>
       {open && !disabled && (
