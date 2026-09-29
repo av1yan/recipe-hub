@@ -164,14 +164,14 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
     // half-saves.
     const makingNewCookbook = cookbookId === NEW_COOKBOOK && !!newCookbookName.trim()
     if (!isPro && makingNewCookbook && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
-      setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
+      setError(`You've reached ${FREE_COOKBOOK_LIMIT} cookbooks on Free. Upgrade to Pro for unlimited organization, smart meal planning, and recipe import. Start your free 3-day trial →`)
       return
     }
     if (!isPro) {
       try {
         const existing = await recipeAPI.list()
         if (Array.isArray(existing) && existing.length >= FREE_RECIPE_LIMIT) {
-          setError(`The Free plan is capped at ${FREE_RECIPE_LIMIT} recipes. Upgrade to Pro in Settings for unlimited.`)
+          setError(`You've hit the ${FREE_RECIPE_LIMIT}-recipe limit on Free. Upgrade to Pro for unlimited recipes, advanced features, and meal planning. Try Pro free for 3 days →`)
           return
         }
       } catch {

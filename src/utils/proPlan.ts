@@ -7,7 +7,7 @@ const EVENT = 'rh-proplan-change'
 
 // Free-plan caps. Pro removes them entirely.
 export const FREE_RECIPE_LIMIT = 10
-export const FREE_COOKBOOK_LIMIT = 1
+export const FREE_COOKBOOK_LIMIT = 3
 
 export const TRIAL_DAYS = 3
 const DAY_MS = 24 * 60 * 60 * 1000

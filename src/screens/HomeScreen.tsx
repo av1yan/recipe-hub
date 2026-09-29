@@ -344,6 +344,15 @@ export default function HomeScreen({ onNavigate }: Props) {
             )}
           </section>
 
+          {/* Feature discovery hint for free users with few recipes */}
+          {!isPro && recipes.length < 3 && recipes.length > 0 && (
+            <div style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '12px', padding: '14px', marginBottom: '28px' }}>
+              <p style={{ margin: '0 0 10px', fontSize: '12.5px', fontWeight: '600', color: 'var(--color-primary)', letterSpacing: '0.05em' }}>💡 SPEED IT UP</p>
+              <p style={{ margin: '0 0 12px', fontSize: '13.5px', color: 'var(--color-text)', lineHeight: 1.5 }}>Import recipes from websites, photos, or text instead of typing everything out.</p>
+              <button onClick={() => onNavigate('home', { openAddSheet: true })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>Import a Recipe</button>
+            </div>
+          )}
+
           {/* Favorites */}
           <section style={{ marginBottom: '36px' }}>
             <SectionHead title="Favorites" action={favorites.length > 0 ? 'See all →' : undefined} onAction={() => onNavigate('favorites')} />

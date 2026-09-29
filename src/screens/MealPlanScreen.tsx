@@ -683,7 +683,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   </>
                 ) : (
                   <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
-                    {recipes.length === 0 ? 'No recipes yet — add some first' : `Add a ${m.label.toLowerCase()} recipe`}
+                    {recipes.length === 0 ? 'No recipes yet — import or create one' : `Add a ${m.label.toLowerCase()} recipe`}
                   </p>
                 )}
               </div>

@@ -412,6 +412,26 @@ function Subscription({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
+        {/* Trial promotion banner for free users who haven't tried yet */}
+        {!isPro && !trial.used && (
+          <div style={{ background: 'linear-gradient(135deg, #fbbf24, #f97316)', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '18px' }}>✨</span>
+              <span style={{ fontSize: '15px', fontWeight: '700', color: '#fff' }}>Try Pro Free</span>
+            </div>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.95)', margin: '0 0 12px', lineHeight: 1.5 }}>
+              Get unlimited recipes, cookbooks, meal planning, and recipe import for {TRIAL_DAYS} days. No payment required.
+            </p>
+            <button
+              onClick={() => { startTrial(); setPlan('trial') }}
+              disabled={busy}
+              style={{ width: '100%', padding: '11px', background: '#fff', color: '#f97316', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1, fontFamily: 'inherit' }}
+            >
+              {busy ? 'Starting trial…' : `Start ${TRIAL_DAYS}-Day Free Trial`}
+            </button>
+          </div>
+        )}
+
         {/* On Free: the full gold upsell card. */}
         {!isPro && (
           <div style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '14px', padding: '14px 16px' }}>
