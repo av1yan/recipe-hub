@@ -785,6 +785,7 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const [positionAbove, setPositionAbove] = useState(false)
   const disabled = recipes.length === 0
 
   useEffect(() => {
@@ -796,6 +797,14 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
     return () => document.removeEventListener('mousedown', onDoc)
   }, [open])
 
+  useEffect(() => {
+    if (!open || !ref.current) return
+    const rect = ref.current.getBoundingClientRect()
+    const dropdownHeight = 272
+    const spaceBelow = window.innerHeight - rect.bottom
+    setPositionAbove(spaceBelow < dropdownHeight + 20)
+  }, [open])
+
   // Float recently-picked recipes to the top; the rest follow in their normal
   // order. Only sections the list when there's actually a recent one to show.
   const recent = recentIds.map(id => recipes.find(r => r.id === id)).filter((r): r is Recipe => !!r)
@@ -804,6 +813,8 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
 
   const row = (r: Recipe, first: boolean) => {
     const selected = current === r.id
+    const totalTime = (r.prepTime || 0) + (r.cookTime || 0)
+    const timeDisplay = totalTime > 0 ? `${totalTime} min` : 'N/A'
     return (
       <button
         key={r.id}
@@ -819,7 +830,7 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
       >
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, `${(r.prepTime || 0) + (r.cookTime || 0)} min`].filter(Boolean).join(' · ')}</div>
+          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, timeDisplay].filter(Boolean).join(' · ')}</div>
         </div>
         {selected && <Check size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />}
       </button>
@@ -840,7 +851,7 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
       </div>
       {open && !disabled && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 2px)', left: 0, right: 0, zIndex: 20,
+          position: 'absolute', [positionAbove ? 'bottom' : 'top']: positionAbove ? 'calc(100% + 2px)' : 'calc(100% + 2px)', left: 0, right: 0, zIndex: 20,
           background: 'var(--color-card)', border: '1px solid var(--color-border)',
           borderRadius: '14px', boxShadow: '0 14px 34px rgba(15,23,42,0.2)',
           overflow: 'hidden', maxHeight: '272px', overflowY: 'auto',

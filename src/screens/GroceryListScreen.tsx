@@ -74,6 +74,15 @@ function parseItemParts(raw: string): { name: string; quantity: number; unit: st
   return { name: raw.trim(), quantity: 1, unit: 'piece' }
 }
 
+function formatQuantity(quantity: number): string {
+  const rounded = Math.round(quantity * 100) / 100
+  return rounded === Math.floor(rounded) ? Math.floor(rounded).toString() : rounded.toString()
+}
+
+function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 /** Quiet square header button — subtle by default, accent when active. */
 function iconBtnStyle(active = false): CSSProperties {
   return {
@@ -616,11 +625,11 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                         </button>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: '15px', fontWeight: '500', color: 'var(--color-text)', textDecoration: item.checked ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {item.name}
+                            {capitalizeFirstLetter(item.name)}
                           </div>
                           {(item.unit || '').trim() && (
                             <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                              {item.quantity} {pluralizeUnit(item.unit, item.quantity)}
+                              {formatQuantity(item.quantity)} {pluralizeUnit(item.unit, item.quantity)}
                             </div>
                           )}
                         </div>
