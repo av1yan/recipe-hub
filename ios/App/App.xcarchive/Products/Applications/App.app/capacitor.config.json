@@ -1,0 +1,15 @@
+{
+	"appId": "com.reciphub.app",
+	"appName": "recipHub",
+	"webDir": "dist",
+	"packageClassList": [
+		"SignInWithApple",
+		"AppPlugin",
+		"CAPBrowserPlugin",
+		"CAPCameraPlugin",
+		"HapticsPlugin",
+		"SharePlugin",
+		"StatusBarPlugin",
+		"PurchasesPlugin"
+	]
+}

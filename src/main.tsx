@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { Capacitor } from '@capacitor/core'
 import App from './App'
 import './styles/global.css'
+import './styles/design-cards.css'
 import { initTheme } from './utils/theme'
 
 // A native build is a real app, never the desktop phone-mock. Mark it so the
