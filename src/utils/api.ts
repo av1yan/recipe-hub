@@ -85,7 +85,7 @@ async function apiRequest(endpoint: string, options: ApiRequestOptions = {}) {
 // Auth endpoints
 export const authAPI = {
   register: (email: string, name: string, password: string) =>
-    apiRequest('/auth/register', {
+    apiRequest('/api/auth/register', {
       method: 'POST',
       body: { email, name, password },
       requiresAuth: false,
@@ -93,23 +93,23 @@ export const authAPI = {
 
   /** `identifier` is an email address or a username. */
   login: (identifier: string, password: string) =>
-    apiRequest('/auth/login', {
+    apiRequest('/api/auth/login', {
       method: 'POST',
       body: { identifier, password },
       requiresAuth: false,
     }),
 
   forgotPassword: (email: string) =>
-    apiRequest('/auth/forgot-password', { method: 'POST', body: { email }, requiresAuth: false }),
+    apiRequest('/api/auth/forgot-password', { method: 'POST', body: { email }, requiresAuth: false }),
 
   resetPassword: (token: string, password: string) =>
-    apiRequest('/auth/reset-password', { method: 'POST', body: { token, password }, requiresAuth: false }),
+    apiRequest('/api/auth/reset-password', { method: 'POST', body: { token, password }, requiresAuth: false }),
 
   /** Whether the server can actually send reset links. */
-  passwordResetAvailable: () => apiRequest('/auth/password-reset/available', { requiresAuth: false }),
+  passwordResetAvailable: () => apiRequest('/api/auth/password-reset/available', { requiresAuth: false }),
 
   /** Which OAuth providers the API has credentials for, e.g. { google: true }. */
-  oauthProviders: () => apiRequest('/auth/oauth/providers', { requiresAuth: false }),
+  oauthProviders: () => apiRequest('/api/auth/oauth/providers', { requiresAuth: false }),
 
   /**
    * Native Sign in with Apple. The iOS app already ran Apple's sheet and holds a
@@ -117,28 +117,28 @@ export const authAPI = {
    * `name` is only present on a person's first-ever authorization.
    */
   appleNative: (identityToken: string, name?: string) =>
-    apiRequest('/auth/apple/native', {
+    apiRequest('/api/auth/apple/native', {
       method: 'POST',
       body: { identityToken, name },
       requiresAuth: false,
     }),
 
-  getProfile: () => apiRequest('/auth/profile'),
+  getProfile: () => apiRequest('/api/auth/profile'),
 
   updateProfile: (data: { name?: string; username?: string }) =>
-    apiRequest('/auth/profile', {
+    apiRequest('/api/auth/profile', {
       method: 'PUT',
       body: data,
     }),
 
   changePassword: (currentPassword: string, newPassword: string) =>
-    apiRequest('/auth/change-password', {
+    apiRequest('/api/auth/change-password', {
       method: 'POST',
       body: { currentPassword, newPassword },
     }),
 
   /** Permanently deletes the account and all its data server-side. */
-  deleteAccount: () => apiRequest('/auth/account', { method: 'DELETE' }),
+  deleteAccount: () => apiRequest('/api/auth/account', { method: 'DELETE' }),
 }
 
 export const subscriptionAPI = {
