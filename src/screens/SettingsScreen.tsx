@@ -15,6 +15,7 @@ import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScr
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref } from '../utils/preferences'
 import { getCalorieGoal, setCalorieGoal, getMacroGoals, setMacroGoal } from '../utils/goals'
+import { StatsGrid, InfoCard, TrackerBox } from '../components/DesignCards'
 
 // Copy text using the Clipboard API, falling back to legacy execCommand.
 // Returns false if both are unavailable (e.g. a sandboxed iframe or denied permission).

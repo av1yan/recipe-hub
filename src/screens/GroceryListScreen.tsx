@@ -10,6 +10,7 @@ import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 import { Capacitor } from '@capacitor/core'
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera'
+import { StatsGrid, TrackerBox } from '../components/DesignCards'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -599,8 +600,28 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                 </div>
 
                 <div>
+                  {selectedList.items && selectedList.items.length > 0 && (
+                    <>
+                      <StatsGrid stats={[
+                        { value: totalCount, label: 'Total' },
+                        { value: checkedCount, label: 'Checked' },
+                        { value: totalCount - checkedCount, label: 'Remaining' }
+                      ]} />
+                      {totalCount > 0 && (
+                        <TrackerBox title="Progress">
+                          <div className="tracker-item">
+                            <strong>{checkedCount}/{totalCount}</strong> items checked
+                          </div>
+                          <div className="tracker-item">
+                            <strong>{Math.round((checkedCount / totalCount) * 100)}%</strong> complete
+                          </div>
+                        </TrackerBox>
+                      )}
+                    </>
+                  )}
                   {selectedList.items && selectedList.items.length > 0 ? (
-                    selectedList.items.map((item, i) => (
+                    <div style={{ marginTop: '16px' }}>
+                    {selectedList.items.map((item, i) => (
                       <div
                         key={item.id}
                         style={{
@@ -642,6 +663,8 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                         </button>
                       </div>
                     ))
+                    }
+                    </div>
                   ) : (
                     <div style={{ textAlign: 'center', padding: '40px 0' }}>
                       <p style={{ color: 'var(--color-text-muted)', margin: '0 0 16px', fontSize: '15px' }}>No items in this list yet</p>

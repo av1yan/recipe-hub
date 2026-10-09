@@ -6,6 +6,7 @@ import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
 import { useProPlan } from '../utils/proPlan'
 import { DAY_NAMES, MEALS, sameWeek, getMeals, mondayOf } from './MealPlanScreen'
+import { InfoCard, StatsGrid, TrackerBox } from '../components/DesignCards'
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -254,40 +255,41 @@ export default function HomeScreen({ onNavigate }: Props) {
             </div>
           )}
 
+          {/* Stats Grid */}
+          {!loading && recipes.length > 0 && (
+            <StatsGrid stats={[
+              { value: recipes.length, label: 'Recipes' },
+              { value: cookbooks.length, label: 'Cookbooks' },
+              { value: plannedThisWeek, label: 'This Week' }
+            ]} />
+          )}
+
           {/* Today */}
           <section style={{ marginBottom: '36px' }}>
             <SectionHead title="Today" action="Plan →" onAction={() => onNavigate('meal-plan')} />
 
             {todayMeals.length > 0 ? (
-              todayMeals.map(({ meal, cfg }, i) => (
-                <div
-                  key={i}
-                  // The meal-plan API strips ingredients from its recipes, so
-                  // open the full one we already loaded; the meal is the fallback.
-                  onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}
-                  style={rowStyle(i > 0)}
-                >
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.05em' }}>
-                      {cfg.label.toUpperCase()}
-                    </p>
-                    <h3 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {meal.name}
-                    </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {todayMeals.map(({ meal, cfg }) => (
+                  <div key={cfg.key} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}>
+                      <InfoCard
+                        leftBadge={{ label: cfg.label.slice(0, 3).toUpperCase(), value: '🍽️' }}
+                        title={meal.name}
+                        subtitle={cfg.label}
+                        rightInfo={`${(meal.prepTime || 0) + (meal.cookTime || 0)} min`}
+                      />
+                    </div>
+                    <button
+                      onClick={() => removeMeal(meal.mealId)}
+                      aria-label={`Remove ${meal.name} from ${cfg.label}`}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', flexShrink: 0 }}
+                    >
+                      <X size={16} color="var(--color-text-muted)" />
+                    </button>
                   </div>
-                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', flexShrink: 0 }}>
-                    {(meal.prepTime || 0) + (meal.cookTime || 0)} min
-                  </span>
-                  {/* Taking a meal off the day, not deleting the recipe. */}
-                  <button
-                    onClick={e => { e.stopPropagation(); removeMeal(meal.mealId) }}
-                    aria-label={`Remove ${meal.name} from ${cfg.label}`}
-                    style={{ flexShrink: 0, width: '28px', height: '28px', borderRadius: '14px', background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                  >
-                    <X size={14} color="var(--color-text-muted)" />
-                  </button>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <EmptyRow label="Nothing planned today" action="Plan →" onClick={() => onNavigate('meal-plan')} />
             )}
@@ -357,17 +359,21 @@ export default function HomeScreen({ onNavigate }: Props) {
           <section style={{ marginBottom: '36px' }}>
             <SectionHead title="Favorites" action={favorites.length > 0 ? 'See all →' : undefined} onAction={() => onNavigate('favorites')} />
             {favorites.length > 0 ? (
-              favorites.slice(0, 5).map((recipe: any, i: number) => {
-                const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
-                return (
-                  <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={rowStyle(i > 0)}>
-                    <h4 style={{ flex: 1, minWidth: 0, fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {recipe.name}
-                    </h4>
-                    <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', flexShrink: 0 }}>{time} min</span>
-                  </div>
-                )
-              })
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {favorites.slice(0, 5).map((recipe: any) => {
+                  const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+                  return (
+                    <InfoCard
+                      key={recipe.id}
+                      leftBadge={{ label: '❤️', value: '⭐' }}
+                      title={recipe.name}
+                      subtitle={recipe.cuisine || 'Recipe'}
+                      rightInfo={`${time} min`}
+                      onClick={() => onNavigate('recipe', { recipe })}
+                    />
+                  )
+                })}
+              </div>
             ) : (
               <EmptyRow label="No favorites yet" action="Browse →" onClick={() => onNavigate('browse')} />
             )}
@@ -377,19 +383,21 @@ export default function HomeScreen({ onNavigate }: Props) {
           <section style={{ marginBottom: '36px' }}>
             <SectionHead title="Cookbooks" action={cookbooks.length > 0 ? 'See all →' : undefined} onAction={() => onNavigate('cookbooks')} />
             {cookbooks.length > 0 ? (
-              cookbooks.slice(0, 5).map((book: any, i: number) => {
-                const count = book.recipes?.length ?? 0
-                return (
-                  <div key={book.id} onClick={() => onNavigate('cookbook', { cookbookId: book.id })} style={rowStyle(i > 0)}>
-                    <h4 style={{ flex: 1, minWidth: 0, fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {book.name}
-                    </h4>
-                    <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', flexShrink: 0 }}>
-                      {count} recipe{count === 1 ? '' : 's'}
-                    </span>
-                  </div>
-                )
-              })
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {cookbooks.slice(0, 5).map((book: any) => {
+                  const count = book.recipes?.length ?? 0
+                  return (
+                    <InfoCard
+                      key={book.id}
+                      leftBadge={{ label: `${count}`, value: '📚' }}
+                      title={book.name}
+                      subtitle={`${count} recipe${count === 1 ? '' : 's'}`}
+                      rightInfo="→"
+                      onClick={() => onNavigate('cookbook', { cookbookId: book.id })}
+                    />
+                  )
+                })}
+              </div>
             ) : (
               <EmptyRow label="No cookbooks yet" action="Create →" onClick={() => onNavigate('cookbooks')} />
             )}

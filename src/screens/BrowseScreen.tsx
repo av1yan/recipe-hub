@@ -4,6 +4,7 @@ import type { Screen, Recipe } from '../types'
 import { recipeAPI } from '../utils/api'
 import { getDietPrefs } from './DietPreferencesScreen'
 import { ALLERGY_OPTIONS, getAllergies, recipeHasAllergen, saveAllergies } from '../utils/allergies'
+import { InfoCard } from '../components/DesignCards'
 
 const DIET_LABELS: Record<string, string> = {
   vegan: 'Vegan', vegetarian: 'Vegetarian', 'gluten-free': 'Gluten-Free',
@@ -457,27 +458,22 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
   const hasCalories = recipes.some(r => r.calories)
   return (
     <div>
-      {recipes.map((recipe, index) => {
-        const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
-        const meta = [recipe.cuisine, `${time} min`, recipe.calories ? `${recipe.calories} cal` : '']
-          .filter(Boolean).join(' · ')
-        return (
-          <div
-            key={recipe.id}
-            onClick={() => onNavigate('recipe', { recipe })}
-            style={rowStyle(index > 0)}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h4 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {recipe.name}
-              </h4>
-              <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {meta}
-              </p>
-            </div>
-          </div>
-        )
-      })}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {recipes.map((recipe) => {
+          const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+          const meta = [recipe.cuisine, `${time} min`].filter(Boolean).join(' · ')
+          return (
+            <InfoCard
+              key={recipe.id}
+              leftBadge={{ label: recipe.cuisine?.slice(0, 3).toUpperCase() || '👨‍🍳', value: '🍽️' }}
+              title={recipe.name}
+              subtitle={meta}
+              rightInfo={`${time}m`}
+              onClick={() => onNavigate('recipe', { recipe })}
+            />
+          )
+        })}
+      </div>
       {/* App Store guideline 1.4.1: calorie counts here are estimates, so cite
           a source wherever they're shown — boxed and visible, not fine print. */}
       {hasCalories && (

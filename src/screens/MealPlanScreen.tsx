@@ -9,6 +9,7 @@ import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 import { tapHaptic } from '../utils/haptics'
+import { StatsGrid } from '../components/DesignCards'
 
 interface Props {
   onNavigate: (screen: Screen) => void
