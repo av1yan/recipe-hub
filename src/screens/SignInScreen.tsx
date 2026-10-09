@@ -383,12 +383,18 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
 }
 
 function OAuthButton({ provider, label, icon }: { provider: string; label: string; icon: React.ReactNode }) {
+  const handleOAuth = () => {
+    const width = 500
+    const height = 600
+    const left = window.screenX + (window.outerWidth - width) / 2
+    const top = window.screenY + (window.outerHeight - height) / 2
+    window.open(oauthStartUrl(provider), 'oauth', `width=${width},height=${height},left=${left},top=${top}`)
+  }
+
   return (
     <button
       type="button"
-      // A full-page redirect, not fetch: the provider must be able to show its
-      // own consent screen, and it refuses to render inside a frame.
-      onClick={() => { window.location.href = oauthStartUrl(provider) }}
+      onClick={handleOAuth}
       style={{
         flex: 1,
         display: 'flex',
