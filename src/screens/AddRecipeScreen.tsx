@@ -407,7 +407,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 <div key={i} style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                   <input placeholder="Ingredient" value={ing.name} onChange={e => updateIngredient(i, 'name', e.target.value)} style={{ ...rowInput, flex: 2, minWidth: 0 }} />
                   <input placeholder="Qty" value={ing.quantity} onChange={e => updateIngredient(i, 'quantity', e.target.value)} inputMode="decimal" style={{ ...rowInput, flex: 1, minWidth: 0 }} />
-                  <input placeholder="Unit" value={ing.unit} onChange={e => updateIngredient(i, 'unit', e.target.value)} style={{ ...rowInput, flex: 1, minWidth: 0 }} />
+                  <input placeholder="Unit" value={ing.unit} onChange={e => updateIngredient(i, 'unit', e.target.value)} style={{ ...rowInput, flex: 1.2, minWidth: '50px' }} />
                   <button type="button" onClick={() => removeIngredient(i)} aria-label="Remove ingredient" style={removeBtn}>
                     <X size={15} />
                   </button>

@@ -9,9 +9,9 @@
 
 ## Executive Summary
 
-**Issues Found:** 5 total (4 fixed, 1 data-related)  
+**Issues Found:** 6 total (4 fixed, 1 data-related, 1 new UX issue)  
 **Critical Bugs:** 0 (no crashes or data loss)  
-**UX Issues:** 1 fixed (OAuth flow)  
+**UX Issues:** 2 (OAuth flow fixed, Unit field width issue)  
 **Data Quality Issues:** 2 (typo in recipe name, zero-time recipe)  
 **Performance Issues:** 0
 
@@ -77,6 +77,25 @@
 
 ---
 
+### 🔴 NEW BUG - Unit Field Width Truncation
+
+**Severity:** Low (UX Issue)  
+**Status:** FOUND DURING TESTING  
+**Location:** AddRecipeScreen.tsx - Ingredients form  
+**Issue:** Unit field truncates input - when entering "g", only "d" is visible  
+**Root Cause:** Unit field has insufficient width/doesn't accommodate full unit text  
+**Impact:** Users can't verify they've entered the correct unit, confusing  
+**Example:** Entered "g" (grams), but field shows only "d"
+
+**Reproduction:**
+1. Click Add Recipe > Write from scratch
+2. Add an ingredient with unit "g"
+3. Observe that unit field shows only last character or single character
+
+**Fix Needed:** Increase Unit field width or adjust placeholder/display logic
+
+---
+
 ### 🔴 DATA ISSUE - Recipe Name Typo
 
 **Severity:** Very Low (Cosmetic)  
@@ -111,7 +130,7 @@
   - [x] Delete functionality (trash icons visible)
 
 ### ⚠️ **Partially Tested**
-- [ ] Recipe creation flow (not tested)
+- [x] Recipe creation flow (basic creation works, found unit field width issue)
 - [ ] Recipe import from URL (not tested)
 - [ ] Recipe import from photo (not tested)
 - [ ] Meal planning assignment (tested dropdown, not assignment)
@@ -140,6 +159,7 @@
 | Dropdown cuts off | Layout | Medium | ✅ WORKING | MealPlanScreen.tsx | Viewport detection added |
 | Quantity shows 3 decimals | Format | Low | ✅ FIXED | GroceryListScreen.tsx | formatQuantity() function |
 | Lowercase ingredient names | UX Polish | Low | ✅ FIXED | GroceryListScreen.tsx | capitalizeFirstLetter() function |
+| Unit field truncation | UX | Low | ❌ NEW | AddRecipeScreen.tsx | Increase field width or adjust display |
 | Zero-time recipe in discover | Data Quality | Low | ⚠️ PARTIAL | RecipePicker + Discover | Fixed in meals, still in discover |
 | "Beast" recipe typo | Data Quality | Very Low | ❌ UNFIXED | Database | Manual fix required |
 
