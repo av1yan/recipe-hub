@@ -672,7 +672,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           // The row content, shared by both the plain (empty) and swipeable
           // (filled) wrappers. `open` drives the chevron rotation.
           const rowContent = (open: boolean) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '15px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', cursor: rowClickable ? 'pointer' : 'default' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', marginBottom: '10px', borderRadius: '16px', border: '1px solid var(--color-border)', background: 'var(--color-subtle)', cursor: rowClickable ? 'pointer' : 'default' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                {m.emoji}
+              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '600', margin: 0, letterSpacing: '0.05em' }}>{m.label.toUpperCase()}</p>
                 {filled ? (
