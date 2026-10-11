@@ -157,6 +157,11 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const rotd = safeRecipes.length ? safeRecipes[Math.floor(Date.now() / 86400000) % safeRecipes.length] : null
   const browsing = !q && !activeFilter
 
+  const trending = [...safeRecipes]
+    .filter(r => r.createdAt)
+    .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
+    .slice(0, 6)
+
   const applyFilter = (f: ActiveFilter) => {
     setActiveFilter(f)
     setExploreCat(null)
@@ -360,6 +365,34 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
                   {[rotd.cuisine, `${(rotd.prepTime || 0) + (rotd.cookTime || 0)} min`, rotd.calories ? `${rotd.calories} cal` : ''].filter(Boolean).join(' · ')}
                 </p>
+              </div>
+            )}
+
+            {trending.length > 0 && (
+              <div style={{ padding: '34px 0 0' }}>
+                <div style={{ padding: '0 24px' }}>
+                  <SectionHead title="Trending" />
+                </div>
+                <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '16px 24px 4px', scrollbarWidth: 'none' }}>
+                  {trending.map(recipe => {
+                    const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+                    return (
+                      <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ flex: '0 0 150px', cursor: 'pointer' }}>
+                        <div style={{ height: '110px', borderRadius: '14px', overflow: 'hidden', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '34px' }}>
+                          {recipe.imageUrl
+                            ? <img src={recipe.imageUrl} alt={recipe.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                            : '🍽️'}
+                        </div>
+                        <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: '10px 0 0', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {recipe.name}
+                        </p>
+                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 0' }}>
+                          {[recipe.cuisine, `${time} min`].filter(Boolean).join(' · ')}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )}
 

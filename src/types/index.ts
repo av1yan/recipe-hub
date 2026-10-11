@@ -68,6 +68,7 @@ export interface Recipe {
   rating?: number
   userNotes?: string
   isFavorite?: boolean
+  createdAt?: string
   timesCooked?: number
   lastCooked?: Date
 }
