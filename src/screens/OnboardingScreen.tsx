@@ -83,7 +83,7 @@ export default function OnboardingScreen({ onNavigate }: Props) {
           onClick={handleNext}
           style={{
             width: '100%', padding: '16px',
-            background: 'var(--color-primary)', color: '#fff',
+            background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff',
             border: 'none', borderRadius: '14px',
             fontSize: '16px', fontWeight: '700', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',

@@ -357,7 +357,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             <div style={{ borderTop: '1px solid var(--color-subtle)', paddingTop: '16px', paddingBottom: '4px' }}>
               <button
                 onClick={() => setAdaptOpen(o => !o)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '12px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '14px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', boxShadow: 'var(--shadow-pill)', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 <Sparkles size={16} /> Adapt this recipe
               </button>
@@ -372,7 +372,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                           key={g}
                           onClick={() => runAdapt(g)}
                           disabled={adaptLoading}
-                          style={{ padding: '7px 12px', borderRadius: '999px', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? 'var(--color-primary)' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: adaptLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                          style={{ padding: '7px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? 'var(--color-primary)' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: adaptLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
                         >
                           {g}
                         </button>
@@ -453,7 +453,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               {/* Servings scaler — amounts below follow this. */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-border)', borderRadius: '999px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-border)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)' }}>
                     <button onClick={() => setServings(s => Math.max(1, s - 1))} aria-label="Fewer servings" style={stepBtn}><Minus size={15} /></button>
                     <span style={{ minWidth: '26px', textAlign: 'center', fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{servings}</span>
                     <button onClick={() => setServings(s => s + 1)} aria-label="More servings" style={stepBtn}><Plus size={15} /></button>
@@ -587,7 +587,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             onClick={() => onNavigate('cooking-mode', { recipe })}
             style={{
               width: '100%', padding: '15px',
-              background: 'var(--color-primary)',
+              background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)',
               color: '#fff', border: 'none', borderRadius: '14px',
               fontSize: '15px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -631,7 +631,7 @@ function ActionButton({ icon, label, onClick, busy }: { icon: React.ReactNode; l
       }}
     >
       <span style={{
-        width: '46px', height: '46px', borderRadius: '23px', background: 'var(--color-subtle)',
+        width: '46px', height: '46px', borderRadius: '23px', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)',
       }}>
         {icon}

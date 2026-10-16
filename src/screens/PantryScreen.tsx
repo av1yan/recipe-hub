@@ -258,9 +258,9 @@ export default function PantryScreen({ onNavigate }: Props) {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') addFromInput() }}
             placeholder="Add an ingredient you have…"
-            style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-subtle)', outline: 'none', fontFamily: 'inherit' }}
+            style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: '12px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-subtle)', boxShadow: 'var(--shadow-sm)', outline: 'none', fontFamily: 'inherit' }}
           />
-          <button onClick={addFromInput} aria-label="Add to pantry" style={{ flexShrink: 0, width: '46px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <button onClick={addFromInput} aria-label="Add to pantry" style={{ flexShrink: 0, width: '46px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <Plus size={20} />
           </button>
         </div>
@@ -269,7 +269,7 @@ export default function PantryScreen({ onNavigate }: Props) {
         {pantry.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
             {pantry.map(item => (
-              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--color-subtle)', color: 'var(--color-text)', borderRadius: '999px', padding: '5px 8px 5px 12px', fontSize: '13px', fontWeight: '600' }}>
+              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--color-subtle)', color: 'var(--color-text)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', padding: '5px 8px 5px 12px', fontSize: '13px', fontWeight: '600' }}>
                 {item}
                 <button onClick={() => removeItem(item)} aria-label={`Remove ${item}`} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: 'var(--color-text-muted)' }}>
                   <X size={14} />
@@ -288,7 +288,7 @@ export default function PantryScreen({ onNavigate }: Props) {
                 <button
                   key={s}
                   onClick={() => add(s)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', borderRadius: '999px', padding: '6px 12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', padding: '6px 12px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   <Plus size={13} color="var(--color-primary)" /> {s}
                 </button>
@@ -324,7 +324,7 @@ export default function PantryScreen({ onNavigate }: Props) {
                         {d.steps && <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '5px 0 0', lineHeight: 1.5 }}>{d.steps}</p>}
                         {d.nutrition && (
                           <div style={{ marginTop: '8px' }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: 'var(--color-primary-dark)', background: 'var(--color-primary-bg)', padding: '3px 9px', borderRadius: '999px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: 'var(--color-primary-dark)', background: 'var(--color-primary-bg)', padding: '3px 9px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)' }}>
                               <Flame size={12} /> {d.nutrition}
                             </span>
                           </div>

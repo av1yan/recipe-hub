@@ -83,7 +83,7 @@ export default function FavoritesScreen({ onNavigate }: Props) {
             </p>
             <button
               onClick={() => onNavigate('home')}
-              style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Find recipes
             </button>

@@ -123,12 +123,12 @@ export default function CookbooksScreen({ onNavigate }: Props) {
               style={{ ...fieldStyle, minHeight: '76px', resize: 'none' }}
             />
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={createCookbook} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={createCookbook} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Create
               </button>
               <button
                 onClick={() => { setShowCreateForm(false); setNewCookbookName(''); setNewCookbookDesc('') }}
-                style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--color-subtle)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Cancel
               </button>
@@ -147,7 +147,7 @@ export default function CookbooksScreen({ onNavigate }: Props) {
             <p style={{ margin: 0, fontSize: '15px' }}>No cookbooks yet</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              style={{ padding: '12px 20px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ padding: '12px 20px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Create your first cookbook
             </button>

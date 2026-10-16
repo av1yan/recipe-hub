@@ -102,7 +102,7 @@ function SectionHeader({ label }: { label: string }) {
 
 function SaveButton({ onClick, saved }: { onClick: () => void; saved: boolean }) {
   return (
-    <button onClick={onClick} style={{ width: '100%', padding: '13px', background: saved ? 'var(--color-primary-bg)' : 'var(--color-primary)', color: saved ? 'var(--color-primary-dark)' : '#fff', border: saved ? '1px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
+    <button onClick={onClick} style={{ width: '100%', padding: '13px', boxShadow: saved ? 'var(--shadow-sm)' : 'var(--shadow-pill)', background: saved ? 'var(--color-primary-bg)' : 'var(--color-primary)', color: saved ? 'var(--color-primary-dark)' : '#fff', border: saved ? '1px solid var(--color-primary-border)' : 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
       {saved ? <><Check size={16} /> Saved!</> : 'Save Changes'}
     </button>
   )
@@ -180,7 +180,7 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
     }
   }
 
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '11px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-card)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
+  const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 14px', borderRadius: '11px', border: 'none', fontSize: '16px', color: 'var(--color-text)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   const labelStyle: React.CSSProperties = { fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }
   const cardStyle: React.CSSProperties = { background: 'var(--color-subtle)', borderRadius: '16px', padding: '16px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }
 
@@ -305,7 +305,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
   // Diet and allergy pills persist the moment they're tapped (like onboarding),
   // so Browse picks them up without needing Save.
   const pill = (active: boolean, accent: string): React.CSSProperties => ({
-    padding: '6px 12px', borderRadius: '999px',
+    padding: '6px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)',
     border: `1.5px solid ${active ? accent : 'var(--color-border)'}`,
     background: active ? accent : 'var(--color-card)',
     color: active ? '#fff' : 'var(--color-text-secondary)',
@@ -329,7 +329,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
       <SubHeader title="Preferences" onBack={onBack} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '6px 16px 8px' }}>
         <SectionHeader label="MEASUREMENTS" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <div style={{ display: 'flex', gap: '10px' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <label style={fieldLabel}>UNITS</label>
@@ -358,12 +358,12 @@ function Preferences({ onBack }: { onBack: () => void }) {
 
         <>
         <SectionHeader label="DAILY CALORIE GOAL" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
+        <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
           <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 10px', lineHeight: 1.35 }}>
             Your target for Insights and the meal-plan nutrition bar.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button onClick={() => setGoal(goal - 50)} aria-label="Lower goal" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '20px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>−</button>
+            <button onClick={() => setGoal(goal - 50)} aria-label="Lower goal" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text)', fontSize: '20px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>−</button>
             <div style={{ flex: 1, textAlign: 'center' }}>
               <span style={{ fontSize: '22px', fontWeight: '800', color: 'var(--color-text)' }}>{goal.toLocaleString()}</span>
               <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginLeft: '5px' }}>cal/day</span>
@@ -373,7 +373,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
         </div>
 
         <SectionHeader label="DAILY MACROS" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px 12px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '10px 12px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {([
             { key: 'protein', label: 'Protein', color: '#a78bfa' },
             { key: 'carbs', label: 'Carbs', color: '#fbbf24' },
@@ -382,7 +382,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
             <div key={m.key} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 0' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.color, flexShrink: 0 }} />
               <span style={{ flex: 1, fontSize: '13.5px', color: 'var(--color-text)', fontWeight: '600' }}>{m.label}</span>
-              <button onClick={() => setMacro(m.key, macros[m.key] - 5)} aria-label={`Lower ${m.label}`} style={{ width: '32px', height: '32px', borderRadius: '9px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', color: 'var(--color-text)', fontSize: '17px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>−</button>
+              <button onClick={() => setMacro(m.key, macros[m.key] - 5)} aria-label={`Lower ${m.label}`} style={{ width: '32px', height: '32px', borderRadius: '9px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text)', fontSize: '17px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>−</button>
               <span style={{ width: '48px', textAlign: 'center', fontSize: '15px', fontWeight: '800', color: 'var(--color-text)' }}>{macros[m.key]}g</span>
               <button onClick={() => setMacro(m.key, macros[m.key] + 5)} aria-label={`Raise ${m.label}`} style={{ width: '32px', height: '32px', borderRadius: '9px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '17px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>+</button>
             </div>
@@ -391,14 +391,14 @@ function Preferences({ onBack }: { onBack: () => void }) {
         </>
 
         <SectionHeader label="DIET" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {DIET_OPTIONS.map(d => (
             <button key={d.id} onClick={() => toggleDiet(d.id)} style={pill(diet.includes(d.id), 'var(--color-primary)')}>{d.label}</button>
           ))}
         </div>
 
         <SectionHeader label="ALLERGIES" />
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px' }}>
+        <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px' }}>
           <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 7px', lineHeight: 1.35 }}>
             Recipes with any of these are hidden across the app.
           </p>
@@ -482,7 +482,7 @@ function InvitePage({ onBack }: { onBack: () => void }) {
           <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-text)', margin: '0 0 8px' }}>Share recipHub</h3>
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>Invite friends and family to start cooking smarter together.</p>
         </div>
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
+        <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '16px', border: '1px solid var(--color-subtle)', marginBottom: '12px' }}>
           <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: '600', margin: '0 0 6px', letterSpacing: '0.05em' }}>SHARE LINK</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <p ref={linkRef} style={{ flex: 1, fontSize: '14px', color: 'var(--color-primary)', fontWeight: '600', margin: 0, wordBreak: 'break-all', userSelect: 'all' }}>{link}</p>
@@ -491,7 +491,7 @@ function InvitePage({ onBack }: { onBack: () => void }) {
             </button>
           </div>
         </div>
-        <button onClick={share} style={{ width: '100%', padding: '14px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
+        <button onClick={share} style={{ width: '100%', padding: '14px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <Share2 size={16} /> Share recipHub
         </button>
       </div>
@@ -524,7 +524,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
       <div style={{ flex: 1, overflowY: 'auto' }}>
 
-        <div style={{ margin: '8px 24px 24px' }}>
+        <div style={{ margin: '8px 24px 24px', padding: '0 16px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', boxShadow: 'var(--shadow-md)' }}>
           <Row icon={<User size={18} color="var(--color-text-secondary)" />} label="Account" onPress={() => setSubPage('account')} />
           <Row icon={<SlidersHorizontal size={18} color="var(--color-text-secondary)" />} label="Preferences" onPress={() => setSubPage('preferences')} divider />
           <Row icon={<HelpCircle size={18} color="var(--color-text-secondary)" />} label="Help" onPress={() => setSubPage('help')} divider />
@@ -538,7 +538,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0' }}>
               <Moon size={18} color="var(--color-text-secondary)" />
               <span style={{ flex: 1, fontSize: '15px', color: 'var(--color-text)', fontWeight: '500' }}>Theme</span>
-              <div style={{ display: 'flex', background: 'var(--color-subtle)', borderRadius: '999px', padding: '3px' }}>
+              <div style={{ display: 'flex', background: 'var(--color-subtle)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', padding: '3px' }}>
                 {(['light', 'dark'] as Theme[]).map(t => (
                   <button
                     key={t}
@@ -570,7 +570,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
         </div>
 
         <div style={{ margin: '0 24px 24px' }}>
-          <button onClick={onSignOut} style={{ width: '100%', padding: '14px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <button onClick={onSignOut} style={{ width: '100%', padding: '14px', background: 'var(--color-card)', boxShadow: 'var(--shadow-md)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', borderRadius: '16px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}>
             <LogOut size={17} />
             Log out
           </button>

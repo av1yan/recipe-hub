@@ -363,7 +363,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={photoBusy}
-                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-subtle)', border: 'none', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
+                style={{ marginTop: '6px', width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: 'var(--color-subtle)', boxShadow: 'var(--shadow-sm)', border: 'none', borderRadius: '12px', cursor: 'pointer', textAlign: 'left' }}
               >
                 <div style={{ width: '40px', height: '40px', borderRadius: '11px', background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Camera size={18} color="var(--color-primary)" />
@@ -439,7 +439,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                       background: active ? 'var(--color-primary-bg)' : 'transparent',
                       color: active ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
                       border: '1px solid ' + (active ? 'var(--color-primary)' : 'var(--color-border)'),
-                      borderRadius: '999px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                      borderRadius: '999px', boxShadow: 'var(--shadow-sm)', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                       fontFamily: 'inherit',
                     }}
                   >

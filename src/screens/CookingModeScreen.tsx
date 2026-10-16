@@ -118,7 +118,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <p style={{ fontSize: '16px', margin: 0 }}>No instructions for this recipe</p>
           <button
             onClick={() => onNavigate('recipe', { recipe })}
-            style={{ background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', marginTop: '8px' }}
+            style={{ background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', marginTop: '8px' }}
           >
             Back to Recipe
           </button>
@@ -151,7 +151,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
 
       {/* Progress bar */}
       <div style={{ height: '3px', background: 'var(--color-subtle)', flexShrink: 0 }}>
-        <div style={{ height: '100%', background: 'var(--color-primary)', width: `${((currentStep + 1) / totalSteps) * 100}%`, transition: 'width 0.4s ease' }} />
+        <div style={{ height: '100%', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', width: `${((currentStep + 1) / totalSteps) * 100}%`, transition: 'width 0.4s ease' }} />
       </div>
 
       {/* Ingredients overlay */}
@@ -175,7 +175,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
           <div style={{ padding: '12px 16px 20px', borderTop: '1px solid var(--color-subtle)' }}>
             <button
               onClick={() => setShowIngredients(false)}
-              style={{ width: '100%', padding: '13px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+              style={{ width: '100%', padding: '13px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
             >
               Back to Steps
             </button>
@@ -214,7 +214,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             <button
               onClick={toggleSpeak}
               aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
             </button>
@@ -306,7 +306,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             onClick={goNext}
             style={{
               flex: 2, padding: '14px', borderRadius: '12px',
-              background: 'var(--color-primary)', color: '#fff',
+              background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff',
               border: 'none', cursor: 'pointer',
               fontSize: '14px', fontWeight: '700',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',

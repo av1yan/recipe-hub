@@ -74,7 +74,7 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
                   background: active ? 'var(--color-primary-bg)' : 'transparent',
                   color: active ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
                   border: '1px solid ' + (active ? 'var(--color-primary)' : 'var(--color-border)'),
-                  borderRadius: '999px',
+                  borderRadius: '999px', boxShadow: 'var(--shadow-sm)',
                   fontSize: '14px',
                   fontWeight: '600',
                   cursor: 'pointer',
@@ -103,7 +103,7 @@ export default function DietPreferencesScreen({ onNavigate }: Props) {
           style={{
             width: '100%',
             padding: '16px',
-            background: 'var(--color-primary)',
+            background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)',
             color: '#fff',
             border: 'none',
             borderRadius: '14px',

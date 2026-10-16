@@ -88,6 +88,7 @@ function iconBtnStyle(active = false): CSSProperties {
   return {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     width: '36px', height: '36px', borderRadius: '11px',
+    boxShadow: active ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
     background: active ? 'var(--color-primary)' : 'var(--color-subtle)',
     color: active ? '#fff' : 'var(--color-text-secondary)',
     border: 'none', cursor: 'pointer',
@@ -456,7 +457,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         <button
           onClick={openCamera}
           aria-label="Scan a grocery note"
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)', borderRadius: '11px', padding: '0 13px', height: '36px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+          style={{ boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)', borderRadius: '11px', padding: '0 13px', height: '36px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
         >
           <Camera size={16} /> Scan
         </button>
@@ -514,12 +515,12 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                 placeholder="Create a new list…"
                 style={{ ...fieldStyle, width: '100%', marginBottom: '8px' }}
               />
-              <button onClick={createNewList} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={createNewList} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Create list
               </button>
               <button
                 onClick={openCamera}
-                style={{ width: '100%', padding: '11px', borderRadius: '12px', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary-border)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ boxShadow: 'var(--shadow-sm)', width: '100%', padding: '11px', borderRadius: '12px', background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary-border)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 <Camera size={16} /> Scan a note
               </button>
@@ -538,7 +539,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     <button
                       key={list.id}
                       onClick={() => setSelectedListId(list.id)}
-                      style={{ padding: '7px 14px', borderRadius: '999px', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'transparent', color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+                      style={{ padding: '7px 14px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'transparent', color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
                     >
                       {list.name}
                     </button>
@@ -589,7 +590,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                   <button
                     onClick={addItemToList}
                     aria-label="Add item"
-                    style={{ flexShrink: 0, width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                    style={{ flexShrink: 0, width: '44px', height: '44px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                   >
                     <Plus size={18} />
                   </button>
@@ -616,7 +617,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     </>
                   )}
                   {selectedList.items && selectedList.items.length > 0 ? (
-                    <div style={{ marginTop: '16px' }}>
+                    <div style={{ marginTop: '16px', padding: '4px 16px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', boxShadow: 'var(--shadow-md)' }}>
                     {selectedList.items.map((item, i) => (
                       <div
                         key={item.id}
@@ -635,6 +636,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                             width: '23px', height: '23px', borderRadius: '7px', flexShrink: 0,
                             border: `2px solid ${item.checked ? 'var(--color-primary)' : 'var(--color-border)'}`,
                             background: item.checked ? 'var(--color-primary)' : 'transparent',
+                            boxShadow: item.checked ? 'var(--shadow-pill)' : 'none',
                             color: '#fff', cursor: 'pointer', padding: 0,
                           }}
                         >
@@ -699,7 +701,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                 This removes the list and its {selectedList.items?.length || 0} item{(selectedList.items?.length || 0) === 1 ? '' : 's'}. It can’t be undone.
               </p>
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setConfirmDeleteList(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <button onClick={() => setConfirmDeleteList(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                   Cancel
                 </button>
                 <button onClick={deleteSelectedList} disabled={deletingList} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: '#dc2626', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: deletingList ? 0.6 : 1, fontFamily: 'inherit' }}>
@@ -722,7 +724,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           {scanProgress > 0 && (
             <>
               <div style={{ width: '200px', height: '6px', background: 'var(--color-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', background: 'var(--color-primary)', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
+                <div style={{ height: '100%', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', width: `${Math.round(scanProgress * 100)}%`, transition: 'width 0.2s' }} />
               </div>
               <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: 0 }}>{Math.round(scanProgress * 100)}%</p>
             </>
@@ -765,13 +767,13 @@ export default function GroceryListScreen({ onNavigate }: Props) {
           </div>
 
           <div style={{ padding: '14px 24px', borderTop: '1px solid var(--color-subtle)', display: 'flex', gap: '10px' }}>
-            <button onClick={() => setScanned(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => setScanned(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--color-subtle)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text-secondary)', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
               Cancel
             </button>
             <button
               onClick={addScannedItems}
               disabled={savingScan || scanned.length === 0}
-              style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1, fontFamily: 'inherit' }}
+              style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: savingScan || scanned.length === 0 ? 0.6 : 1, fontFamily: 'inherit' }}
             >
               {savingScan ? 'Adding…' : `Add ${scanned.length} item${scanned.length === 1 ? '' : 's'}`}
             </button>
@@ -791,7 +793,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             <p style={{ margin: '2px 0 6px', fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', textAlign: 'center' }}>Scan a grocery note</p>
             <button
               onClick={() => { setPickerOpen(false); isNative ? nativeScan(CameraSource.Camera) : cameraRef.current?.click() }}
-              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontFamily: 'inherit' }}
             >
               <Camera size={17} /> Take a photo
             </button>
@@ -803,7 +805,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             </button>
             <button
               onClick={() => setPickerOpen(false)}
-              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--color-subtle)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Cancel
             </button>

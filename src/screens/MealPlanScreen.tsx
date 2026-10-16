@@ -82,6 +82,7 @@ export function getMeals(plan: MealPlan | undefined, dayName: string, mealType: 
 function iconBtnStyle(active = false): CSSProperties {
   return {
     width: '36px', height: '36px', borderRadius: '11px',
+    boxShadow: active ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
     background: active ? 'var(--color-primary)' : 'var(--color-subtle)',
     color: active ? '#fff' : 'var(--color-text-secondary)',
     border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -468,16 +469,33 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* Month label — tap (or the calendar icon) to expand into a month grid. */}
-      <button
-        onClick={toggleExpanded}
-        aria-expanded={expanded}
-        aria-label={expanded ? 'Collapse calendar' : 'Expand calendar'}
-        style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', padding: 0, marginBottom: '12px', cursor: 'pointer', fontFamily: 'inherit' }}
-      >
+      {/* Week / Month segmented control, with the month label beside it. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '12px' }}>
         <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>{monthLabel}</span>
-        <ChevronDown size={13} color="var(--color-text-muted)" style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s ease' }} />
-      </button>
+        <div role="tablist" style={{ display: 'flex', padding: '3px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)' }}>
+          {(['Week', 'Month'] as const).map(mode => {
+            const selected = mode === 'Month' ? expanded : !expanded
+            return (
+              <button
+                key={mode}
+                role="tab"
+                aria-selected={selected}
+                onClick={() => { if (selected) return; toggleExpanded() }}
+                style={{
+                  padding: '6px 14px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: '13px', fontWeight: '700',
+                  background: selected ? 'var(--color-primary-bg)' : 'transparent',
+                  color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                  boxShadow: selected ? 'var(--shadow-pill)' : 'none',
+                  transition: 'background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
+                }}
+              >
+                {mode}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       {expanded ? renderMonthGrid() : (
         // Week strip — chevrons or swipe to move between weeks.
@@ -497,7 +515,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 numbers). Column centres are (i + 0.5)/7 of the width. */}
             <div
               className="rh-day-pill"
-              style={{ position: 'absolute', top: '24px', left: `calc(${((DAY_NAMES.indexOf(selectedDay) + 0.5) * 100) / 7}% - 17px)`, width: '34px', height: '34px', borderRadius: '17px', background: 'var(--color-primary)', pointerEvents: 'none' }}
+              style={{ position: 'absolute', top: '24px', left: `calc(${((DAY_NAMES.indexOf(selectedDay) + 0.5) * 100) / 7}% - 17px)`, width: '34px', height: '34px', borderRadius: '17px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', pointerEvents: 'none' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               {DAY_SHORT.map((short, idx) => {
@@ -580,7 +598,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               <button
                 onClick={commitGroceryAdd}
                 disabled={generating || (preview.newCount === 0 && preview.updatedCount === 0)}
-                style={{ flex: 1.4, padding: '11px', borderRadius: '11px', background: 'var(--color-primary)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: generating || (preview.newCount === 0 && preview.updatedCount === 0) ? 0.6 : 1, fontFamily: 'inherit' }}
+                style={{ flex: 1.4, padding: '11px', borderRadius: '11px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: '700', cursor: 'pointer', opacity: generating || (preview.newCount === 0 && preview.updatedCount === 0) ? 0.6 : 1, fontFamily: 'inherit' }}
               >
                 {generating ? 'Adding…' : `Add ${preview.newCount + preview.updatedCount} item${preview.newCount + preview.updatedCount === 1 ? '' : 's'}`}
               </button>
@@ -591,14 +609,17 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             onClick={openGroceryPreview}
             disabled={previewing}
             style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              padding: '13px', marginBottom: '22px', borderRadius: '12px',
-              background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)',
-              fontSize: '14px', fontWeight: '700', cursor: previewing ? 'default' : 'pointer',
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+              padding: '14px 18px', marginBottom: '22px', borderRadius: '18px',
+              background: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)',
+              fontSize: '15px', fontWeight: '700', cursor: previewing ? 'default' : 'pointer',
               fontFamily: 'inherit', opacity: previewing ? 0.7 : 1,
             }}
           >
-            <ShoppingCart size={16} /> {previewing ? 'Checking…' : 'Add this week to Groceries'}
+            <span style={{ width: '34px', height: '34px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ShoppingCart size={17} color="#fff" />
+            </span>
+            {previewing ? 'Checking…' : 'Add this week to Groceries'}
           </button>
         ))}
 
@@ -619,7 +640,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>cal</span>
                 </div>
                 <div style={{ height: '6px', borderRadius: '3px', background: 'var(--color-border)', overflow: 'hidden', marginTop: '9px' }}>
-                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / goalCal) * 100))}%`, background: 'var(--color-primary)', borderRadius: '3px', transition: 'width 0.3s ease' }} />
+                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / goalCal) * 100))}%`, background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', borderRadius: '3px', transition: 'width 0.3s ease' }} />
                 </div>
                 <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>of {goalCal.toLocaleString()} cal goal</span>
               </div>
@@ -647,8 +668,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
         {/* The day's meals as one ruled list — each row is its own recipe
             picker (tap to fill or swap). */}
-        <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)', marginBottom: '2px' }}>
-          <h2 style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: 0 }}>{selectedDay}</h2>
+        <div style={{ borderRadius: '20px', border: '1px solid var(--color-border)', background: 'var(--color-card)', padding: '4px 16px', marginBottom: '16px', boxShadow: 'var(--shadow-md)' }}>
+        <div style={{ padding: '12px 0 10px' }}>
+          <h2 style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)', margin: 0 }}>{selectedDay}</h2>
         </div>
         {dayRows.map(({ m, meal }, i) => {
           const filled = !!meal
@@ -660,7 +682,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           // The row content, shared by both the plain (empty) and swipeable
           // (filled) wrappers. `open` drives the chevron rotation.
           const rowContent = (open: boolean) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', marginBottom: '10px', borderRadius: '16px', border: '1px solid var(--color-border)', background: 'var(--color-subtle)', cursor: rowClickable ? 'pointer' : 'default' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none', cursor: rowClickable ? 'pointer' : 'default' }}>
               <div style={{ width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
                 {m.emoji}
               </div>
@@ -713,6 +735,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             </RecipePicker>
           )
         })}
+        </div>
       </div>
 
       {/* Long-press → move or copy a planned meal to another day this week. */}

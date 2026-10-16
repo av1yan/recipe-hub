@@ -74,9 +74,10 @@
   --radius-xl: 20px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.10);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+  --shadow-pill: 0 4px 12px rgba(74, 124, 53, 0.22);
 
   /* Skeleton loading -- base fill + a lighter band that sweeps across it. */
   --color-skeleton: #e8edf3;
@@ -87,6 +88,8 @@
    the system preference). Only the palette flips; brand green and reds carry
    over. Set once here rather than per component. */
 :root[data-theme="dark"] {
+  --shadow-pill: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
   --color-text: #f1f5f9;
   --color-text-secondary: #cbd5e1;
   --color-text-muted: #94a3b8;

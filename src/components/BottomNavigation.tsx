@@ -33,9 +33,6 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid, sidebar = f
   const { openAddSheet } = useApp()
   const handleAdd = onAdd ?? openAddSheet
 
-  // Index of the active *regular* tab (never the accent "+"); -1 = none.
-  const activeIndex = tabs.findIndex(t => t.id === active && !t.accent)
-
   const navBg = solid ? 'var(--color-card)' : 'var(--color-nav-bg)'
   const blur = solid ? 'none' : 'saturate(180%) blur(24px)'
 
@@ -130,20 +127,8 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid, sidebar = f
       // devices that have an indicator, which clips the labels; floor it so the
       // bar always has real clearance.
       paddingBottom: 'max(calc(6px + env(safe-area-inset-bottom)), 26px)',
-      paddingTop: '2px',
+      paddingTop: '8px',
     }}>
-      {/* Accent indicator that slides between tabs (persistent nav → it flows). */}
-      {activeIndex >= 0 && (
-        <div
-          className="rh-nav-pill"
-          style={{
-            position: 'absolute', top: '2px',
-            left: `calc(${((activeIndex + 0.5) * 100) / tabs.length}% - 10px)`,
-            width: '20px', height: '2.5px', borderRadius: '0 0 3px 3px',
-            background: 'var(--color-primary)', pointerEvents: 'none',
-          }}
-        />
-      )}
       {tabs.map((tab) => {
         const isActive = active === tab.id
         if (tab.accent) {
@@ -177,11 +162,14 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid, sidebar = f
             style={{
               flex: 1, display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
-              padding: '8px 0 4px',
-              border: 'none', background: 'none', cursor: 'pointer',
+              margin: '0 4px', padding: '8px 0 7px', borderRadius: '16px',
+              border: `1px solid ${isActive ? 'var(--color-primary-border)' : 'var(--color-border)'}`,
+              background: isActive ? 'var(--color-primary-bg)' : 'var(--color-card)',
+              cursor: 'pointer',
               gap: '3px',
               color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-              transition: 'color 0.2s ease',
+              boxShadow: isActive ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
+              transition: 'background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
             }}
           >
             <span className={isActive ? 'rh-nav-pop' : undefined} style={{ display: 'flex' }}>

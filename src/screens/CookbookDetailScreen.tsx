@@ -124,7 +124,7 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '260px', margin: '0 auto' }}>
               <button
                 onClick={openAdd}
-                style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
+                style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px' }}
               >
                 <Plus size={16} /> Add recipes
               </button>
@@ -181,7 +181,7 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
             ) : addable.length === 0 ? (
               <div style={{ textAlign: 'center', paddingTop: '40px', color: 'var(--color-text-muted)' }}>
                 <p style={{ fontSize: '14px', margin: '0 0 16px' }}>{allRecipes.length === 0 ? "You haven't saved any recipes yet." : 'Every recipe you have is already in here.'}</p>
-                <button onClick={() => { setShowAdd(false); onNavigate('add-recipe', { cookbookId }) }} style={{ padding: '11px 18px', borderRadius: '11px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <button onClick={() => { setShowAdd(false); onNavigate('add-recipe', { cookbookId }) }} style={{ padding: '11px 18px', borderRadius: '11px', border: 'none', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
                   Create a new recipe
                 </button>
               </div>
@@ -200,7 +200,7 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
                         <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
                         <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, `${(r.prepTime || 0) + (r.cookTime || 0)} min`].filter(Boolean).join(' · ')}</div>
                       </div>
-                      <span style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'var(--color-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {busy ? <Check size={16} /> : <Plus size={17} />}
                       </span>
                     </button>

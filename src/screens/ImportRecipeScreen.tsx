@@ -321,7 +321,7 @@ const inputBase: React.CSSProperties = {
 
 const miniBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px',
-  background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '999px',
+  background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)',
   fontSize: '12px', fontWeight: '700', color: 'var(--color-text-secondary)', cursor: 'pointer',
   fontFamily: 'inherit',
 }

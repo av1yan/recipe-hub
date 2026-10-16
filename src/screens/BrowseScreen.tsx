@@ -77,6 +77,7 @@ function chipStyle(on: boolean): CSSProperties {
   return {
     padding: '7px 13px',
     borderRadius: '999px',
+    boxShadow: on ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
     border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'),
     background: on ? 'var(--color-primary-bg)' : 'transparent',
     color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
@@ -96,6 +97,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null)
   const [exploreCat, setExploreCat] = useState<FilterKind | null>(null)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [segment, setSegment] = useState<'discover' | 'favorites'>('discover')
 
   useEffect(() => {
     loadRecipes()
@@ -235,10 +237,34 @@ export default function BrowseScreen({ onNavigate }: Props) {
           >
             <SlidersHorizontal size={18} color={filterActive ? '#fff' : 'var(--color-text-secondary)'} />
             {activeFilter && !filterOpen && (
-              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: 'var(--color-primary)', border: '2px solid var(--color-bg)' }} />
+              <span style={{ position: 'absolute', top: '9px', right: '10px', width: '7px', height: '7px', borderRadius: '4px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', border: '2px solid var(--color-bg)' }} />
             )}
           </button>
         )}
+      </div>
+
+      <div role="tablist" style={{ display: 'flex', padding: '3px', marginTop: '14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)' }}>
+        {(['discover', 'favorites'] as const).map(seg => {
+          const selected = segment === seg
+          return (
+            <button
+              key={seg}
+              role="tab"
+              aria-selected={selected}
+              onClick={() => setSegment(seg)}
+              style={{
+                flex: 1, padding: '8px 14px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                fontSize: '14px', fontWeight: '700',
+                background: selected ? 'var(--color-primary-bg)' : 'transparent',
+                color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                boxShadow: selected ? 'var(--shadow-pill)' : 'none',
+                transition: 'background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
+              }}
+            >
+              {seg === 'discover' ? 'Discover' : 'Favorites'}
+            </button>
+          )
+        })}
       </div>
 
       {filterOpen && (
@@ -288,7 +314,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                       <button
                         key={opt.id}
                         onClick={() => toggleAllergy(opt.id)}
-                        style={{ padding: '7px 13px', borderRadius: '999px', border: '1px solid ' + (on ? '#d1584f' : 'var(--color-border)'), background: on ? 'rgba(209,88,79,0.12)' : 'transparent', color: on ? '#d1584f' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                        style={{ padding: '7px 13px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid ' + (on ? '#d1584f' : 'var(--color-border)'), background: on ? 'rgba(209,88,79,0.12)' : 'transparent', color: on ? '#d1584f' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                       >
                         {opt.label}
                       </button>
@@ -334,7 +360,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
           <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: 'var(--color-text-muted)', flexShrink: 0 }}>DIET</span>
           <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
             {dietPrefs.map(pref => (
-              <span key={pref} style={{ flexShrink: 0, border: '1px solid var(--color-primary-border)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '600', padding: '4px 11px', borderRadius: '999px' }}>
+              <span key={pref} style={{ flexShrink: 0, boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-primary-border)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '600', padding: '4px 11px', borderRadius: '999px' }}>
                 {DIET_LABELS[pref] || pref}
               </span>
             ))}
@@ -346,7 +372,11 @@ export default function BrowseScreen({ onNavigate }: Props) {
       )}
 
       <div style={{ flex: 1, overflowY: 'auto' }}>
-        {browsing ? (
+        {segment === 'favorites' ? (
+          <div style={{ padding: '20px 24px 24px' }}>
+            <RecipeList recipes={recipes.filter(r => r.isFavorite && !recipeHasAllergen(r, allergies))} onNavigate={onNavigate} />
+          </div>
+        ) : browsing ? (
           <>
             {/* Recipe of the day — one big image, then quiet text. No card. */}
             {rotd && (
@@ -443,7 +473,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
           <div style={{ padding: '16px 24px 24px' }}>
             {activeFilter && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', padding: '5px 12px', borderRadius: '999px', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', padding: '5px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
                   {activeFilter.label}
                   <button onClick={() => setActiveFilter(null)} aria-label="Remove filter" style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
                     <X size={13} />

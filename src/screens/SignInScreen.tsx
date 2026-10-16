@@ -122,7 +122,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
           <div style={{
             width: '64px', height: '64px', borderRadius: '18px',
-            background: 'var(--color-primary)',
+            background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <ChefHat size={34} color="#fff" strokeWidth={2} />
@@ -253,7 +253,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
           disabled={loading}
           style={{
             padding: '14px 16px',
-            background: 'var(--color-primary)',
+            background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)',
             color: '#fff',
             border: 'none',
             borderRadius: '12px',

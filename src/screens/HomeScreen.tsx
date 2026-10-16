@@ -238,7 +238,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                   onClick={() => onNavigate(a.screen)}
                   style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '4px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
                 >
-                  <span style={{ width: '46px', height: '46px', borderRadius: '50%', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ width: '46px', height: '46px', borderRadius: '50%', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <a.icon size={19} color="var(--color-primary)" />
                   </span>
                   <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>{a.label}</span>
@@ -302,7 +302,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <button
                       key={cfg.key}
                       onClick={() => setAddingSlot(cfg.key)}
-                      style={{ padding: '5px 11px', borderRadius: '999px', border: '1px solid ' + (addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-border)'), background: addingSlot === cfg.key ? 'var(--color-primary)' : 'transparent', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ padding: '5px 11px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid ' + (addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-border)'), background: addingSlot === cfg.key ? 'var(--color-primary)' : 'transparent', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       {cfg.label}
                     </button>
@@ -316,7 +316,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                       disabled={busy}
                       style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 4px', background: 'none', border: 'none', borderTop: idx > 0 ? '1px solid var(--color-border)' : 'none', cursor: busy ? 'default' : 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' }}
                     >
-                      <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'var(--color-card)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
+                      <span style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
                         {r.imageUrl
                           ? <img src={recipeImageSrc(r.imageUrl, 30, 30)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.currentTarget.style.display = 'none' }} />
                           : '🍽️'}

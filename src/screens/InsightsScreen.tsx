@@ -139,7 +139,7 @@ export default function InsightsScreen({ onNavigate }: Props) {
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-muted)' }}>
             <div style={{ fontSize: '34px', marginBottom: '8px' }}>🗓️</div>
             <p style={{ fontSize: '14px', margin: '0 0 16px' }}>Plan a few meals this week and I'll have something to say.</p>
-            <button onClick={() => onNavigate('meal-plan')} style={{ padding: '11px 18px', borderRadius: '11px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => onNavigate('meal-plan')} style={{ padding: '11px 18px', borderRadius: '11px', border: 'none', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
               Plan your week
             </button>
           </div>
