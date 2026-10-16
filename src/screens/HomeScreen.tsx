@@ -220,7 +220,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           {loading ? <HomeSkeleton /> : <>
 
           {/* Shortcuts -- three quiet ringed icons, no cards. */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '36px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
               {([
                 { icon: ChefHat, label: 'Pantry', screen: 'pantry' as Screen },
                 { icon: Lightbulb, label: 'Insights', screen: 'insights' as Screen },
@@ -229,12 +229,10 @@ export default function HomeScreen({ onNavigate }: Props) {
                 <button
                   key={a.label}
                   onClick={() => onNavigate(a.screen)}
-                  style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '4px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '38px', borderRadius: '999px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', background: 'var(--color-card)', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
                 >
-                  <span style={{ width: '46px', height: '46px', borderRadius: '50%', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', background: 'var(--color-card)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <a.icon size={19} color="var(--color-primary)" />
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>{a.label}</span>
+                  <a.icon size={15} color="var(--color-primary)" />
+                  <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>{a.label}</span>
                 </button>
               ))}
             </div>
@@ -276,7 +274,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 ))}
               </div>
             ) : (
-              <EmptyRow label="Nothing planned today" action="Plan →" onClick={() => onNavigate('meal-plan')} />
+              <EmptyRow label="Nothing planned today" onClick={() => onNavigate('meal-plan')} />
             )}
 
             {/* Add a meal without leaving Home. */}
@@ -338,12 +336,13 @@ export default function HomeScreen({ onNavigate }: Props) {
           <section style={{ marginBottom: '36px' }}>
             <SectionHead title="Favorites" action={favorites.length > 0 ? 'See all →' : undefined} onAction={() => onNavigate('favorites')} />
             {favorites.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ marginTop: '12px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)', padding: '4px 16px', display: 'flex', flexDirection: 'column' }}>
                 {favorites.slice(0, 5).map((recipe: any) => {
                   const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
                   return (
                     <InfoCard
                       key={recipe.id}
+                      className="info-card--flat"
                       leftBadge={{ label: '❤️', value: '⭐' }}
                       title={recipe.name}
                       subtitle={recipe.cuisine || 'Recipe'}
@@ -407,14 +406,14 @@ function SectionHead({ title, action, onAction }: { title: string; action?: stri
 }
 
 /** Empty shelf: a single muted line with the action floated right. */
-function EmptyRow({ label, action, onClick }: { label: string; action: string; onClick: () => void }) {
+function EmptyRow({ label, action, onClick }: { label: string; action?: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', padding: '17px 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
     >
       <span style={{ fontSize: '15px', color: 'var(--color-text-secondary)' }}>{label}</span>
-      <span style={{ fontSize: '13px', color: 'var(--color-primary)', fontWeight: '600' }}>{action}</span>
+      {action && <span style={{ fontSize: '13px', color: 'var(--color-primary)', fontWeight: '600' }}>{action}</span>}
     </button>
   )
 }

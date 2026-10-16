@@ -77,6 +77,18 @@
   white-space: nowrap;
 }
 
+.info-card.info-card--flat {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 12px 0;
+}
+
+.info-card.info-card--flat + .info-card.info-card--flat {
+  border-top: 1px solid var(--color-subtle);
+}
+
 /* Stats Grid */
 .stats-grid {
   display: grid;
