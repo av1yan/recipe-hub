@@ -243,7 +243,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
         )}
       </div>
 
-      <div role="tablist" style={{ display: 'flex', padding: '3px', marginTop: '14px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)' }}>
+      <div role="tablist" style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
         {(['discover', 'favorites'] as const).map(seg => {
           const selected = segment === seg
           return (
@@ -253,11 +253,12 @@ export default function BrowseScreen({ onNavigate }: Props) {
               aria-selected={selected}
               onClick={() => setSegment(seg)}
               style={{
-                flex: 1, padding: '8px 14px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                flex: 1, padding: '10px 14px', borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit',
                 fontSize: '14px', fontWeight: '700',
-                background: selected ? 'var(--color-primary-bg)' : 'transparent',
+                border: `1px solid ${selected ? 'var(--color-primary-border)' : 'var(--color-border)'}`,
+                background: selected ? 'var(--color-primary-bg)' : 'var(--color-card)',
                 color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                boxShadow: selected ? 'var(--shadow-pill)' : 'none',
+                boxShadow: selected ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
                 transition: 'background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
               }}
             >
