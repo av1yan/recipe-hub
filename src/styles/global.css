@@ -475,6 +475,14 @@ button:not(:disabled):active,
   transform: scale(0.97);
 }
 
+/* Touch targets: every button gets at least a 44pt hit area, even when it is
+   a bare text link or a small icon. min-* beats the inline height/width the
+   screens set, so the visual size stays put where it already clears 44pt. */
+button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 /* --- Shimmer skeletons -------------------------------------------------------
    First-load placeholders that mirror the shape of the content they stand in
    for, so screens never flash empty states before their data lands. The base

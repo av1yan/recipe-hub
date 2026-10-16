@@ -269,9 +269,9 @@ export default function PantryScreen({ onNavigate }: Props) {
         {pantry.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
             {pantry.map(item => (
-              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--color-subtle)', color: 'var(--color-text)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', padding: '5px 8px 5px 12px', fontSize: '13px', fontWeight: '600' }}>
+              <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'var(--color-subtle)', color: 'var(--color-text)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', padding: '0 0 0 14px', minHeight: '44px', fontSize: '13px', fontWeight: '600' }}>
                 {item}
-                <button onClick={() => removeItem(item)} aria-label={`Remove ${item}`} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: 'var(--color-text-muted)' }}>
+                <button onClick={() => removeItem(item)} aria-label={`Remove ${item}`} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', padding: 0, color: 'var(--color-text-muted)' }}>
                   <X size={14} />
                 </button>
               </span>
