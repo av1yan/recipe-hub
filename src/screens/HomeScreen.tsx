@@ -251,6 +251,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           {/* Today */}
           <section style={{ marginBottom: '36px' }}>
             <SectionHead title="Today" action="Plan →" onAction={() => onNavigate('meal-plan')} />
+            <div style={{ marginTop: '12px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)', padding: '4px 16px 14px' }}>
 
             {todayMeals.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -328,6 +329,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 </button>
               </div>
             )}
+          </div>
           </section>
 
           {/* Feature discovery hint for free users with few recipes */}

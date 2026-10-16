@@ -81,24 +81,24 @@
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 16px 0;
+  gap: 10px;
+  padding: 4px 0 8px;
 }
 
 .stat-box {
-  padding: 14px 8px;
+  padding: 10px 6px;
   background: var(--color-card);
-  border-radius: 16px;
+  border-radius: 14px;
   text-align: center;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
 
 .stat-value {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--color-primary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .stat-label {
