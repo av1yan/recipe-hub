@@ -191,7 +191,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             quiet top line with the avatar; the greeting gets its own full-width
             line so it never wraps mid-phrase. */}
         <div style={{ padding: '20px 24px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
               <span style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '0.08em', color: 'var(--color-text-muted)' }}>
                 {getDateLabel()}
@@ -211,16 +211,9 @@ export default function HomeScreen({ onNavigate }: Props) {
             {getGreeting()}{displayName ? `, ${displayName}` : ''}{' \u{1F44B}'}
           </h1>
           {/* A fresh quirky one-liner each time Home opens. */}
-          <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: '9px 0 0', lineHeight: 1.45 }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: '6px 0 0', lineHeight: 1.45 }}>
             {joke}
           </p>
-          {loading ? (
-            <div className="rh-skel" style={{ width: '80px', height: '10px', borderRadius: '6px', marginTop: '6px' }} />
-          ) : (
-            <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 0' }}>
-              {recipes.length} recipe{recipes.length === 1 ? '' : 's'}{plannedThisWeek > 0 ? ` · ${plannedThisWeek} planned this week` : ''}
-            </p>
-          )}
         </div>
 
         <div style={{ padding: '30px 24px 0' }}>
