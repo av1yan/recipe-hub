@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, X, ChevronRight, Check, Crown, ChefHat, ShoppingCart, Sparkles, BookmarkPlus, Flame, CalendarPlus } from 'lucide-react'
+import { ArrowLeft, Plus, X, ChevronRight, Check, ChefHat, ShoppingCart, Sparkles, BookmarkPlus, Flame, CalendarPlus } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { recipeAPI, groceryAPI, insightsAPI, mealPlanAPI } from '../utils/api'
 import { DAY_NAMES, getMeals, sameWeek, mondayOf } from './MealPlanScreen'
 import { getPantry, savePantry, pantryMatch } from '../utils/pantry'
-import { useProPlan } from '../utils/proPlan'
 import { Toast, useToast } from '../components/Toast'
 
 interface Props {
@@ -53,7 +52,6 @@ function parseDishes(text: string): Dish[] {
 }
 
 export default function PantryScreen({ onNavigate }: Props) {
-  const [isPro] = useProPlan()
   const [pantry, setPantry] = useState<string[]>(() => getPantry())
   const [input, setInput] = useState('')
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -69,7 +67,7 @@ export default function PantryScreen({ onNavigate }: Props) {
   const { toast, show } = useToast()
 
   useEffect(() => {
-    if (isPro) loadRecipes()
+    loadRecipes()
   }, [])
 
   async function loadRecipes() {
@@ -240,25 +238,6 @@ export default function PantryScreen({ onNavigate }: Props) {
     </header>
   )
 
-  if (!isPro) {
-    return (
-      <div className="screen" style={{ background: 'var(--color-bg)' }}>
-        {header}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '40px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ChefHat size={32} color="#fff" />
-          </div>
-          <h2 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-text)', margin: 0 }}>A Pro feature</h2>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5, maxWidth: '280px' }}>
-            Tell recipHub what's in your kitchen and it shows the recipes you can make right now — ranked by what you already have.
-          </p>
-          <button onClick={() => onNavigate('settings')} style={{ marginTop: '6px', padding: '13px 22px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
-            <Crown size={16} color="#f4b860" /> Upgrade to Pro
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="screen" style={{ background: 'var(--color-bg)', position: 'relative' }}>

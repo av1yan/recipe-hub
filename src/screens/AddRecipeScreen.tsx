@@ -5,7 +5,6 @@ import { recipeAPI, cookbookAPI } from '../utils/api'
 import { DIET_OPTIONS } from './DietPreferencesScreen'
 import { Toast, useToast } from '../components/Toast'
 import { fileToCompressedDataUrl } from '../utils/image'
-import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT } from '../utils/proPlan'
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -117,7 +116,6 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
   const [photoError, setPhotoError] = useState('')
   const photoInputRef = useRef<HTMLInputElement>(null)
   const { toast, show } = useToast()
-  const [isPro] = useProPlan()
 
   useEffect(() => {
     // Not being able to list cookbooks just means the picker offers "none" and
@@ -159,25 +157,6 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    // Free-plan caps (Pro removes them). Check before doing any work so nothing
-    // half-saves.
-    const makingNewCookbook = cookbookId === NEW_COOKBOOK && !!newCookbookName.trim()
-    if (!isPro && makingNewCookbook && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
-      setError(`You've reached ${FREE_COOKBOOK_LIMIT} cookbooks on Free. Upgrade to Pro for unlimited organization, smart meal planning, and recipe import. Start your free 3-day trial →`)
-      return
-    }
-    if (!isPro) {
-      try {
-        const existing = await recipeAPI.list()
-        if (Array.isArray(existing) && existing.length >= FREE_RECIPE_LIMIT) {
-          setError(`You've hit the ${FREE_RECIPE_LIMIT}-recipe limit on Free. Upgrade to Pro for unlimited recipes, advanced features, and meal planning. Try Pro free for 3 days →`)
-          return
-        }
-      } catch {
-        // If the count can't be fetched, don't block the save.
-      }
-    }
 
     setLoading(true)
 

@@ -1,16 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import {
-  ChevronRight, ChevronLeft, User, Crown,
-  SlidersHorizontal, HelpCircle,
+  ChevronRight, ChevronLeft, User,
+  SlidersHorizontal, HelpCircle, FileText, Shield,
   UserPlus, LogOut, Check, Copy, Share2, ChevronDown, ChevronUp, Leaf, Sun, Moon,
 } from 'lucide-react'
-import { Capacitor } from '@capacitor/core'
 import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
-import { authAPI, subscriptionAPI } from '../utils/api'
-import { purchaseMonthly, restorePurchases, getMonthlyPrice } from '../utils/purchases'
+import { authAPI } from '../utils/api'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
-import { useProPlan, FREE_RECIPE_LIMIT, FREE_COOKBOOK_LIMIT, startTrial, getTrialInfo, isUpgraded, TRIAL_DAYS, trialTimeLeft, clearLocalPlan } from '../utils/proPlan'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
 import { getAllergies, saveAllergies, ALLERGY_OPTIONS } from '../utils/allergies'
 import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref } from '../utils/preferences'
@@ -54,7 +51,7 @@ function selectElementText(el: HTMLElement | null) {
 }
 
 type SubPage =
-  | 'account' | 'subscription'
+  | 'account'
   | 'preferences' | 'help' | 'invite' | null
 
 interface Props {
@@ -175,9 +172,7 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
     try {
       await authAPI.deleteAccount()
       // The account is gone server-side; drop every local trace and return to
-      // sign-in. Clearing the plan keys stops a stale Pro/trial leaking to the
-      // next person who signs in on this device.
-      clearLocalPlan()
+      // sign-in.
       onSignOut()
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Could not delete account')
@@ -274,271 +269,6 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
   )
 }
 
-const PRO_FEATURES = [
-  { title: 'Cook with what I have', desc: 'Recipes you can make from your pantry' },
-  { title: 'Insights', desc: 'Your week, read for you — balance, variety, tips' },
-  { title: 'AI cooking assistant', desc: 'Adapt any recipe — dairy-free, gluten-free, lower-cal' },
-  { title: 'Hands-free cooking', desc: 'Step timers, read-aloud, and a screen that stays awake' },
-  { title: 'Family share & sync', desc: 'One live grocery list for the whole household' },
-  { title: 'Unlimited recipes & cookbooks', desc: `Free stops at ${FREE_RECIPE_LIMIT} recipes / ${FREE_COOKBOOK_LIMIT} cookbook` },
-  { title: 'Automatic grocery lists', desc: 'A week’s plan → one shopping list' },
-  { title: 'Plan any week', desc: 'Free is this week only; Pro, any week' },
-  { title: 'Export & share', desc: 'Send your list or plan anywhere' },
-  { title: 'Nutrition & goals', desc: 'Daily macros and calorie targets' },
-]
-
-function Subscription({ onBack }: { onBack: () => void }) {
-  const [isPro, setPro] = useProPlan()
-  const trial = getTrialInfo()
-  const onTrial = isPro && !isUpgraded()  // Pro because of the trial, not an upgrade
-  // Which way in the person is looking at. Once the trial is spent there is only
-  // one path, so the tabs collapse and this is forced to the paid plan.
-  const [plan, setPlan] = useState<'trial' | 'monthly'>('trial')
-
-  // On a native build the store owns billing: no client-side free trial, the
-  // price comes from StoreKit, and purchases go through Apple. The web keeps its
-  // original localStorage plan so the demo/PWA behaves exactly as before.
-  const isNative = Capacitor.isNativePlatform()
-  const showTrial = !isNative && !trial.used && plan === 'trial'
-  const [busy, setBusy] = useState(false)
-  const [subError, setSubError] = useState('')
-  const [price, setPrice] = useState<string | null>(null)
-  const priceLabel = price ?? '$4.99'
-
-  useEffect(() => {
-    if (isNative) getMonthlyPrice().then(setPrice).catch(() => {})
-  }, [isNative])
-
-  // Web keeps the instant flip; native runs the App Store sheet and then trusts
-  // the server's verified verdict over StoreKit's local view.
-  const doPurchase = async () => {
-    if (!isNative) { setPro(true); return }
-    setSubError(''); setBusy(true)
-    try {
-      if (await purchaseMonthly() === 'cancelled') return
-      try { setPro(Boolean((await subscriptionAPI.refresh()).isPro)) } catch { setPro(true) }
-    } catch (e) {
-      setSubError(e instanceof Error ? e.message : 'The purchase could not be completed.')
-    } finally { setBusy(false) }
-  }
-
-  const doRestore = async () => {
-    setSubError(''); setBusy(true)
-    try {
-      await restorePurchases()
-      if ((await subscriptionAPI.refresh()).isPro) setPro(true)
-      else setSubError('No active subscription was found to restore.')
-    } catch (e) {
-      setSubError(e instanceof Error ? e.message : 'Could not restore purchases.')
-    } finally { setBusy(false) }
-  }
-
-  const openManage = () => window.open('https://apps.apple.com/account/subscriptions', '_blank')
-
-  return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-bg)' }}>
-      <SubHeader title="My Subscription" onBack={onBack} />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px' }}>
-        {/* Current plan. On Pro the perks live here, since the upsell card below
-            is only shown to Free users -- selling Pro to a Pro user is noise. */}
-        <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '13px 16px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '3px' }}>Current plan</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '19px', fontWeight: '800', color: 'var(--color-text)' }}>
-                {isPro && <Crown size={18} color="#f4b860" />}
-                {isPro ? 'Pro' : 'Free'}
-              </div>
-            </div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '700', padding: '5px 11px', borderRadius: '999px', flexShrink: 0 }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
-              {onTrial ? `Trial · ${trialTimeLeft(trial, 'short')}` : 'Active'}
-            </span>
-          </div>
-          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '7px 0 0', lineHeight: 1.45 }}>
-            {onTrial
-              ? `Free trial — ${trialTimeLeft(trial)}, then it reverts to Free.`
-              : isPro
-                ? 'Pro is on — every feature below is unlocked.'
-                : 'Everything you need to save and cook your own recipes.'}
-          </p>
-
-          {isPro && (
-            <div style={{ marginTop: '12px', borderTop: '1px solid var(--color-subtle)', paddingTop: '12px' }}>
-              <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '10px' }}>Included</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {PRO_FEATURES.map(f => (
-                  <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                    <Check size={15} color="var(--color-primary)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--color-text)', lineHeight: 1.2 }}>{f.title}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* On a trial: one tap to convert before it ends. */}
-        {onTrial && (
-          <button
-            onClick={doPurchase}
-            disabled={busy}
-            style={{ width: '100%', marginBottom: '10px', padding: '13px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1, fontFamily: 'inherit' }}
-          >
-            {busy ? 'Processing…' : `Keep Pro after the trial — ${priceLabel}/mo`}
-          </button>
-        )}
-        {onTrial && subError && (
-          <p style={{ margin: '0 0 10px', textAlign: 'center', fontSize: '12.5px', fontWeight: '600', color: 'var(--color-error)', background: 'var(--color-error-bg)', borderRadius: '10px', padding: '9px 12px' }}>
-            {subError}
-          </p>
-        )}
-
-        {/* Upgraded (paid) only: downgrade gets its own quiet tile. Trials aren't
-            offered this -- there's no card to cancel and the trial reverts to
-            Free on its own, so switching mid-trial would only forfeit free days. */}
-        {isPro && !onTrial && (
-          <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '14px 18px', border: '1px solid var(--color-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text)' }}>
-                {isNative ? 'Manage subscription' : 'Switch back to Free'}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px', lineHeight: 1.4 }}>
-                {isNative ? 'Renews monthly. Cancel anytime in the App Store.' : 'Keep your recipes; lose the Pro features.'}
-              </div>
-            </div>
-            <button onClick={() => (isNative ? openManage() : setPro(false))} style={{ flexShrink: 0, padding: '9px 15px', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
-              {isNative ? 'Manage' : 'Switch'}
-            </button>
-          </div>
-        )}
-
-        {/* Trial promotion banner for free users who haven't tried yet */}
-        {!isPro && !trial.used && (
-          <div style={{ background: 'linear-gradient(135deg, #fbbf24, #f97316)', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ fontSize: '18px' }}>✨</span>
-              <span style={{ fontSize: '15px', fontWeight: '700', color: '#fff' }}>Try Pro Free</span>
-            </div>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.95)', margin: '0 0 12px', lineHeight: 1.5 }}>
-              Get unlimited recipes, cookbooks, meal planning, and recipe import for {TRIAL_DAYS} days. No payment required.
-            </p>
-            <button
-              onClick={() => { startTrial(); setPlan('trial') }}
-              disabled={busy}
-              style={{ width: '100%', padding: '11px', background: '#fff', color: '#f97316', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1, fontFamily: 'inherit' }}
-            >
-              {busy ? 'Starting trial…' : `Start ${TRIAL_DAYS}-Day Free Trial`}
-            </button>
-          </div>
-        )}
-
-        {/* On Free: the full gold upsell card. */}
-        {!isPro && (
-          <div style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', borderRadius: '14px', padding: '14px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '11px' }}>
-              <Crown size={19} color="#f4b860" />
-              <span style={{ fontSize: '16px', fontWeight: '800', color: '#fff' }}>Pro Plan</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
-              {PRO_FEATURES.map(f => (
-                <div key={f.title} style={{ display: 'flex', alignItems: 'flex-start', gap: '9px' }}>
-                  <Check size={15} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#fff', lineHeight: 1.25 }}>{f.title}</div>
-                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.82)', lineHeight: 1.35, marginTop: '1px' }}>{f.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* The two ways in, as tabs. Each carries its own button *and* its
-                own fine print -- the trial's "no card needed" line used to sit
-                under the upgrade button, where it read as a promise about the
-                paid plan. */}
-            {!isNative && !trial.used && (
-              <div style={{ display: 'flex', gap: '3px', background: 'rgba(255,255,255,0.18)', borderRadius: '999px', padding: '3px', marginTop: '14px' }}>
-                {([
-                  { key: 'trial' as const, label: `${TRIAL_DAYS}-day free trial` },
-                  { key: 'monthly' as const, label: '$4.99/mo' },
-                ]).map(t => (
-                  <button
-                    key={t.key}
-                    onClick={() => setPlan(t.key)}
-                    aria-pressed={plan === t.key}
-                    style={{
-                      flex: 1, padding: '8px 6px', borderRadius: '999px', border: 'none',
-                      cursor: 'pointer', fontFamily: 'inherit', fontSize: '12.5px', fontWeight: '700',
-                      background: plan === t.key ? '#fff' : 'transparent',
-                      color: plan === t.key ? 'var(--color-primary-dark)' : 'rgba(255,255,255,0.92)',
-                      transition: 'background 0.15s ease',
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <button
-              onClick={() => { if (showTrial) startTrial(); else doPurchase() }}
-              disabled={busy}
-              style={{ marginTop: (isNative || trial.used) ? '14px' : '10px', width: '100%', padding: '12px', background: '#fff', color: 'var(--color-primary-dark)', border: 'none', borderRadius: '11px', fontSize: '15px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1, fontFamily: 'inherit' }}
-            >
-              {showTrial
-                ? `Start ${TRIAL_DAYS}-day free trial`
-                : isNative
-                  ? (busy ? 'Processing…' : `Subscribe — ${priceLabel}/mo`)
-                  : 'Upgrade for $4.99/mo'}
-            </button>
-            <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '11.5px', color: 'rgba(255,255,255,0.85)' }}>
-              {isNative
-                ? 'Auto-renews monthly · cancel anytime in the App Store.'
-                : showTrial
-                  ? `No card needed · reverts to Free after ${TRIAL_DAYS} days.`
-                  : trial.used
-                    ? 'Your free trial has ended · cancel anytime.'
-                    : 'Billed monthly · cancel anytime.'}
-            </p>
-            {subError && (
-              <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '12px', fontWeight: '600', color: '#fff', background: 'rgba(0,0,0,0.18)', borderRadius: '8px', padding: '7px 10px' }}>
-                {subError}
-              </p>
-            )}
-            {isNative && (
-              <button
-                onClick={doRestore}
-                disabled={busy}
-                style={{ marginTop: '10px', width: '100%', padding: '4px', background: 'transparent', color: 'rgba(255,255,255,0.9)', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
-              >
-                Restore purchases
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* App Store guideline 3.1.2 requires functional Terms of Use (EULA) and
-            Privacy Policy links on the subscription screen for everyone — not just
-            the pre-purchase upsell card (a subscriber sees the manage tile above). */}
-        <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'center', gap: '18px' }}>
-          <button
-            onClick={() => window.open('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/', '_blank')}
-            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 }}
-          >
-            Terms of Use
-          </button>
-          <button
-            onClick={() => window.open('https://recipe-hub-orcin-ten.vercel.app/privacy-policy.html', '_blank')}
-            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 }}
-          >
-            Privacy Policy
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-
 function Preferences({ onBack }: { onBack: () => void }) {
   const [units, setUnitsState] = useState<'imperial' | 'metric'>(() => getUnitPref())
   const [temp, setTempState] = useState<'F' | 'C'>(() => getTempPref())
@@ -550,7 +280,6 @@ function Preferences({ onBack }: { onBack: () => void }) {
   const [saved, setSaved] = useState(false)
   // Calorie/macro goals feed Insights and the meal-plan nutrition bar — both
   // Pro — so the whole section only shows once Pro is active.
-  const [isPro] = useProPlan()
 
   // Units, default servings and the calorie goal persist the moment they change,
   // so recipes and Insights reflect them straight away.
@@ -627,7 +356,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {isPro && (<>
+        <>
         <SectionHeader label="DAILY CALORIE GOAL" />
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
           <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 10px', lineHeight: 1.35 }}>
@@ -659,7 +388,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
             </div>
           ))}
         </div>
-        </>)}
+        </>
 
         <SectionHeader label="DIET" />
         <div style={{ background: 'var(--color-card)', borderRadius: '14px', padding: '10px', border: '1px solid var(--color-subtle)', marginBottom: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -775,12 +504,10 @@ function InvitePage({ onBack }: { onBack: () => void }) {
 
 export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   const [subPage, setSubPage] = useState<SubPage>(null)
-  const [isPro] = useProPlan()
   const [theme, setThemeState] = useState<Theme>(activeTheme())
   const chooseTheme = (t: Theme) => { setTheme(t); setThemeState(t) }
 
   if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} onSignOut={onSignOut} />
-  if (subPage === 'subscription') return <Subscription onBack={() => setSubPage(null)} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} />
   if (subPage === 'help') return <HelpPage onBack={() => setSubPage(null)} />
   if (subPage === 'invite') return <InvitePage onBack={() => setSubPage(null)} />
@@ -799,17 +526,10 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
 
         <div style={{ margin: '8px 24px 24px' }}>
           <Row icon={<User size={18} color="var(--color-text-secondary)" />} label="Account" onPress={() => setSubPage('account')} />
-          <Row
-            icon={<Crown size={18} color="#f4b860" />}
-            label="Subscription"
-            value={isPro
-              ? <span style={{ background: 'rgba(244,184,96,0.16)', color: 'var(--color-pro-badge)', fontSize: '10px', fontWeight: '800', padding: '2.5px 7px', borderRadius: '999px', letterSpacing: '0.05em' }}>PRO</span>
-              : 'Free'}
-            onPress={() => setSubPage('subscription')}
-            divider
-          />
           <Row icon={<SlidersHorizontal size={18} color="var(--color-text-secondary)" />} label="Preferences" onPress={() => setSubPage('preferences')} divider />
           <Row icon={<HelpCircle size={18} color="var(--color-text-secondary)" />} label="Help" onPress={() => setSubPage('help')} divider />
+          <Row icon={<FileText size={18} color="var(--color-text-secondary)" />} label="Terms of Use" onPress={() => window.open('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/', '_blank')} divider />
+          <Row icon={<Shield size={18} color="var(--color-text-secondary)" />} label="Privacy Policy" onPress={() => window.open('https://recipe-hub-orcin-ten.vercel.app/privacy-policy.html', '_blank')} divider />
         </div>
 
         <div style={{ marginBottom: '20px' }}>

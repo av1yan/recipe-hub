@@ -5,7 +5,6 @@ import { recipeAPI, groceryAPI, mealPlanAPI, insightsAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
 import { DAY_NAMES, MEALS, sameWeek, mondayOf, getMeals } from './MealPlanScreen'
 import { getDefaultServings, getUnitPref, convertMeasurement, getTempPref, convertTempInText } from '../utils/preferences'
-import { useProPlan } from '../utils/proPlan'
 
 // Quick adaptations the AI cooking assistant offers.
 const ADAPT_GOALS = ['Dairy-free', 'Gluten-free', 'Lower calorie', 'Vegetarian', 'Quicker']
@@ -51,7 +50,6 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
   const [servings, setServings] = useState(() => getDefaultServings())
   const [actionBusy, setActionBusy] = useState('')
   const { toast, show } = useToast()
-  const [isPro] = useProPlan()
   // AI cooking assistant
   const [adaptOpen, setAdaptOpen] = useState(false)
   const [adaptLoading, setAdaptLoading] = useState(false)
@@ -354,8 +352,8 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             <ActionButton icon={<Share2 size={18} />} label="Share" onClick={share} />
           </div>
 
-          {/* AI cooking assistant — Pro only. Adapt the recipe to a goal. */}
-          {isPro && recipe.ingredients?.length > 0 && (
+          {/* AI cooking assistant. Adapt the recipe to a goal. */}
+          {recipe.ingredients?.length > 0 && (
             <div style={{ borderTop: '1px solid var(--color-subtle)', paddingTop: '16px', paddingBottom: '4px' }}>
               <button
                 onClick={() => setAdaptOpen(o => !o)}

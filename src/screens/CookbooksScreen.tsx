@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import type { Screen, Cookbook } from '../types'
 import { cookbookAPI } from '../utils/api'
-import { useProPlan, FREE_COOKBOOK_LIMIT } from '../utils/proPlan'
 
 interface Props {
   onNavigate: (screen: Screen, data?: any) => void
@@ -24,7 +23,6 @@ export default function CookbooksScreen({ onNavigate }: Props) {
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
-  const [isPro] = useProPlan()
 
   useEffect(() => {
     loadCookbooks()
@@ -44,10 +42,6 @@ export default function CookbooksScreen({ onNavigate }: Props) {
 
   async function createCookbook() {
     if (!newCookbookName.trim()) return
-    if (!isPro && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
-      setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
-      return
-    }
     try {
       const cookbook = await cookbookAPI.create(newCookbookName, newCookbookDesc || undefined)
       setCookbooks([...cookbooks, cookbook])
@@ -81,10 +75,6 @@ export default function CookbooksScreen({ onNavigate }: Props) {
       <h1 style={{ flex: 1, fontSize: '19px', fontWeight: '700', letterSpacing: '-0.01em', margin: 0, color: 'var(--color-text)' }}>My Cookbooks</h1>
       <button
         onClick={() => {
-          if (!isPro && !showCreateForm && cookbooks.length >= FREE_COOKBOOK_LIMIT) {
-            setError(`The Free plan is capped at ${FREE_COOKBOOK_LIMIT} cookbook. Upgrade to Pro in Settings for unlimited.`)
-            return
-          }
           setError('')
           setShowCreateForm(!showCreateForm)
         }}

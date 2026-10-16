@@ -6,7 +6,6 @@ import { FrameOverlay } from '../components/FrameOverlay'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
 import { getCalorieGoal, getMacroGoals } from '../utils/goals'
-import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 import { tapHaptic } from '../utils/haptics'
 import { StatsGrid } from '../components/DesignCards'
@@ -109,7 +108,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [monthCursor, setMonthCursor] = useState<Date>(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   const [generating, setGenerating] = useState(false)
-  const [isPro] = useProPlan()
   const { toast, show } = useToast()
   const goalCal = getCalorieGoal()
   const macroGoals = getMacroGoals()
@@ -162,10 +160,8 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const swipeX = useRef<number | null>(null)
   const swiped = useRef(false)
 
-  // Viewing another week is a Pro perk ("Plan any week"); Free stays on the
   // current week. Selecting a day within the shown week is always free.
   function changeWeek(delta: number) {
-    if (!isPro) { show('Planning other weeks is a Pro feature — upgrade in Settings.', 'error'); return }
     const ws = mondayOf(viewWeek)
     ws.setDate(ws.getDate() + delta * 7)
     setViewWeek(ws)
@@ -174,10 +170,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
 
   // Jump to a date from the expanded month grid.
   function goToDate(date: Date) {
-    if (!isPro && !sameWeek(date, mondayOf(new Date()))) {
-      show('Planning other weeks is a Pro feature — upgrade in Settings.', 'error')
-      return
-    }
     setViewWeek(mondayOf(date))
     setSelectedDay(DAY_NAMES[(date.getDay() + 6) % 7])
     setExpanded(false)
@@ -259,14 +251,13 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
-  // Pro feature: pull every ingredient from the week's planned meals into the
+  // Pull every ingredient from the week's planned meals into the
   // grocery list. The list endpoint omits ingredients, so re-fetch the plan by
   // id (that one includes them). Rather than commit straight away — the backend
   // silently tops up existing lines' quantities — work out the change first and
   // surface it for confirmation.
   async function openGroceryPreview() {
     if (previewing || generating) return
-    if (!isPro) { show('Auto grocery lists are a Pro feature — upgrade in Settings.', 'error'); return }
     if (!currentPlan) { show('Plan some meals this week first.', 'error'); return }
     setPreviewing(true)
     try {
@@ -351,10 +342,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     }
   }
 
-  // Pro feature: share the week's plan as text — native share sheet on a phone,
+  // Share the week's plan as text — native share sheet on a phone,
   // clipboard on desktop.
   async function sharePlan() {
-    if (!isPro) { show('Sharing your plan is a Pro feature — upgrade in Settings.', 'error'); return }
     if (!currentPlan) { show('Plan some meals this week first.', 'error'); return }
     const lines: string[] = [`🗓 Meal plan · ${weekLabel(viewWeek)}`, '']
     DAY_NAMES.forEach(day => {
@@ -410,7 +400,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   })
 
   // Full month grid shown when the calendar is expanded. Page months with the
-  // chevrons; tap a date to jump to it (Pro for weeks other than this one).
+  // chevrons; tap a date to jump to it.
   function renderMonthGrid() {
     const y = monthCursor.getFullYear(), m = monthCursor.getMonth()
     const lead = (new Date(y, m, 1).getDay() + 6) % 7   // Monday-based leading blanks
@@ -439,7 +429,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             const date = new Date(y, m, d)
             const isSel = sameDay(date, selDate)
             const isToday = sameDay(date, today)
-            const locked = !isPro && !sameWeek(date, thisWeek)
             return (
               <button
                 key={i}
@@ -448,8 +437,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   height: '38px', borderRadius: '10px', fontSize: '14px', fontWeight: '700',
                   border: isToday && !isSel ? '1.5px solid var(--color-primary)' : '1.5px solid transparent',
                   background: isSel ? 'var(--color-primary)' : 'transparent',
-                  color: isSel ? '#fff' : locked ? 'var(--color-text-muted)' : 'var(--color-text)',
-                  opacity: locked ? 0.5 : 1,
+                  color: isSel ? '#fff' : 'var(--color-text)',
                   cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
@@ -467,7 +455,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
         <h1 style={{ fontSize: '27px', fontWeight: '700', letterSpacing: '-0.02em', margin: 0, color: 'var(--color-text)' }}>{title}</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
-          {hasMeals && isPro && (
+          {hasMeals && (
             <button onClick={sharePlan} aria-label="Share this week's plan" style={iconBtnStyle()}>
               <Share2 size={15} />
             </button>
@@ -492,7 +480,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       </button>
 
       {expanded ? renderMonthGrid() : (
-        // Week strip — chevrons or swipe (Pro) to move between weeks.
+        // Week strip — chevrons or swipe to move between weeks.
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
           <button onClick={() => changeWeek(-1)} aria-label="Previous week" style={weekNav}><ChevronLeft size={18} /></button>
           <div
@@ -572,9 +560,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </div>
         )}
 
-        {/* Pro only: build the week's grocery list from the plan. Tapping it
+        {/* Build the week's grocery list from the plan. Tapping it
             previews the change (new vs. topped-up) before anything is written. */}
-        {hasMeals && isPro && (preview ? (
+        {hasMeals && (preview ? (
           <div style={{ marginBottom: '22px', borderRadius: '14px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', padding: '15px 16px' }}>
             <p style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--color-primary-dark)', margin: '0 0 3px' }}>Add this week to Groceries</p>
             <p style={{ fontSize: '12.5px', color: 'var(--color-primary-dark)', opacity: 0.85, margin: '0 0 13px', lineHeight: 1.5 }}>
@@ -614,10 +602,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </button>
         ))}
 
-        {/* Pro only: the selected day's nutrition, summed from the planned recipes.
+        {/* The selected day's nutrition, summed from the planned recipes.
             Wrapped so it grows in smoothly — adding the day's first meal used to
             snap it in and shove the rows below out from under a finger. */}
-        {dayHasMeals && isPro && (
+        {dayHasMeals && (
           <Reveal>
           <div style={{ background: 'var(--color-subtle)', borderRadius: '16px', padding: '16px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>

@@ -1,10 +1,9 @@
 import { useState, useEffect, type CSSProperties } from 'react'
-import { Plus, X, Crown, ChefHat, Lightbulb, Users } from 'lucide-react'
+import { Plus, X, ChefHat, Lightbulb, Users } from 'lucide-react'
 import type { Screen } from '../types'
 import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
 import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
-import { useProPlan } from '../utils/proPlan'
 import { DAY_NAMES, MEALS, sameWeek, getMeals, mondayOf } from './MealPlanScreen'
 import { InfoCard, StatsGrid, TrackerBox } from '../components/DesignCards'
 
@@ -88,7 +87,6 @@ let homeCache: {
 
 export default function HomeScreen({ onNavigate }: Props) {
   const { user } = useApp()
-  const [isPro] = useProPlan()
   // Only trust the cache when it belongs to the person currently signed in.
   const cache = homeCache && user?.id && homeCache.userId === user.id ? homeCache : null
   const [recipes, setRecipes] = useState<any[]>(cache?.recipes ?? [])
@@ -189,7 +187,7 @@ export default function HomeScreen({ onNavigate }: Props) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--color-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        {/* Header -- lives on the page, no panel behind it. Date + Pro sit on a
+        {/* Header -- lives on the page, no panel behind it. Date sits on a
             quiet top line with the avatar; the greeting gets its own full-width
             line so it never wraps mid-phrase. */}
         <div style={{ padding: '20px 24px 0' }}>
@@ -198,11 +196,6 @@ export default function HomeScreen({ onNavigate }: Props) {
               <span style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '0.08em', color: 'var(--color-text-muted)' }}>
                 {getDateLabel()}
               </span>
-              {isPro && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '10px', fontWeight: '800', letterSpacing: '0.08em', color: 'var(--color-primary)' }}>
-                  <Crown size={11} /> PRO
-                </span>
-              )}
             </div>
             <button
               onClick={() => onNavigate('settings')}
@@ -231,10 +224,9 @@ export default function HomeScreen({ onNavigate }: Props) {
         </div>
 
         <div style={{ padding: '30px 24px 0' }}>
-          {loading ? <HomeSkeleton isPro={isPro} /> : <>
+          {loading ? <HomeSkeleton /> : <>
 
-          {/* Pro shortcuts -- three quiet ringed icons, no cards. */}
-          {isPro && (
+          {/* Shortcuts -- three quiet ringed icons, no cards. */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '36px' }}>
               {([
                 { icon: ChefHat, label: 'Pantry', screen: 'pantry' as Screen },
@@ -253,7 +245,6 @@ export default function HomeScreen({ onNavigate }: Props) {
                 </button>
               ))}
             </div>
-          )}
 
           {/* Stats Grid */}
           {!loading && recipes.length > 0 && (
@@ -347,13 +338,6 @@ export default function HomeScreen({ onNavigate }: Props) {
           </section>
 
           {/* Feature discovery hint for free users with few recipes */}
-          {!isPro && recipes.length < 3 && recipes.length > 0 && (
-            <div style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '12px', padding: '14px', marginBottom: '28px' }}>
-              <p style={{ margin: '0 0 10px', fontSize: '12.5px', fontWeight: '600', color: 'var(--color-primary)', letterSpacing: '0.05em' }}>💡 SPEED IT UP</p>
-              <p style={{ margin: '0 0 12px', fontSize: '13.5px', color: 'var(--color-text)', lineHeight: 1.5 }}>Import recipes from websites, photos, or text instead of typing everything out.</p>
-              <button onClick={() => onNavigate('home', { openAddSheet: true })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: 'var(--color-primary)', color: '#fff', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>Import a Recipe</button>
-            </div>
-          )}
 
           {/* Favorites */}
           <section style={{ marginBottom: '36px' }}>
@@ -468,10 +452,9 @@ function SkelSection() {
   )
 }
 
-function HomeSkeleton({ isPro }: { isPro: boolean }) {
+function HomeSkeleton() {
   return (
     <div>
-      {isPro && (
         <div style={{ display: 'flex', gap: '8px', marginBottom: '36px' }}>
           {[0, 1, 2].map(i => (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
@@ -480,7 +463,6 @@ function HomeSkeleton({ isPro }: { isPro: boolean }) {
             </div>
           ))}
         </div>
-      )}
       <SkelSection />
       <SkelSection />
       <SkelSection />

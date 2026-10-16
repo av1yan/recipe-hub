@@ -6,7 +6,6 @@ import { DAY_NAMES, MEALS, getMeals, sameWeek } from './MealPlanScreen'
 import { toGroceryLine, pluralizeUnit } from '../utils/grocery'
 import { Toast, useToast } from '../components/Toast'
 import { FrameOverlay } from '../components/FrameOverlay'
-import { useProPlan } from '../utils/proPlan'
 import { shareText } from '../utils/share'
 import { Capacitor } from '@capacitor/core'
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera'
@@ -120,7 +119,6 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   const libraryRef = useRef<HTMLInputElement>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
   const { toast, show } = useToast()
-  const [isPro] = useProPlan()
   const isNative = Capacitor.isNativePlatform()
   const [generating, setGenerating] = useState(false)
   // Confirm-then-delete for the whole list.
@@ -273,10 +271,9 @@ export default function GroceryListScreen({ onNavigate }: Props) {
   // recipe photo import.
   const openCamera = () => setPickerOpen(true)
 
-  // Pro feature: share the current list as text — native share sheet on a
+  // Share the current list as text — native share sheet on a
   // phone, clipboard on desktop.
   async function shareList() {
-    if (!isPro) { show('Sharing your list is a Pro feature — upgrade in Settings.', 'error'); return }
     const list = lists.find(l => l.id === selectedListId)
     const items = list?.items || []
     if (items.length === 0) { show('Nothing to share yet.', 'error'); return }
@@ -392,12 +389,11 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     }
   }
 
-  // Pro: pull every ingredient from this week's planned meals into the grocery
+  // Pull every ingredient from this week's planned meals into the grocery
   // list (the backend merges repeats by name+unit). Same logic the Meal Plan
   // screen uses, offered here from where you read the list.
   async function generateFromPlan() {
     if (generating) return
-    if (!isPro) { show('Building the list from your plan is a Pro feature — upgrade in Settings.', 'error'); return }
     setGenerating(true)
     try {
       const plans: any = await mealPlanAPI.list()
@@ -447,12 +443,12 @@ export default function GroceryListScreen({ onNavigate }: Props) {
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <h1 style={{ fontSize: '27px', fontWeight: '700', letterSpacing: '-0.02em', margin: 0, color: 'var(--color-text)' }}>Groceries</h1>
       <div style={{ display: 'flex', gap: '8px' }}>
-        {isPro && selectedList && (
+        {selectedList && (
           <button onClick={generateFromPlan} disabled={generating} aria-label="Generate from this week's plan" style={iconBtnStyle()}>
             <CalendarDays size={16} />
           </button>
         )}
-        {isPro && selectedList && (selectedList.items?.length || 0) > 0 && (
+        {selectedList && (selectedList.items?.length || 0) > 0 && (
           <button onClick={shareList} aria-label="Share grocery list" style={iconBtnStyle()}>
             <Share2 size={15} />
           </button>
@@ -668,15 +664,13 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                   ) : (
                     <div style={{ textAlign: 'center', padding: '40px 0' }}>
                       <p style={{ color: 'var(--color-text-muted)', margin: '0 0 16px', fontSize: '15px' }}>No items in this list yet</p>
-                      {isPro && (
-                        <button
-                          onClick={generateFromPlan}
-                          disabled={generating}
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '11px 18px', borderRadius: '12px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer', fontFamily: 'inherit' }}
-                        >
-                          <CalendarDays size={16} /> {generating ? 'Building…' : "Generate from this week's plan"}
-                        </button>
-                      )}
+                      <button
+                        onClick={generateFromPlan}
+                        disabled={generating}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '11px 18px', borderRadius: '12px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '14px', fontWeight: '700', cursor: generating ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                      >
+                        <CalendarDays size={16} /> {generating ? 'Building…' : "Generate from this week's plan"}
+                      </button>
                     </div>
                   )}
                 </div>

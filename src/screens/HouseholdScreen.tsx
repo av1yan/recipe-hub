@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, Users, Crown, Plus, X, Check, Copy, Share2, RefreshCw, LogOut, Trash2 } from 'lucide-react'
 import type { Screen } from '../types'
 import { householdAPI } from '../utils/api'
-import { useProPlan } from '../utils/proPlan'
 import { Toast, useToast } from '../components/Toast'
 
 interface Props {
@@ -35,7 +34,6 @@ interface Item {
 const POLL_MS = 4000
 
 export default function HouseholdScreen({ onNavigate }: Props) {
-  const [isPro] = useProPlan()
   const [household, setHousehold] = useState<Household | null>(null)
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,8 +50,7 @@ export default function HouseholdScreen({ onNavigate }: Props) {
   idRef.current = householdId
 
   useEffect(() => {
-    if (isPro) loadHousehold()
-    else setLoading(false)
+    loadHousehold()
   }, [])
 
   // Live sync: poll the shared list while we're in a household.
@@ -226,25 +223,6 @@ export default function HouseholdScreen({ onNavigate }: Props) {
     </header>
   )
 
-  if (!isPro) {
-    return (
-      <div className="screen" style={{ background: 'var(--color-bg)' }}>
-        {header}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '40px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '14px' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={32} color="#fff" />
-          </div>
-          <h2 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--color-text)', margin: 0 }}>A Pro feature</h2>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5, maxWidth: '280px' }}>
-            Share one grocery list with your whole household — everyone adds to it and checks things off, live, from their own phone.
-          </p>
-          <button onClick={() => onNavigate('settings')} style={{ marginTop: '6px', padding: '13px 22px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
-            <Crown size={16} color="#f4b860" /> Upgrade to Pro
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   const checkedCount = items.filter(i => i.checked).length
 

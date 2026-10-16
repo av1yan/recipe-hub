@@ -122,31 +122,6 @@
   color-scheme: dark;
 }
 
-/* Pro plan repaints the brand accent gold. data-pro="true" is set on the root
-   from the Pro state (App.tsx), the same mechanism as data-theme. Every element
-   that uses the accent variables flips at once -- buttons, nav, pills, links. */
-:root[data-pro="true"] {
-  --color-primary: #8a6718;
-  --color-primary-dark: #6f5213;
-  --color-primary-light: #d9b356;
-  --color-primary-bg: #fbf3df;
-  --color-primary-border: #e8d5a0;
-  --color-accent: #8a6718;
-}
-/* Dark + Pro: keep the gold accent but restore the translucent tints so they
-   read on the dark surfaces. More specific than either single-attr rule, so it
-   wins for the overlap. */
-:root[data-theme="dark"][data-pro="true"] {
-  --color-primary-bg: rgba(191, 143, 44, 0.22);
-  --color-primary-border: rgba(191, 143, 44, 0.48);
-  /* Higher specificity than the light-Pro block above, so the bright gold
-     survives into dark mode. */
-  --color-primary: #bf8f2c;
-  --color-primary-dark: #9c7420;
-  --color-accent: #bf8f2c;
-  --color-pro-badge: #f4b860;
-}
-
 /* --- The phone mockup ---------------------------------------------------------
    A presentation device for desktop, never something that should clip the app.
    Two rules make it safe everywhere:

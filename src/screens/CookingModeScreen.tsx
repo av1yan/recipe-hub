@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight, Clock, CheckCircle, List, Volume2, VolumeX, Crown, PartyPopper } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, CheckCircle, List, Volume2, VolumeX, PartyPopper } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { getUnitPref, convertMeasurement, getTempPref, convertTempInText } from '../utils/preferences'
-import { useProPlan } from '../utils/proPlan'
 
 interface Props {
   recipe: Recipe | null
@@ -10,7 +9,6 @@ interface Props {
 }
 
 export default function CookingModeScreen({ recipe, onNavigate }: Props) {
-  const [isPro] = useProPlan()
   const [currentStep, setCurrentStep] = useState(0)
   const [timerSeconds, setTimerSeconds] = useState<number | null>(null)
   const [timerActive, setTimerActive] = useState(false)
@@ -50,14 +48,14 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
     setSpeaking(false)
   }, [currentStep])
 
-  // Keep the screen awake while cooking (hands are busy) — Pro perk. Released
+  // Keep the screen awake while cooking (hands are busy). Released
   // on unmount; re-acquired if the tab is re-shown.
   const wakeRef = useRef<any>(null)
   useEffect(() => {
     let cancelled = false
     const acquire = async () => {
       try {
-        if (isPro && 'wakeLock' in navigator && document.visibilityState === 'visible') {
+        if ('wakeLock' in navigator && document.visibilityState === 'visible') {
           wakeRef.current = await (navigator as any).wakeLock.request('screen')
         }
       } catch { /* denied or unsupported */ }
@@ -71,7 +69,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
       try { wakeRef.current?.release?.() } catch { /* noop */ }
       try { speechSynthesis?.cancel() } catch { /* noop */ }
     }
-  }, [isPro])
+  }, [])
 
   // Read the current step aloud (toggle).
   const toggleSpeak = () => {
@@ -213,46 +211,20 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             <p style={{ fontSize: '11px', color: 'var(--color-primary)', fontWeight: '800', letterSpacing: '0.1em', margin: 0 }}>
               STEP {step?.stepNumber || currentStep + 1}
             </p>
-            {isPro ? (
-              <button
-                onClick={toggleSpeak}
-                aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
-              </button>
-            ) : (
-              <button
-                onClick={() => onNavigate('settings')}
-                aria-label="Read step aloud is a Pro feature"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                <Volume2 size={13} /> Read <Crown size={11} color="#f4b860" />
-              </button>
-            )}
+            <button
+              onClick={toggleSpeak}
+              aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
+            </button>
           </div>
           <p style={{ fontSize: '22px', fontWeight: '500', color: 'var(--color-text)', lineHeight: 1.6, margin: 0, letterSpacing: '-0.01em' }}>
             {stepText}
           </p>
         </div>
 
-        {/* Timer — interactive for Pro; a teaser for free */}
-        {timerSeconds !== null && !isPro && (
-          <div style={{ marginTop: '36px', display: 'flex', justifyContent: 'center' }}>
-            <button
-              onClick={() => onNavigate('settings')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '11px 18px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--color-subtle)', color: 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              <Clock size={15} color="var(--color-text-muted)" />
-              <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatTime(timerSeconds)}</span>
-              <span style={{ color: 'var(--color-text-muted)', fontWeight: '600' }}>step timer</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                <Crown size={12} color="#f4b860" /> Pro
-              </span>
-            </button>
-          </div>
-        )}
-        {timerSeconds !== null && isPro && (
+        {timerSeconds !== null && (
           <div style={{ marginTop: '36px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '130px', height: '130px', borderRadius: '65px',
