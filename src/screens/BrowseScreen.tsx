@@ -41,6 +41,18 @@ function matchesFilter(recipe: Recipe, f: ActiveFilter | null): boolean {
 }
 
 // Curated quick filters — only the ones that actually match a recipe are shown.
+// Recipe types getting attention online in 2026, from food-trend roundups
+// (Tastewise, Pinterest and Yelp forecasts, Canadian Grocer, SideChef). Curated
+// by hand, so refresh it when the trends move.
+const ONLINE_TRENDS: { label: string; query: string }[] = [
+  { label: 'Cottage cheese', query: 'cottage cheese' },
+  { label: 'Sheet pan dinners', query: 'sheet pan' },
+  { label: 'One-pot meals', query: 'one-pot' },
+  { label: 'Yogurt desserts', query: 'yogurt' },
+  { label: 'Smashed potatoes', query: 'potato' },
+  { label: 'Crostini', query: 'crostini' },
+]
+
 const POPULAR: { label: string; kind: FilterKind; value: string }[] = [
   { label: 'Vegetarian', kind: 'tag', value: 'vegetarian' },
   { label: 'Vegan', kind: 'tag', value: 'vegan' },
@@ -128,8 +140,13 @@ export default function BrowseScreen({ onNavigate }: Props) {
   }
 
   const q = searchTerm.trim().toLowerCase()
-  const matchesSearch = (r: Recipe) =>
-    !q || r.name.toLowerCase().includes(q) || (r.cuisine || '').toLowerCase().includes(q)
+  const qSlug = q.replace(/\s+/g, '-')
+  const matchesSearch = (r: Recipe) => {
+    if (!q) return true
+    if (r.name.toLowerCase().includes(q) || (r.cuisine || '').toLowerCase().includes(q)) return true
+    if (tagsOf(r).some(t => t.includes(qSlug))) return true
+    return (r.ingredients || []).some(i => (i.name || '').toLowerCase().includes(q))
+  }
 
   const displayed = recipes.filter(
     r => matchesSearch(r) && matchesFilter(r, activeFilter) && matchesDiet(r, dietPrefs) && !recipeHasAllergen(r, allergies)
@@ -426,6 +443,20 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 </div>
               </div>
             )}
+
+            <div style={{ padding: '34px 24px 0' }}>
+              <SectionHead title="Trending online" />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '14px 0 0' }}>
+                {ONLINE_TRENDS.map(t => (
+                  <button key={t.label} onClick={() => setSearchTerm(t.query)} style={{ ...chipStyle(false), minHeight: '44px' }}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '10px 0 0', lineHeight: 1.5 }}>
+                Matches recipe names, ingredients and tags. Trend list curated from 2026 food-trend roundups.
+              </p>
+            </div>
 
             {/* Explore — a ruled list; each row opens its values inline. */}
             <div style={{ padding: '34px 24px 0' }}>
