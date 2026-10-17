@@ -633,14 +633,20 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                           aria-label={item.checked ? `Uncheck ${item.name}` : `Check ${item.name}`}
                           style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: '23px', height: '23px', borderRadius: '7px', flexShrink: 0,
+                            width: '44px', height: '44px', margin: '-10px -10px -10px -10px', flexShrink: 0,
+                            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                          }}
+                        >
+                          <span style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: '23px', height: '23px', borderRadius: '7px',
                             border: `2px solid ${item.checked ? 'var(--color-primary)' : 'var(--color-border)'}`,
                             background: item.checked ? 'var(--color-primary)' : 'transparent',
                             boxShadow: item.checked ? 'var(--shadow-pill)' : 'none',
-                            color: '#fff', cursor: 'pointer', padding: 0,
-                          }}
-                        >
-                          {item.checked && <Check size={14} />}
+                            color: '#fff',
+                          }}>
+                            {item.checked && <Check size={14} />}
+                          </span>
                         </button>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: '15px', fontWeight: '500', color: 'var(--color-text)', textDecoration: item.checked ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
