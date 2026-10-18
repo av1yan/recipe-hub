@@ -186,6 +186,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             quiet top line with the avatar; the greeting gets its own full-width
             line so it never wraps mid-phrase. */}
         <div style={{ padding: '20px 24px 0' }}>
+          <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '22px', boxShadow: 'var(--shadow-hero)', padding: '18px 18px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
               <span style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '0.08em', color: 'var(--color-text-muted)' }}>
@@ -209,6 +210,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: '6px 0 0', lineHeight: 1.45 }}>
             {joke}
           </p>
+          </div>
         </div>
 
         <div style={{ padding: '30px 24px 0' }}>

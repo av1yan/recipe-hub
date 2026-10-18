@@ -78,6 +78,7 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
   --shadow-pill: 0 4px 12px rgba(74, 124, 53, 0.22);
+  --shadow-hero: 0 2px 4px rgba(15, 23, 42, 0.06), 0 14px 30px rgba(15, 23, 42, 0.18);
 
   /* Skeleton loading -- base fill + a lighter band that sweeps across it. */
   --color-skeleton: #e8edf3;
@@ -89,6 +90,7 @@
    over. Set once here rather than per component. */
 :root[data-theme="dark"] {
   --shadow-pill: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-hero: 0 2px 4px rgba(0, 0, 0, 0.4), 0 14px 32px rgba(0, 0, 0, 0.7);
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
   --color-text: #f1f5f9;
   --color-text-secondary: #cbd5e1;
