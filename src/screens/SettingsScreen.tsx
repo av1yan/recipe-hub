@@ -532,9 +532,9 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
           <Row icon={<Shield size={18} color="var(--color-text-secondary)" />} label="Privacy Policy" onPress={() => window.open('https://recipe-hub-orcin-ten.vercel.app/privacy-policy.html', '_blank')} divider />
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <SectionHeader label="APPEARANCE" />
-          <div style={{ margin: '0 24px' }}>
+        <div style={{ margin: '0 24px 16px', padding: '14px 16px 4px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)' }}>
+          <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.09em', margin: '0 0 4px' }}>APPEARANCE</p>
+          <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0' }}>
               <Moon size={18} color="var(--color-text-secondary)" />
               <span style={{ flex: 1, fontSize: '15px', color: 'var(--color-text)', fontWeight: '500' }}>Theme</span>
@@ -562,11 +562,9 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
           </div>
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <SectionHeader label="CONNECT" />
-          <div style={{ margin: '0 24px' }}>
-            <Row icon={<UserPlus size={18} color="var(--color-primary)" />} label="Invite friends" onPress={() => setSubPage('invite')} />
-          </div>
+        <div style={{ margin: '0 24px 20px', padding: '14px 16px 4px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)' }}>
+          <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', letterSpacing: '0.09em', margin: '0 0 4px' }}>CONNECT</p>
+          <Row icon={<UserPlus size={18} color="var(--color-primary)" />} label="Invite friends" onPress={() => setSubPage('invite')} />
         </div>
 
         <div style={{ margin: '0 24px 24px' }}>

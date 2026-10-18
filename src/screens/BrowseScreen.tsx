@@ -41,6 +41,18 @@ function matchesFilter(recipe: Recipe, f: ActiveFilter | null): boolean {
 }
 
 // Curated quick filters — only the ones that actually match a recipe are shown.
+function matchesTerm(r: Recipe, term: string): boolean {
+  const t = term.trim().toLowerCase()
+  if (r.name.toLowerCase().includes(t) || (r.cuisine || '').toLowerCase().includes(t)) return true
+  if (tagsOf(r).some(tag => tag.includes(t.replace(/\s+/g, '-')))) return true
+  return (r.ingredients || []).some(i => (i.name || '').toLowerCase().includes(t))
+}
+
+const CUISINE_EMOJI: Record<string, string> = {
+  Italian: '🍝', Asian: '🥢', Indian: '🍛', Mexican: '🌮', Mediterranean: '🫒',
+  'Middle Eastern': '🧆', Japanese: '🍣', Thai: '🍜', French: '🥐', American: '🍔',
+}
+
 // Recipe types getting attention online in 2026, from food-trend roundups
 // (Tastewise, Pinterest and Yelp forecasts, Canadian Grocer, SideChef). Curated
 // by hand, so refresh it when the trends move.
@@ -140,13 +152,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
   }
 
   const q = searchTerm.trim().toLowerCase()
-  const qSlug = q.replace(/\s+/g, '-')
-  const matchesSearch = (r: Recipe) => {
-    if (!q) return true
-    if (r.name.toLowerCase().includes(q) || (r.cuisine || '').toLowerCase().includes(q)) return true
-    if (tagsOf(r).some(t => t.includes(qSlug))) return true
-    return (r.ingredients || []).some(i => (i.name || '').toLowerCase().includes(q))
-  }
+  const matchesSearch = (r: Recipe) => !q || matchesTerm(r, q)
 
   const displayed = recipes.filter(
     r => matchesSearch(r) && matchesFilter(r, activeFilter) && matchesDiet(r, dietPrefs) && !recipeHasAllergen(r, allergies)
@@ -444,10 +450,10 @@ export default function BrowseScreen({ onNavigate }: Props) {
               </div>
             )}
 
-            <div style={{ padding: '34px 24px 0' }}>
-              <SectionHead title="Trending online" />
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '14px 0 0' }}>
-                {ONLINE_TRENDS.map(t => (
+            <div style={{ margin: '34px 24px 0', padding: '14px 16px 16px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)' }}>
+              <p style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: '0 0 4px' }}>Trending online</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '10px 0 0' }}>
+                {ONLINE_TRENDS.filter(t => recipes.some(r => matchesTerm(r, t.query))).map(t => (
                   <button key={t.label} onClick={() => setSearchTerm(t.query)} style={{ ...chipStyle(false), minHeight: '44px' }}>
                     {t.label}
                   </button>
@@ -560,7 +566,7 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
           return (
             <InfoCard
               key={recipe.id}
-              leftBadge={{ label: recipe.cuisine?.slice(0, 3).toUpperCase() || '👨‍🍳', value: '🍽️' }}
+              leftBadge={{ label: '', value: CUISINE_EMOJI[recipe.cuisine] ?? '🍽️' }}
               title={recipe.name}
               subtitle={meta}
               rightInfo={`${time}m`}

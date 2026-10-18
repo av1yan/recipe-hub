@@ -574,7 +574,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     value={newItemUnit}
                     onChange={(e) => setNewItemUnit(e.target.value)}
                     aria-label="Unit"
-                    style={{ ...fieldStyle, width: '74px' }}
+                    style={{ ...fieldStyle, width: '96px', padding: '11px 28px 11px 10px' }}
                   >
                     <option>piece</option>
                     <option>lb</option>

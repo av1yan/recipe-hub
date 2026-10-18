@@ -197,7 +197,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               onClick={() => onNavigate('settings')}
               aria-label="Settings"
               title={user?.name || undefined}
-              style={{ width: '44px', height: '44px', borderRadius: '50%', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))', color: '#fff', fontSize: '14px', fontWeight: '700', flexShrink: 0 }}
+              style={{ width: '44px', height: '44px', borderRadius: '50%', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-hero)', cursor: 'pointer', background: 'var(--color-card)', color: 'var(--color-primary-dark)', fontSize: '15px', fontWeight: '700', flexShrink: 0 }}
             >
               {initial}
             </button>
