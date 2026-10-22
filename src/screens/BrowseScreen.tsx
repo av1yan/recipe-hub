@@ -449,12 +449,12 @@ export default function BrowseScreen({ onNavigate }: Props) {
               </div>
             )}
 
-            {ONLINE_TRENDS.some(t => recipes.some(r => matchesTerm(r, t.query))) && (
+            {(
               <div style={{ padding: '34px 24px 0' }}>
                 <SectionHead title="Popular searches" />
                 <div style={{ height: '12px' }} />
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {ONLINE_TRENDS.filter(t => recipes.some(r => matchesTerm(r, t.query))).map(t => (
+                  {ONLINE_TRENDS.map(t => (
                     <button key={t.label} onClick={() => setSearchTerm(t.query)} style={{ ...chipStyle(false), minHeight: '44px' }}>
                       {t.label}
                     </button>
