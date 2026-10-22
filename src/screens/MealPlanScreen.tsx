@@ -92,11 +92,11 @@ export function getMeals(plan: MealPlan | undefined, dayName: string, mealType: 
 /** Quiet square header button — subtle by default, accent when active. */
 function iconBtnStyle(active = false): CSSProperties {
   return {
-    width: '36px', height: '36px', borderRadius: '11px',
+    width: '38px', height: '38px', borderRadius: '13px',
     boxShadow: active ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
-    background: active ? 'var(--color-primary)' : 'var(--color-subtle)',
+    background: active ? 'var(--color-primary)' : 'var(--color-card)',
     color: active ? '#fff' : 'var(--color-text-secondary)',
-    border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    border: `1px solid ${active ? 'var(--color-primary)' : 'var(--color-border)'}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
   }
 }
 
@@ -621,14 +621,14 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             disabled={previewing}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
-              padding: '14px 18px', marginBottom: '22px', borderRadius: '18px',
+              padding: '10px 16px', marginBottom: '16px', borderRadius: '18px',
               background: 'var(--color-card)', color: 'var(--color-text)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)',
-              fontSize: '15px', fontWeight: '700', cursor: previewing ? 'default' : 'pointer',
+              fontSize: '14px', fontWeight: '700', cursor: previewing ? 'default' : 'pointer',
               fontFamily: 'inherit', opacity: previewing ? 0.7 : 1,
             }}
           >
-            <span style={{ width: '34px', height: '34px', borderRadius: '12px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <ShoppingCart size={17} color="#fff" />
+            <span style={{ width: '30px', height: '30px', borderRadius: '10px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <ShoppingCart size={16} color="#fff" />
             </span>
             {previewing ? 'Checking…' : 'Add this week to Groceries'}
           </button>
@@ -639,12 +639,12 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             snap it in and shove the rows below out from under a finger. */}
         {(
           <Reveal>
-          <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', padding: '16px', marginBottom: '24px', boxShadow: 'var(--shadow-md)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', padding: '14px 16px', marginBottom: '20px', boxShadow: 'var(--shadow-md)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
               <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Nutrition goals · {selectedDay}</span>
               <button onClick={() => onNavigate('settings')} style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', color: 'var(--color-primary-dark)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', fontFamily: 'inherit' }}>Edit goals</button>
             </div>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '8px 0 16px', lineHeight: 1.45 }}>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '6px 0 12px', lineHeight: 1.45 }}>
               {(() => {
                 const calLeft = goalCal - dayNutrition.cal
                 const proLeft = macroGoals.protein - dayNutrition.protein
@@ -655,7 +655,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
               <CalorieRing cal={dayNutrition.cal} goal={goalCal} />
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}>
                 <MacroStat color="#a78bfa" label="Protein" grams={dayNutrition.protein} goal={macroGoals.protein} />
                 <MacroStat color="#fbbf24" label="Carbs" grams={dayNutrition.carbs} goal={macroGoals.carbs} />
                 <MacroStat color="var(--color-primary)" label="Fat" grams={dayNutrition.fat} goal={macroGoals.fat} />
@@ -663,9 +663,9 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             </div>
             {/* 1.4.1 citation — same estimated recipe data, summed. Boxed with an
                 icon so it's actually noticeable, not fine print under the bars. */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '16px', padding: '10px 12px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '12px', padding: '8px 10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '12px' }}>
               <Info size={14} color="var(--color-primary-dark)" style={{ flexShrink: 0, marginTop: '1px' }} />
-              <p style={{ margin: 0, fontSize: '12.5px', lineHeight: 1.5, color: 'var(--color-primary-dark)' }}>
+              <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.45, color: 'var(--color-primary-dark)' }}>
                 Estimated totals for general reference — not medical advice. Source:{' '}
                 <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary-dark)', textDecoration: 'underline', fontWeight: 600 }}>
                   USDA FoodData Central
@@ -802,7 +802,7 @@ function MacroStat({ color, label, grams, goal }: { color: string; label: string
 
 /** Calories eaten against the daily goal as a ring, with the count in the middle. Turns amber once over goal. */
 function CalorieRing({ cal, goal }: { cal: number; goal: number }) {
-  const size = 104, stroke = 10, r = (size - stroke) / 2, c = 2 * Math.PI * r
+  const size = 92, stroke = 9, r = (size - stroke) / 2, c = 2 * Math.PI * r
   const pct = goal > 0 ? Math.min(1, cal / goal) : 0
   const over = cal > goal
   return (
@@ -812,7 +812,7 @@ function CalorieRing({ cal, goal }: { cal: number; goal: number }) {
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={over ? '#f59e0b' : 'var(--color-primary)'} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} style={{ transition: 'stroke-dashoffset 0.4s ease' }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: '22px', fontWeight: '800', color: 'var(--color-text)', lineHeight: 1 }}>{cal.toLocaleString()}</span>
+        <span style={{ fontSize: '20px', fontWeight: '800', color: 'var(--color-text)', lineHeight: 1 }}>{cal.toLocaleString()}</span>
         <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '3px' }}>of {goal.toLocaleString()} cal</span>
       </div>
     </div>
@@ -1059,7 +1059,7 @@ function SwipeableMealRow({ recipes, recentIds, m, meal, onSwap, onRemove, onLon
         onPointerMove={onMove}
         onPointerUp={finish}
         onPointerCancel={finish}
-        style={{ position: 'relative', background: 'var(--color-bg)', transform: `translateX(${dx}px)`, transition: animate ? 'transform 0.22s ease' : 'none', touchAction: 'pan-y' }}
+        style={{ position: 'relative', background: 'var(--color-card)', transform: `translateX(${dx}px)`, transition: animate ? 'transform 0.22s ease' : 'none', touchAction: 'pan-y' }}
       >
         <RecipePicker recipes={recipes} recentIds={recentIds} meal={m} current={meal?.recipeId ?? meal?.id} onPick={onSwap}>
           {children}
