@@ -357,10 +357,10 @@ function Preferences({ onBack }: { onBack: () => void }) {
         </div>
 
         <>
-        <SectionHeader label="DAILY CALORIE GOAL" />
+        <SectionHeader label="DAILY GOALS" />
         <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '12px', border: '1px solid var(--color-subtle)', marginBottom: '10px' }}>
-          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 10px', lineHeight: 1.35 }}>
-            Your target for Insights and the meal-plan nutrition bar.
+          <p style={{ fontSize: '11.5px', color: 'var(--color-text-muted)', margin: '0 0 12px', lineHeight: 1.35 }}>
+            Your targets for Insights and the meal-plan nutrition tile.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button onClick={() => setGoal(goal - 50)} aria-label="Lower goal" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1.5px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', color: 'var(--color-text)', fontSize: '20px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>−</button>
@@ -370,10 +370,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
             </div>
             <button onClick={() => setGoal(goal + 50)} aria-label="Raise goal" style={{ width: '40px', height: '40px', borderRadius: '11px', border: '1.5px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: '20px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}>+</button>
           </div>
-        </div>
-
-        <SectionHeader label="DAILY MACROS" />
-        <div style={{ background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', borderRadius: '14px', padding: '10px 12px', border: '1px solid var(--color-subtle)', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ height: '1px', background: 'var(--color-border)', margin: '12px 0 6px' }} />
           {([
             { key: 'protein', label: 'Protein', color: '#a78bfa' },
             { key: 'carbs', label: 'Carbs', color: '#fbbf24' },

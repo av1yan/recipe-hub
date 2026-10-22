@@ -5,8 +5,7 @@ import { Toast, useToast } from '../components/Toast'
 import { FrameOverlay } from '../components/FrameOverlay'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
-import { getCalorieGoal, setCalorieGoal, getMacroGoals } from '../utils/goals'
-import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref, type MeasurementSystem, type TempUnit } from '../utils/preferences'
+import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { shareText } from '../utils/share'
 import { tapHaptic } from '../utils/haptics'
 import { StatsGrid } from '../components/DesignCards'
@@ -70,6 +69,15 @@ function groceryKey(name: string, unit: string): string {
   return `${(name || '').trim().toLowerCase()}|${(unit || '').trim().toLowerCase()}`
 }
 
+// A recipe's per-serving calories and protein, from its nutrition or the bare
+// calorie field. Null when the recipe has no nutrition data at all.
+function nutritionOf(r: any): { cal: number; protein: number } | null {
+  const n = r?.nutrition
+  if (n && typeof n.calories === 'number') return { cal: n.calories, protein: n.protein || 0 }
+  if (typeof r?.calories === 'number') return { cal: r.calories, protein: 0 }
+  return null
+}
+
 // Returns the recipe(s) planned for a given day + meal type as an array.
 export function getMeals(plan: MealPlan | undefined, dayName: string, mealType: string): any[] {
   const dayMeals: any = plan?.meals?.[dayName]
@@ -111,10 +119,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [monthCursor, setMonthCursor] = useState<Date>(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   const [generating, setGenerating] = useState(false)
   const { toast, show } = useToast()
-  const [goalCal, setGoalCal] = useState(() => getCalorieGoal())
-  const [units, setUnitsState] = useState<MeasurementSystem>(() => getUnitPref())
-  const [servings, setServingsState] = useState(() => getDefaultServings())
-  const [temp, setTempState] = useState<TempUnit>(() => getTempPref())
+  const goalCal = getCalorieGoal()
   const macroGoals = getMacroGoals()
 
   // Recently-picked recipes (floated to the top of the picker).
@@ -582,43 +587,6 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           </div>
         )}
 
-        <div style={{ margin: '0 0 22px', padding: '14px 16px 16px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Goals & units</span>
-            <button onClick={() => onNavigate('settings')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>All preferences →</button>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '14px' }}>
-            <span style={{ fontSize: '14px', color: 'var(--color-text)', fontWeight: '600' }}>Daily calories</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button aria-label="Lower calorie goal" onClick={() => { const n = Math.max(1000, goalCal - 50); setCalorieGoal(n); setGoalCal(n) }} style={{ width: '44px', height: '44px', borderRadius: '14px', border: '1px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer', fontSize: '18px', fontWeight: '700', color: 'var(--color-text)' }}>−</button>
-              <span style={{ minWidth: '70px', textAlign: 'center', fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{goalCal.toLocaleString()}</span>
-              <button aria-label="Raise calorie goal" onClick={() => { const n = Math.min(6000, goalCal + 50); setCalorieGoal(n); setGoalCal(n) }} style={{ width: '44px', height: '44px', borderRadius: '14px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer', fontSize: '18px', fontWeight: '700', color: 'var(--color-primary-dark)' }}>+</button>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '14px' }}>
-            <span style={{ fontSize: '14px', color: 'var(--color-text)', fontWeight: '600' }}>Default servings</span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {[1, 2, 4, 6].map(n => (
-                <button key={n} onClick={() => { setDefaultServings(n); setServingsState(n) }} aria-pressed={servings === n} style={{ minWidth: '44px', height: '44px', borderRadius: '14px', border: `1px solid ${servings === n ? 'var(--color-primary)' : 'var(--color-border)'}`, background: servings === n ? 'var(--color-primary-bg)' : 'var(--color-card)', color: servings === n ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: 'var(--shadow-sm)' }}>{n}</button>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-            <span style={{ fontSize: '14px', color: 'var(--color-text)', fontWeight: '600' }}>Units</span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {(['imperial', 'metric'] as const).map(u => (
-                <button key={u} onClick={() => { setUnitPref(u); setUnitsState(u) }} aria-pressed={units === u} style={{ height: '44px', padding: '0 12px', borderRadius: '14px', border: `1px solid ${units === u ? 'var(--color-primary)' : 'var(--color-border)'}`, background: units === u ? 'var(--color-primary-bg)' : 'var(--color-card)', color: units === u ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: 'var(--shadow-sm)' }}>{u === 'imperial' ? 'Imperial' : 'Metric'}</button>
-              ))}
-              {(['F', 'C'] as const).map(t => (
-                <button key={t} onClick={() => { setTempPref(t); setTempState(t) }} aria-pressed={temp === t} style={{ width: '44px', height: '44px', borderRadius: '14px', border: `1px solid ${temp === t ? 'var(--color-primary)' : 'var(--color-border)'}`, background: temp === t ? 'var(--color-primary-bg)' : 'var(--color-card)', color: temp === t ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: 'var(--shadow-sm)' }}>°{t}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* Build the week's grocery list from the plan. Tapping it
             previews the change (new vs. topped-up) before anything is written. */}
         {hasMeals && (preview ? (
@@ -667,25 +635,25 @@ export default function MealPlanScreen({ onNavigate }: Props) {
         {/* The selected day's nutrition, summed from the planned recipes.
             Wrapped so it grows in smoothly — adding the day's first meal used to
             snap it in and shove the rows below out from under a finger. */}
-        {dayHasMeals && (
+        {(
           <Reveal>
-          <div style={{ background: 'var(--color-subtle)', borderRadius: '16px', padding: '16px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Nutrition</span>
-              <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{selectedDay}</span>
+          <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', padding: '16px', marginBottom: '24px', boxShadow: 'var(--shadow-md)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Nutrition goals · {selectedDay}</span>
+              <button onClick={() => onNavigate('settings')} style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', color: 'var(--color-primary-dark)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', fontFamily: 'inherit' }}>Edit goals</button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ flexShrink: 0, width: '116px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                  <span style={{ fontSize: '26px', fontWeight: '800', color: 'var(--color-text)', lineHeight: 1 }}>{dayNutrition.cal.toLocaleString()}</span>
-                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>cal</span>
-                </div>
-                <div style={{ height: '6px', borderRadius: '3px', background: 'var(--color-border)', overflow: 'hidden', marginTop: '9px' }}>
-                  <div style={{ height: '100%', width: `${Math.min(100, Math.round((dayNutrition.cal / goalCal) * 100))}%`, background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', borderRadius: '3px', transition: 'width 0.3s ease' }} />
-                </div>
-                <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '4px', display: 'block' }}>of {goalCal.toLocaleString()} cal goal</span>
-              </div>
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '8px 0 16px', lineHeight: 1.45 }}>
+              {(() => {
+                const calLeft = goalCal - dayNutrition.cal
+                const proLeft = macroGoals.protein - dayNutrition.protein
+                const calText = calLeft >= 0 ? `${calLeft.toLocaleString()} cal left` : `${(-calLeft).toLocaleString()} cal over`
+                const proText = proLeft >= 0 ? `${proLeft}g protein left` : `${-proLeft}g protein over`
+                return dayHasMeals ? `${calText} · ${proText}` : `Plan within ${goalCal.toLocaleString()} cal and ${macroGoals.protein}g protein`
+              })()}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+              <CalorieRing cal={dayNutrition.cal} goal={goalCal} />
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <MacroStat color="#a78bfa" label="Protein" grams={dayNutrition.protein} goal={macroGoals.protein} />
                 <MacroStat color="#fbbf24" label="Carbs" grams={dayNutrition.carbs} goal={macroGoals.carbs} />
                 <MacroStat color="var(--color-primary)" label="Fat" grams={dayNutrition.fat} goal={macroGoals.fat} />
@@ -693,7 +661,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             </div>
             {/* 1.4.1 citation — same estimated recipe data, summed. Boxed with an
                 icon so it's actually noticeable, not fine print under the bars. */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '12px', padding: '10px 12px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '10px' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginTop: '16px', padding: '10px 12px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '12px' }}>
               <Info size={14} color="var(--color-primary-dark)" style={{ flexShrink: 0, marginTop: '1px' }} />
               <p style={{ margin: 0, fontSize: '12.5px', lineHeight: 1.5, color: 'var(--color-primary-dark)' }}>
                 Estimated totals for general reference — not medical advice. Source:{' '}
@@ -771,7 +739,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
               {rowContent}
             </SwipeableMealRow>
           ) : (
-            <RecipePicker key={`${m.key}-${i}`} recipes={recipes} recentIds={recentIds} meal={m} onPick={(id) => addMealToPlan(id, m.key)} onNoRecipes={() => onNavigate('add-recipe')}>
+            <RecipePicker key={`${m.key}-${i}`} recipes={recipes} recentIds={recentIds} meal={m} remainingCal={goalCal - dayNutrition.cal} onPick={(id) => addMealToPlan(id, m.key)} onNoRecipes={() => onNavigate('add-recipe')}>
               {rowContent}
             </RecipePicker>
           )
@@ -811,15 +779,40 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   )
 }
 
-/** One macro line in the nutrition summary: coloured dot, label, grams. */
+/** One macro in the nutrition tile: coloured dot, label, grams against goal, and a progress bar. */
 function MacroStat({ color, label, grams, goal }: { color: string; label: string; grams: number; goal: number }) {
+  const pct = goal > 0 ? Math.min(100, Math.round((grams / goal) * 100)) : 0
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, flexShrink: 0 }} />
-      <span style={{ flex: 1, fontSize: '13px', color: 'var(--color-text-secondary)' }}>{label}</span>
-      <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>
-        {grams}<span style={{ color: 'var(--color-text-muted)', fontWeight: '600' }}> / {goal}g</span>
-      </span>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+        <span style={{ flex: 1, fontSize: '13px', color: 'var(--color-text-secondary)' }}>{label}</span>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-text)' }}>
+          {grams}<span style={{ color: 'var(--color-text-muted)', fontWeight: '600' }}> / {goal}g</span>
+        </span>
+      </div>
+      <div role="progressbar" aria-label={`${label} progress`} aria-valuemin={0} aria-valuemax={goal} aria-valuenow={grams} style={{ height: '6px', borderRadius: '3px', background: 'var(--color-border)', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '3px', transition: 'width 0.3s ease' }} />
+      </div>
+    </div>
+  )
+}
+
+/** Calories eaten against the daily goal as a ring, with the count in the middle. Turns amber once over goal. */
+function CalorieRing({ cal, goal }: { cal: number; goal: number }) {
+  const size = 104, stroke = 10, r = (size - stroke) / 2, c = 2 * Math.PI * r
+  const pct = goal > 0 ? Math.min(1, cal / goal) : 0
+  const over = cal > goal
+  return (
+    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }} role="img" aria-label={`${cal.toLocaleString()} of ${goal.toLocaleString()} calories`}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--color-border)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={over ? '#f59e0b' : 'var(--color-primary)'} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} style={{ transition: 'stroke-dashoffset 0.4s ease' }} />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: '22px', fontWeight: '800', color: 'var(--color-text)', lineHeight: 1 }}>{cal.toLocaleString()}</span>
+        <span style={{ fontSize: '10.5px', color: 'var(--color-text-muted)', marginTop: '3px' }}>of {goal.toLocaleString()} cal</span>
+      </div>
     </div>
   )
 }
@@ -830,10 +823,11 @@ function MacroStat({ color, label, grams, goal }: { color: string; label: string
  * instead of the browser's native <select>. Click-outside closes it; the
  * current recipe (for a swap) is ticked.
  */
-function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentIds = [], onNoRecipes }: {
+function RecipePicker({ recipes, meal: _meal, current, remainingCal, onPick, children, recentIds = [], onNoRecipes }: {
   recipes: Recipe[]
   meal: typeof MEALS[number]
   current?: string
+  remainingCal?: number
   onPick: (recipeId: string) => void
   children: (open: boolean) => React.ReactNode
   recentIds?: string[]
@@ -865,12 +859,20 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
   // order. Only sections the list when there's actually a recent one to show.
   const recent = recentIds.map(id => recipes.find(r => r.id === id)).filter((r): r is Recipe => !!r)
   const recentSet = new Set(recent.map(r => r.id))
-  const rest = recipes.filter(r => !recentSet.has(r.id))
+  const fitsBudget = (r: Recipe) => {
+    const nut = nutritionOf(r)
+    return !!nut && remainingCal !== undefined && nut.cal <= remainingCal
+  }
+  const rest = recipes
+    .filter(r => !recentSet.has(r.id))
+    .sort((a, b) => Number(fitsBudget(b)) - Number(fitsBudget(a)))
 
   const row = (r: Recipe, first: boolean) => {
     const selected = current === r.id
     const totalTime = (r.prepTime || 0) + (r.cookTime || 0)
     const timeDisplay = totalTime > 0 ? `${totalTime} min` : 'N/A'
+    const nut = nutritionOf(r)
+    const fits = !!nut && remainingCal !== undefined && nut.cal <= remainingCal
     return (
       <button
         key={r.id}
@@ -886,8 +888,11 @@ function RecipePicker({ recipes, meal: _meal, current, onPick, children, recentI
       >
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, timeDisplay].filter(Boolean).join(' · ')}</div>
+          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+            {[r.cuisine, timeDisplay, nut ? `${nut.cal} cal` : null, nut && nut.protein ? `${nut.protein}g protein` : null].filter(Boolean).join(' · ')}
+          </div>
         </div>
+        {fits && <span style={{ flexShrink: 0, fontSize: '11px', fontWeight: '700', color: 'var(--color-primary-dark)', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', padding: '3px 8px' }}>Fits</span>}
         {selected && <Check size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />}
       </button>
     )
