@@ -8,6 +8,10 @@ export const SLOT_LABELS: Record<SlotType, string> = {
   breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack', drink: 'Drink',
 }
 
+export const SLOT_EMOJIS: Record<SlotType, string> = {
+  breakfast: '🍳', lunch: '🥗', dinner: '🍽️', snack: '🍎', drink: '🥤',
+}
+
 const ALIASES: [RegExp, SlotType][] = [
   [/breakfast|brunch/, 'breakfast'],
   [/lunch/, 'lunch'],

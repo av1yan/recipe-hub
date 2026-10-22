@@ -1,3 +1,4 @@
+import { slotTypeOf, SLOT_EMOJIS } from '../utils/mealType'
 import { useState, useEffect, type CSSProperties } from 'react'
 import { Search, SlidersHorizontal, X, ChevronRight, Info } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
@@ -232,7 +233,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
         Discover
       </h1>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--color-subtle)', borderRadius: '13px', padding: '12px 14px', minWidth: 0 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--color-card)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', borderRadius: '16px', padding: '12px 14px', minWidth: 0 }}>
           <Search size={17} color="var(--color-text-muted)" />
           <input
             type="text"
@@ -253,8 +254,8 @@ export default function BrowseScreen({ onNavigate }: Props) {
             onClick={() => setFilterOpen(o => !o)}
             aria-label="Filters"
             style={{
-              position: 'relative', flexShrink: 0, width: '46px', height: '46px', borderRadius: '13px',
-              border: 'none', background: filterActive ? 'var(--color-primary)' : 'var(--color-subtle)',
+              position: 'relative', flexShrink: 0, width: '46px', height: '46px', borderRadius: '16px',
+              border: `1px solid ${filterActive ? 'var(--color-primary)' : 'var(--color-border)'}`, boxShadow: 'var(--shadow-sm)', background: filterActive ? 'var(--color-primary)' : 'var(--color-card)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             }}
           >
@@ -403,45 +404,51 @@ export default function BrowseScreen({ onNavigate }: Props) {
         ) : browsing ? (
           <>
             {rotd && (
-              <div style={{ padding: '20px 24px 0', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
-                <div style={{ height: '190px', borderRadius: '20px', overflow: 'hidden', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '58px' }}>
-                  {rotd.imageUrl
-                    ? <img src={rotd.imageUrl} alt={rotd.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                    : '🍽️'}
+              <div style={{ padding: '20px 24px 0' }}>
+                <div onClick={() => onNavigate('recipe', { recipe: rotd })} style={{ cursor: 'pointer', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+                  <div style={{ height: rotd.imageUrl ? '180px' : '116px', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '52px' }}>
+                    {rotd.imageUrl
+                      ? <img src={rotd.imageUrl} alt={rotd.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
+                      : SLOT_EMOJIS[slotTypeOf(rotd)]}
+                  </div>
+                  <div style={{ padding: '14px 16px 16px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-primary)', margin: 0 }}>
+                      Recipe of the day
+                    </p>
+                    <h2 style={{ fontSize: '21px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--color-text)', margin: '6px 0 0', lineHeight: 1.2 }}>
+                      {rotd.name}
+                    </h2>
+                    <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
+                      {[rotd.cuisine, `${(rotd.prepTime || 0) + (rotd.cookTime || 0)} min`, rotd.calories ? `${rotd.calories} cal` : ''].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
                 </div>
-                <p style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-primary)', margin: '16px 0 0' }}>
-                  Recipe of the day
-                </p>
-                <h2 style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--color-text)', margin: '6px 0 0', lineHeight: 1.2 }}>
-                  {rotd.name}
-                </h2>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
-                  {[rotd.cuisine, `${(rotd.prepTime || 0) + (rotd.cookTime || 0)} min`, rotd.calories ? `${rotd.calories} cal` : ''].filter(Boolean).join(' · ')}
-                </p>
               </div>
             )}
 
             {trending.length > 0 && (
-              <div style={{ padding: '34px 0 0' }}>
+              <div style={{ padding: '28px 0 0' }}>
                 <div style={{ padding: '0 24px' }}>
                   <SectionHead title="Trending" />
                 </div>
-                <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '16px 24px 4px', scrollbarWidth: 'none' }}>
+                <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '16px 24px 16px', scrollbarWidth: 'none' }}>
                   {trending.map(recipe => {
                     const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
                     return (
-                      <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ flex: '0 0 150px', cursor: 'pointer' }}>
-                        <div style={{ height: '110px', borderRadius: '14px', overflow: 'hidden', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '34px' }}>
+                      <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ flex: '0 0 160px', cursor: 'pointer', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+                        <div style={{ height: '96px', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>
                           {recipe.imageUrl
                             ? <img src={recipe.imageUrl} alt={recipe.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none' }} />
-                            : '🍽️'}
+                            : SLOT_EMOJIS[slotTypeOf(recipe)]}
                         </div>
-                        <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: '10px 0 0', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {recipe.name}
-                        </p>
-                        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 0' }}>
-                          {[recipe.cuisine, `${time} min`].filter(Boolean).join(' · ')}
-                        </p>
+                        <div style={{ padding: '10px 12px 12px' }}>
+                          <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', margin: 0, lineHeight: 1.3, minHeight: '36px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {recipe.name}
+                          </p>
+                          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 0' }}>
+                            {[recipe.cuisine, `${time} min`].filter(Boolean).join(' · ')}
+                          </p>
+                        </div>
                       </div>
                     )
                   })}
@@ -466,6 +473,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
             {/* Explore — a ruled list; each row opens its values inline. */}
             <div style={{ padding: '34px 24px 0' }}>
               <SectionHead title="Explore" />
+              <div style={{ marginTop: '12px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', boxShadow: 'var(--shadow-md)', padding: '0 16px' }}>
               {EXPLORE.map((cat, i) => {
                 const open = exploreCat === cat.key
                 const disabled = cat.values.length === 0
@@ -498,6 +506,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                   </div>
                 )
               })}
+              </div>
             </div>
 
             {/* All recipes */}
