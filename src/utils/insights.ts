@@ -121,7 +121,8 @@ export function computeInsights(opts: {
     })
     const shared = Object.entries(counts).filter(([, n]) => n >= 2).map(([n]) => n)
     if (shared.length >= 2) {
-      out.push({ emoji: '🛒', tone: 'info', text: `${shared.slice(0, 3).join(', ')} appear in several recipes — buy once, use across the week.` })
+      const list = shared.slice(0, 3).join(', ')
+      out.push({ emoji: '🛒', tone: 'info', text: `${list.charAt(0).toUpperCase()}${list.slice(1)} appear in several recipes — buy once, use across the week.` })
     }
   }
 

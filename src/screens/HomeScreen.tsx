@@ -261,27 +261,34 @@ export default function HomeScreen({ onNavigate }: Props) {
             </div>
 
             {todayMeals.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {todayMeals.map(({ meal, cfg }) => (
-                  <div key={cfg.key} style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
-                    <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}>
-                      <InfoCard
-                        className="info-card--flat"
-                        leftBadge={{ label: cfg.label.slice(0, 3).toUpperCase(), value: cfg.emoji }}
-                        title={meal.name}
-                        subtitle={cfg.label}
-                        rightInfo={`${(meal.prepTime || 0) + (meal.cookTime || 0)} min`}
-                      />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '12px' }}>
+                {todayMeals.map(({ meal, cfg }) => {
+                  const mins = (meal.prepTime || 0) + (meal.cookTime || 0)
+                  return (
+                    <div key={cfg.key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 4px 12px 12px', background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '18px' }}>
+                      <div
+                        onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}
+                        style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}
+                      >
+                        <span style={{ width: '50px', height: '50px', borderRadius: '15px', background: 'var(--color-card)', border: '1px solid var(--color-primary-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '23px', flexShrink: 0 }}>
+                          {cfg.emoji}
+                        </span>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>{cfg.label}</div>
+                          <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--color-text)', lineHeight: 1.3, margin: '2px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{meal.name}</div>
+                          {mins > 0 && <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)' }}>{mins} min</div>}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeMeal(meal.mealId)}
+                        aria-label={`Remove ${meal.name} from ${cfg.label}`}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', width: '44px', height: '44px', margin: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                      >
+                        <X size={16} color="var(--color-text-muted)" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => removeMeal(meal.mealId)}
-                      aria-label={`Remove ${meal.name} from ${cfg.label}`}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', width: '44px', height: '44px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                    >
-                      <X size={16} color="var(--color-text-muted)" />
-                    </button>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <EmptyRow compact label="Nothing planned today" onClick={() => onNavigate('meal-plan')} />
