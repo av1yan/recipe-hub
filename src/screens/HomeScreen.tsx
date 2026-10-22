@@ -6,6 +6,7 @@ import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
 import { DAY_NAMES, MEALS, sameWeek, getMeals, mondayOf } from './MealPlanScreen'
 import { slotTypeOf } from '../utils/mealType'
+import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { InfoCard, TrackerBox } from '../components/DesignCards'
 
 interface Props {
@@ -180,6 +181,16 @@ export default function HomeScreen({ onNavigate }: Props) {
 
   const favorites = recipes.filter((r: any) => r.isFavorite)
 
+  // Today's calories and protein: one serving of each planned recipe. The plan
+  // list omits nutrition, so read it off the recipes list by id.
+  const goalCal = getCalorieGoal()
+  const goalProtein = getMacroGoals().protein
+  const todayTotals = todayMeals.reduce((t, { meal }) => {
+    const r: any = recipes.find((x: any) => x.id === meal.id) || meal
+    const n = r?.nutrition
+    return { cal: t.cal + (n ? n.calories || 0 : r?.calories || 0), protein: t.protein + (n?.protein || 0) }
+  }, { cal: 0, protein: 0 })
+
   // The quick-add list offers recipes that suit the chosen slot, or everything
   // when none are tagged for it.
   const slotMatches = addingSlot ? recipes.filter((r: any) => slotTypeOf(r) === addingSlot) : []
@@ -244,6 +255,10 @@ export default function HomeScreen({ onNavigate }: Props) {
           <section style={{ marginBottom: '20px' }}>
             <div style={{ ...sectionCard, padding: '16px 16px 16px' }}>
             <SectionHead title="Today" action="Plan →" onAction={() => onNavigate('meal-plan')} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', padding: '14px 0 6px' }}>
+              <GoalBar label="Calories" value={todayTotals.cal} goal={goalCal} unit="" color="var(--color-primary)" />
+              <GoalBar label="Protein" value={todayTotals.protein} goal={goalProtein} unit="g" color="#a78bfa" />
+            </div>
 
             {todayMeals.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -252,7 +267,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: recipes.find((r: any) => r.id === meal.id) ?? meal })}>
                       <InfoCard
                         className="info-card--flat"
-                        leftBadge={{ label: cfg.label.slice(0, 3).toUpperCase(), value: '🍽️' }}
+                        leftBadge={{ label: cfg.label.slice(0, 3).toUpperCase(), value: cfg.emoji }}
                         title={meal.name}
                         subtitle={cfg.label}
                         rightInfo={`${(meal.prepTime || 0) + (meal.cookTime || 0)} min`}
@@ -410,6 +425,23 @@ function SectionHead({ title, action, onAction }: { title: string; action?: stri
           {action}
         </button>
       )}
+    </div>
+  )
+}
+
+/** A label, "value / goal", and a progress bar. Turns amber once the goal is passed. */
+function GoalBar({ label, value, goal, unit, color }: { label: string; value: number; goal: number; unit: string; color: string }) {
+  const pct = goal > 0 ? Math.min(100, Math.round((value / goal) * 100)) : 0
+  const over = value > goal
+  return (
+    <div>
+      <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: '4px' }}>{label}</div>
+      <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text)', marginBottom: '7px' }}>
+        {value.toLocaleString()}{unit}<span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--color-text-muted)' }}> / {goal.toLocaleString()}{unit}</span>
+      </div>
+      <div role="progressbar" aria-label={`${label} today`} aria-valuemin={0} aria-valuemax={goal} aria-valuenow={value} style={{ height: '6px', borderRadius: '3px', background: 'var(--color-border)', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: over ? '#f59e0b' : color, borderRadius: '3px', transition: 'width 0.3s ease' }} />
+      </div>
     </div>
   )
 }
