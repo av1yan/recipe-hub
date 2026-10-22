@@ -9,7 +9,6 @@ import { FrameOverlay } from '../components/FrameOverlay'
 import { shareText } from '../utils/share'
 import { Capacitor } from '@capacitor/core'
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera'
-import { StatsGrid, TrackerBox } from '../components/DesignCards'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -87,18 +86,19 @@ function capitalizeFirstLetter(str: string): string {
 function iconBtnStyle(active = false): CSSProperties {
   return {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    width: '36px', height: '36px', borderRadius: '11px',
+    width: '38px', height: '38px', borderRadius: '13px',
     boxShadow: active ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
-    background: active ? 'var(--color-primary)' : 'var(--color-subtle)',
+    background: active ? 'var(--color-primary)' : 'var(--color-card)',
     color: active ? '#fff' : 'var(--color-text-secondary)',
-    border: 'none', cursor: 'pointer',
+    border: `1px solid ${active ? 'var(--color-primary)' : 'var(--color-border)'}`, cursor: 'pointer',
   }
 }
 
 // Filled, borderless input — the minimal field used across this screen.
 const fieldStyle: CSSProperties = {
-  padding: '11px 13px', borderRadius: '11px', border: 'none',
-  background: 'var(--color-subtle)', color: 'var(--color-text)',
+  padding: '11px 13px', borderRadius: '14px', border: '1px solid var(--color-border)',
+  boxShadow: 'var(--shadow-sm)',
+  background: 'var(--color-card)', color: 'var(--color-text)',
   fontSize: '16px', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
 }
 
@@ -457,7 +457,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
         <button
           onClick={openCamera}
           aria-label="Scan a grocery note"
-          style={{ boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)', borderRadius: '11px', padding: '0 13px', height: '36px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+          style={{ boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', border: '1px solid var(--color-primary-border)', borderRadius: '13px', padding: '0 13px', height: '38px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
         >
           <Camera size={16} /> Scan
         </button>
@@ -495,11 +495,6 @@ export default function GroceryListScreen({ onNavigate }: Props) {
 
       <header style={{ padding: '20px 24px 14px', background: 'var(--color-bg)', flexShrink: 0 }}>
         {headerTop}
-        {selectedList && (
-          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '8px' }}>
-            {checkedCount} of {totalCount} checked
-          </div>
-        )}
       </header>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '6px 24px 24px', display: 'flex', flexDirection: 'column' }}>
@@ -599,21 +594,19 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                 <div>
                   {selectedList.items && selectedList.items.length > 0 && (
                     <>
-                      <StatsGrid stats={[
-                        { value: totalCount, label: 'Total' },
-                        { value: checkedCount, label: 'Checked' },
-                        { value: totalCount - checkedCount, label: 'Remaining' }
-                      ]} />
-                      {totalCount > 0 && (
-                        <TrackerBox title="Progress">
-                          <div className="tracker-item">
-                            <strong>{checkedCount}/{totalCount}</strong> items checked
-                          </div>
-                          <div className="tracker-item">
-                            <strong>{Math.round((checkedCount / totalCount) * 100)}%</strong> complete
-                          </div>
-                        </TrackerBox>
-                      )}
+                      <div style={{ padding: '14px 16px 16px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', boxShadow: 'var(--shadow-md)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>
+                            {checkedCount} of {totalCount} checked
+                          </span>
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: checkedCount === totalCount ? 'var(--color-primary-dark)' : 'var(--color-text-muted)' }}>
+                            {checkedCount === totalCount ? 'All done' : `${totalCount - checkedCount} left`}
+                          </span>
+                        </div>
+                        <div role="progressbar" aria-label="Items checked" aria-valuemin={0} aria-valuemax={totalCount} aria-valuenow={checkedCount} style={{ height: '8px', borderRadius: '4px', background: 'var(--color-border)', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0}%`, background: 'var(--color-primary)', borderRadius: '4px', transition: 'width 0.3s ease' }} />
+                        </div>
+                      </div>
                     </>
                   )}
                   {selectedList.items && selectedList.items.length > 0 ? (
