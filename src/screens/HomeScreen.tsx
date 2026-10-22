@@ -235,8 +235,8 @@ export default function HomeScreen({ onNavigate }: Props) {
             </div>
 
           {/* Today */}
-          <section style={{ marginBottom: '36px' }}>
-            <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)', padding: '14px 16px 14px' }}>
+          <section style={{ marginBottom: '20px' }}>
+            <div style={{ ...sectionCard, padding: '16px 16px 16px' }}>
             <SectionHead title="Today" action="Plan →" onAction={() => onNavigate('meal-plan')} />
 
             {todayMeals.length > 0 ? (
@@ -263,7 +263,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 ))}
               </div>
             ) : (
-              <EmptyRow label="Nothing planned today" onClick={() => onNavigate('meal-plan')} />
+              <EmptyRow compact label="Nothing planned today" onClick={() => onNavigate('meal-plan')} />
             )}
 
             {/* Add a meal without leaving Home. */}
@@ -271,7 +271,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               MEALS.some(cfg => !filledSlots.has(cfg.key)) && (
                 <button
                   onClick={() => setAddingSlot(MEALS.find(cfg => !filledSlots.has(cfg.key))!.key)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '16px', background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: todayMeals.length > 0 ? '14px' : '10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', color: 'var(--color-primary-dark)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', padding: '9px 16px', fontFamily: 'inherit' }}
                 >
                   <Plus size={14} /> Add a meal
                 </button>
@@ -322,9 +322,9 @@ export default function HomeScreen({ onNavigate }: Props) {
           {/* Feature discovery hint for free users with few recipes */}
 
           {/* Favorites */}
-          <section style={{ marginBottom: '36px' }}>
+          <section style={{ marginBottom: '20px' }}>
             {favorites.length > 0 ? (
-              <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)', padding: '14px 16px 4px', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ ...sectionCard, padding: '16px 16px 6px', display: 'flex', flexDirection: 'column' }}>
                 <SectionHead title="Favorites" action="See all →" onAction={() => onNavigate('favorites')} />
                 {favorites.slice(0, 5).map((recipe: any) => {
                   const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
@@ -332,7 +332,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <InfoCard
                       key={recipe.id}
                       className="info-card--flat"
-                      leftBadge={{ label: '❤️', value: '⭐' }}
+                      leftBadge={{ label: (recipe.cuisine || 'Fav').slice(0, 3).toUpperCase(), value: '❤️' }}
                       title={recipe.name}
                       subtitle={recipe.cuisine || 'Recipe'}
                       rightInfo={`${time} min`}
@@ -350,8 +350,8 @@ export default function HomeScreen({ onNavigate }: Props) {
           </section>
 
           {/* Cookbooks */}
-          <section style={{ marginBottom: '36px' }}>
-            <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)', padding: '14px 16px 4px', display: 'flex', flexDirection: 'column' }}>
+          <section style={{ marginBottom: '20px' }}>
+            <div style={{ ...sectionCard, padding: '16px 16px 6px', display: 'flex', flexDirection: 'column' }}>
             <SectionHead title="Cookbooks" action={cookbooks.length > 0 ? 'See all →' : undefined} onAction={() => onNavigate('cookbooks')} />
             {cookbooks.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -384,6 +384,14 @@ export default function HomeScreen({ onNavigate }: Props) {
   )
 }
 
+/** The white elevated tile every Home section sits in. */
+const sectionCard: CSSProperties = {
+  background: 'var(--color-card)',
+  border: '1px solid var(--color-border)',
+  borderRadius: '20px',
+  boxShadow: 'var(--shadow-md)',
+}
+
 /** A ruled section label: small all-caps title on a hairline, optional link. */
 function SectionHead({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
   return (
@@ -401,11 +409,11 @@ function SectionHead({ title, action, onAction }: { title: string; action?: stri
 }
 
 /** Empty shelf: a single muted line with the action floated right. */
-function EmptyRow({ label, action, onClick }: { label: string; action?: string; onClick: () => void }) {
+function EmptyRow({ label, action, onClick, compact }: { label: string; action?: string; onClick: () => void; compact?: boolean }) {
   return (
     <button
       onClick={onClick}
-      style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', padding: '17px 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+      style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', padding: compact ? '14px 0 4px' : '17px 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
     >
       <span style={{ fontSize: '15px', color: 'var(--color-text-secondary)' }}>{label}</span>
       {action && <span style={{ fontSize: '13px', color: 'var(--color-primary)', fontWeight: '600' }}>{action}</span>}
@@ -431,7 +439,7 @@ function SkelTextRow({ divider = false }: { divider?: boolean }) {
 
 function SkelSection() {
   return (
-    <div style={{ marginBottom: '36px' }}>
+    <div style={{ marginBottom: '20px' }}>
       <div style={{ paddingBottom: '10px', borderBottom: '1px solid var(--color-subtle)' }}>
         <Skel w={84} h={11} r={6} />
       </div>
@@ -444,7 +452,7 @@ function SkelSection() {
 function HomeSkeleton() {
   return (
     <div>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '36px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
           {[0, 1, 2].map(i => (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
               <Skel w={46} h={46} r={23} />
