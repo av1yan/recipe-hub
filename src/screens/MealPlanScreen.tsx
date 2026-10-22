@@ -5,7 +5,8 @@ import { Toast, useToast } from '../components/Toast'
 import { FrameOverlay } from '../components/FrameOverlay'
 import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
-import { getCalorieGoal, getMacroGoals } from '../utils/goals'
+import { getCalorieGoal, setCalorieGoal, getMacroGoals } from '../utils/goals'
+import { getUnitPref, setUnitPref, getDefaultServings, setDefaultServings, getTempPref, setTempPref, type MeasurementSystem, type TempUnit } from '../utils/preferences'
 import { shareText } from '../utils/share'
 import { tapHaptic } from '../utils/haptics'
 import { StatsGrid } from '../components/DesignCards'
@@ -110,7 +111,10 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   const [monthCursor, setMonthCursor] = useState<Date>(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   const [generating, setGenerating] = useState(false)
   const { toast, show } = useToast()
-  const goalCal = getCalorieGoal()
+  const [goalCal, setGoalCal] = useState(() => getCalorieGoal())
+  const [units, setUnitsState] = useState<MeasurementSystem>(() => getUnitPref())
+  const [servings, setServingsState] = useState(() => getDefaultServings())
+  const [temp, setTempState] = useState<TempUnit>(() => getTempPref())
   const macroGoals = getMacroGoals()
 
   // Recently-picked recipes (floated to the top of the picker).
@@ -577,6 +581,43 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             </div>
           </div>
         )}
+
+        <div style={{ margin: '0 0 22px', padding: '14px 16px 16px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Goals & units</span>
+            <button onClick={() => onNavigate('settings')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>All preferences →</button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '14px' }}>
+            <span style={{ fontSize: '14px', color: 'var(--color-text)', fontWeight: '600' }}>Daily calories</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button aria-label="Lower calorie goal" onClick={() => { const n = Math.max(1000, goalCal - 50); setCalorieGoal(n); setGoalCal(n) }} style={{ width: '44px', height: '44px', borderRadius: '14px', border: '1px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer', fontSize: '18px', fontWeight: '700', color: 'var(--color-text)' }}>−</button>
+              <span style={{ minWidth: '70px', textAlign: 'center', fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{goalCal.toLocaleString()}</span>
+              <button aria-label="Raise calorie goal" onClick={() => { const n = Math.min(6000, goalCal + 50); setCalorieGoal(n); setGoalCal(n) }} style={{ width: '44px', height: '44px', borderRadius: '14px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', boxShadow: 'var(--shadow-sm)', cursor: 'pointer', fontSize: '18px', fontWeight: '700', color: 'var(--color-primary-dark)' }}>+</button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '14px' }}>
+            <span style={{ fontSize: '14px', color: 'var(--color-text)', fontWeight: '600' }}>Default servings</span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {[1, 2, 4, 6].map(n => (
+                <button key={n} onClick={() => { setDefaultServings(n); setServingsState(n) }} aria-pressed={servings === n} style={{ minWidth: '44px', height: '44px', borderRadius: '14px', border: `1px solid ${servings === n ? 'var(--color-primary)' : 'var(--color-border)'}`, background: servings === n ? 'var(--color-primary-bg)' : 'var(--color-card)', color: servings === n ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: 'var(--shadow-sm)' }}>{n}</button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+            <span style={{ fontSize: '14px', color: 'var(--color-text)', fontWeight: '600' }}>Units</span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {(['imperial', 'metric'] as const).map(u => (
+                <button key={u} onClick={() => { setUnitPref(u); setUnitsState(u) }} aria-pressed={units === u} style={{ height: '44px', padding: '0 12px', borderRadius: '14px', border: `1px solid ${units === u ? 'var(--color-primary)' : 'var(--color-border)'}`, background: units === u ? 'var(--color-primary-bg)' : 'var(--color-card)', color: units === u ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: 'var(--shadow-sm)' }}>{u === 'imperial' ? 'Imperial' : 'Metric'}</button>
+              ))}
+              {(['F', 'C'] as const).map(t => (
+                <button key={t} onClick={() => { setTempPref(t); setTempState(t) }} aria-pressed={temp === t} style={{ width: '44px', height: '44px', borderRadius: '14px', border: `1px solid ${temp === t ? 'var(--color-primary)' : 'var(--color-border)'}`, background: temp === t ? 'var(--color-primary-bg)' : 'var(--color-card)', color: temp === t ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: 'var(--shadow-sm)' }}>°{t}</button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Build the week's grocery list from the plan. Tapping it
             previews the change (new vs. topped-up) before anything is written. */}

@@ -402,7 +402,6 @@ export default function BrowseScreen({ onNavigate }: Props) {
           </div>
         ) : browsing ? (
           <>
-            {/* Recipe of the day — one big image, then quiet text. No card. */}
             {rotd && (
               <div style={{ padding: '20px 24px 0', cursor: 'pointer' }} onClick={() => onNavigate('recipe', { recipe: rotd })}>
                 <div style={{ height: '190px', borderRadius: '20px', overflow: 'hidden', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '58px' }}>
@@ -450,19 +449,19 @@ export default function BrowseScreen({ onNavigate }: Props) {
               </div>
             )}
 
-            <div style={{ margin: '34px 24px 0', padding: '14px 16px 16px', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-sm)' }}>
-              <p style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--color-text-muted)', margin: '0 0 4px' }}>Trending online</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '10px 0 0' }}>
-                {ONLINE_TRENDS.filter(t => recipes.some(r => matchesTerm(r, t.query))).map(t => (
-                  <button key={t.label} onClick={() => setSearchTerm(t.query)} style={{ ...chipStyle(false), minHeight: '44px' }}>
-                    {t.label}
-                  </button>
-                ))}
+            {ONLINE_TRENDS.some(t => recipes.some(r => matchesTerm(r, t.query))) && (
+              <div style={{ padding: '34px 24px 0' }}>
+                <SectionHead title="Popular searches" />
+                <div style={{ height: '12px' }} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {ONLINE_TRENDS.filter(t => recipes.some(r => matchesTerm(r, t.query))).map(t => (
+                    <button key={t.label} onClick={() => setSearchTerm(t.query)} style={{ ...chipStyle(false), minHeight: '44px' }}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '10px 0 0', lineHeight: 1.5 }}>
-                Matches recipe names, ingredients and tags. Trend list curated from 2026 food-trend roundups.
-              </p>
-            </div>
+            )}
 
             {/* Explore — a ruled list; each row opens its values inline. */}
             <div style={{ padding: '34px 24px 0' }}>
