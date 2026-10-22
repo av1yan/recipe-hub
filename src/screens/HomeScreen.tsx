@@ -5,6 +5,7 @@ import { recipeAPI, mealPlanAPI, cookbookAPI } from '../utils/api'
 import { recipeImageSrc } from '../utils/image'
 import { useApp } from '../context/AppContext'
 import { DAY_NAMES, MEALS, sameWeek, getMeals, mondayOf } from './MealPlanScreen'
+import { slotTypeOf } from '../utils/mealType'
 import { InfoCard, TrackerBox } from '../components/DesignCards'
 
 interface Props {
@@ -179,6 +180,11 @@ export default function HomeScreen({ onNavigate }: Props) {
 
   const favorites = recipes.filter((r: any) => r.isFavorite)
 
+  // The quick-add list offers recipes that suit the chosen slot, or everything
+  // when none are tagged for it.
+  const slotMatches = addingSlot ? recipes.filter((r: any) => slotTypeOf(r) === addingSlot) : []
+  const slotRecipes = addingSlot && slotMatches.length > 0 ? slotMatches : recipes
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--color-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
@@ -290,7 +296,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                   ))}
                 </div>
                 <div style={{ maxHeight: '168px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                  {recipes.map((r: any, idx: number) => (
+                  {slotRecipes.map((r: any, idx: number) => (
                     <button
                       key={r.id}
                       onClick={() => addMeal(r.id, addingSlot)}

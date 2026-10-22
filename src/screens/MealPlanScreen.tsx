@@ -7,6 +7,7 @@ import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
 import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { shareText } from '../utils/share'
+import { slotTypeOf, SLOT_LABELS } from '../utils/mealType'
 import { tapHaptic } from '../utils/haptics'
 import { StatsGrid } from '../components/DesignCards'
 
@@ -22,6 +23,7 @@ export const MEALS = [
   { key: 'lunch', label: 'Lunch', tint: '#eaf6e0', emoji: '🥗' },
   { key: 'dinner', label: 'Dinner', tint: '#e5e9ff', emoji: '🍽️' },
   { key: 'snack', label: 'Snack', tint: '#fce7f3', emoji: '🍎' },
+  { key: 'drink', label: 'Drink', tint: '#e0f2fe', emoji: '🥤' },
 ]
 
 
@@ -823,7 +825,7 @@ function CalorieRing({ cal, goal }: { cal: number; goal: number }) {
  * instead of the browser's native <select>. Click-outside closes it; the
  * current recipe (for a swap) is ticked.
  */
-function RecipePicker({ recipes, meal: _meal, current, remainingCal, onPick, children, recentIds = [], onNoRecipes }: {
+function RecipePicker({ recipes: allRecipes, meal, current, remainingCal, onPick, children, recentIds = [], onNoRecipes }: {
   recipes: Recipe[]
   meal: typeof MEALS[number]
   current?: string
@@ -834,9 +836,17 @@ function RecipePicker({ recipes, meal: _meal, current, remainingCal, onPick, chi
   onNoRecipes?: () => void
 }) {
   const [open, setOpen] = useState(false)
+  const [showAll, setShowAll] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const [positionAbove, setPositionAbove] = useState(false)
-  const disabled = recipes.length === 0
+  const disabled = allRecipes.length === 0
+
+  // Offer the recipes that belong in this slot; fall back to everything when
+  // none are tagged for it, so the slot is never a dead end.
+  const matching = allRecipes.filter(r => slotTypeOf(r) === meal.key)
+  const noMatches = matching.length === 0
+  const listingAll = showAll || noMatches
+  const recipes = listingAll ? allRecipes : matching
 
   useEffect(() => {
     if (!open) return
@@ -889,7 +899,7 @@ function RecipePicker({ recipes, meal: _meal, current, remainingCal, onPick, chi
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
           <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-            {[r.cuisine, timeDisplay, nut ? `${nut.cal} cal` : null, nut && nut.protein ? `${nut.protein}g protein` : null].filter(Boolean).join(' · ')}
+            {[listingAll ? SLOT_LABELS[slotTypeOf(r)] : null, r.cuisine, timeDisplay, nut ? `${nut.cal} cal` : null, nut && nut.protein ? `${nut.protein}g protein` : null].filter(Boolean).join(' · ')}
           </div>
         </div>
         {fits && <span style={{ flexShrink: 0, fontSize: '11px', fontWeight: '700', color: 'var(--color-primary-dark)', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', padding: '3px 8px' }}>Fits</span>}
@@ -926,6 +936,18 @@ function RecipePicker({ recipes, meal: _meal, current, remainingCal, onPick, chi
             </>
           ) : (
             recipes.map((r, i) => row(r, i === 0))
+          )}
+          {noMatches ? (
+            <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-subtle)', fontSize: '12px', color: 'var(--color-text-muted)' }}>
+              No {meal.label.toLowerCase()} recipes yet — showing all recipes.
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowAll(v => !v)}
+              style={{ width: '100%', padding: '11px 14px', background: 'var(--color-subtle)', border: 'none', borderTop: '1px solid var(--color-border)', color: 'var(--color-primary-dark)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              {showAll ? `Only ${meal.label.toLowerCase()} recipes` : `Show all recipes (${allRecipes.length})`}
+            </button>
           )}
         </div>
       )}

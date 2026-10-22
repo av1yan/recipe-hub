@@ -27,6 +27,8 @@ const MEAL_EMOJIS: Record<string, string> = {
   lunch: '🥗',
   dinner: '🍽️',
   snack: '🍎',
+  dessert: '🍰',
+  drink: '🥤',
 }
 
 const HERO_COLORS = ['#d4a574', 'var(--color-primary)', '#c67139', '#9b7ec8', '#f4b860', '#5b9acd']

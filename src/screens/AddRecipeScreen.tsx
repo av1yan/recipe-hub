@@ -42,7 +42,7 @@ const CUISINES = [
   'Italian', 'Asian', 'Mexican', 'American', 'Mediterranean',
   'Indian', 'Middle Eastern', 'French', 'Other',
 ]
-const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert']
+const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'drink']
 
 /** Sentinel for the picker's "make a new one" option. */
 const NEW_COOKBOOK = '__new__'

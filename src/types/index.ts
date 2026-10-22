@@ -52,7 +52,7 @@ export interface Recipe {
   name: string
   description?: string
   cuisine: string
-  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
+  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'dessert' | 'drink'
   difficulty: 'easy' | 'medium' | 'hard'
   prepTime: number
   cookTime: number
