@@ -7,7 +7,8 @@ import { mealPlanAPI, recipeAPI, groceryAPI } from '../utils/api'
 import { toGroceryLine } from '../utils/grocery'
 import { getCalorieGoal, getMacroGoals } from '../utils/goals'
 import { shareText } from '../utils/share'
-import { slotTypeOf, SLOT_LABELS } from '../utils/mealType'
+import { slotTypeOf, SLOT_LABELS, type SlotType } from '../utils/mealType'
+import { fillDayToGoals } from '../utils/fillToGoals'
 import { tapHaptic } from '../utils/haptics'
 import { StatsGrid } from '../components/DesignCards'
 
@@ -134,6 +135,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   // "Add this week to Groceries" now previews the change before committing, and
   // leaves an undo behind so a merge that topped up existing lines can be rolled
   // back. `preview` holds what the confirm card shows + everything commit needs.
+  const [filling, setFilling] = useState(false)
   const [preview, setPreview] = useState<{
     newCount: number; updatedCount: number; lines: any[]; listId: string | null;
     beforeById: Map<string, number>
@@ -234,6 +236,44 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       await loadData(false)
     } catch (error) {
       console.error('Failed to add meal to plan:', error)
+    }
+  }
+
+  // Fill the selected day's empty slots to the goals in one go: one plan lookup,
+  // then each pick is saved, so a day fills without a round trip per slot.
+  async function fillDayToGoalsNow() {
+    if (!selectedDay || filling) return
+    const picks = fillPicks
+    if (picks.length === 0) { show('Nothing in your recipes fits the rest of the day.', 'error'); return }
+    setFilling(true)
+    try {
+      let planId = currentPlan?.id
+      if (!planId) {
+        const latest: MealPlan[] = await mealPlanAPI.list()
+        setMealPlans(latest)
+        const existing = latest.find(p => sameWeek(p.weekStart, viewWeek))
+        if (existing) planId = existing.id
+        else {
+          const plan = await mealPlanAPI.create(viewWeek)
+          setMealPlans(prev => [...prev, plan])
+          planId = plan.id
+        }
+      }
+      for (const pick of picks) {
+        await mealPlanAPI.addMeal(planId, pick.recipeId, selectedDay, pick.slot)
+      }
+      let recent: string[] = recentIds
+      for (const pk of picks) recent = pushRecent(pk.recipeId)
+      setRecentIds(recent)
+      await loadData(false)
+      const cal = picks.reduce((n, pk) => n + pk.cal, 0)
+      const pro = picks.reduce((n, pk) => n + pk.protein, 0)
+      show(`Added ${picks.length} meal${picks.length === 1 ? '' : 's'} · ${cal} cal · ${pro}g protein`)
+    } catch (error) {
+      console.error('Failed to fill the day:', error)
+      show('Could not fill the day', 'error')
+    } finally {
+      setFilling(false)
     }
   }
 
@@ -419,6 +459,15 @@ export default function MealPlanScreen({ onNavigate }: Props) {
     if (meals.length > 0) meals.forEach(meal => dayRows.push({ m, meal }))
     else dayRows.push({ m, meal: null })
   })
+
+  // The recipes that would fill the empty slots right now, so the fill button only
+  // shows when pressing it would actually add something.
+  const fillPicks = fillDayToGoals(
+    dayRows.filter(r => !r.meal).map(r => r.m.key as SlotType),
+    recipes as any,
+    goalCal - dayNutrition.cal,
+    macroGoals.protein - dayNutrition.protein,
+  )
 
   // Full month grid shown when the calendar is expanded. Page months with the
   // chevrons; tap a date to jump to it.
@@ -663,6 +712,15 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 return dayHasMeals ? `${calText} · ${proText}` : `Plan within ${goalCal.toLocaleString()} cal and ${macroGoals.protein}g protein`
               })()}
             </p>
+            {fillPicks.length > 0 && (
+              <button
+                onClick={fillDayToGoalsNow}
+                disabled={filling}
+                style={{ width: '100%', margin: '0 0 12px', padding: '11px 14px', borderRadius: '14px', border: '1px solid var(--color-primary-border)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '14px', fontWeight: '700', cursor: filling ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: 'var(--shadow-pill)', opacity: filling ? 0.6 : 1 }}
+              >
+                {filling ? 'Filling…' : 'Fill the empty meals to my goals'}
+              </button>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
               <CalorieRing cal={dayNutrition.cal} goal={goalCal} />
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '9px' }}>
