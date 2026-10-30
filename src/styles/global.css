@@ -485,6 +485,15 @@ button {
   min-width: 44px;
 }
 
+/* Wide native shells (iPad, Duo) keep the sign-in form at a readable width
+   instead of stretching the fields across the whole display. */
+:root[data-native="true"] .signin-screen > * {
+  width: 100%;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* --- Shimmer skeletons -------------------------------------------------------
    First-load placeholders that mirror the shape of the content they stand in
    for, so screens never flash empty states before their data lands. The base

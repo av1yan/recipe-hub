@@ -116,7 +116,7 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
   }
 
   return (
-    <div className="screen" style={{ background: 'var(--color-bg)', padding: '28px 24px', display: 'flex', flexDirection: 'column' }}>
+    <div className="screen signin-screen" style={{ background: 'var(--color-bg)', padding: '28px 24px', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '26px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
