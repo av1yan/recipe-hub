@@ -214,7 +214,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
             <button
               onClick={toggleSpeak}
               aria-label={speaking ? 'Stop reading' : 'Read step aloud'}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', border: '1px solid var(--color-primary-border)', background: speaking ? 'var(--color-primary)' : 'var(--color-primary-bg)', color: speaking ? '#fff' : 'var(--color-primary-dark)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {speaking ? <><VolumeX size={13} /> Stop</> : <><Volume2 size={13} /> Read</>}
             </button>

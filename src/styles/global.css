@@ -498,6 +498,23 @@ button {
    First-load placeholders that mirror the shape of the content they stand in
    for, so screens never flash empty states before their data lands. The base
    and highlight are theme tokens, so the sweep reads on light and dark alike. */
+/* The centre "+" turns into a close while the add panel is open. */
+.rh-add-icon {
+  transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.rh-add-icon--open {
+  transform: rotate(135deg);
+}
+.rh-add-btn {
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+}
+.rh-add-btn:active {
+  transform: scale(0.92);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rh-add-icon, .rh-add-btn { transition: none; }
+}
+
 @keyframes rh-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

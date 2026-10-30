@@ -439,7 +439,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
                       background: active ? 'var(--color-primary-bg)' : 'transparent',
                       color: active ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
                       border: '1px solid ' + (active ? 'var(--color-primary)' : 'var(--color-border)'),
-                      borderRadius: '999px', boxShadow: 'var(--shadow-sm)', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                      borderRadius: '999px', boxShadow: 'var(--shadow-hero)', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                       fontFamily: 'inherit',
                     }}
                   >

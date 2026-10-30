@@ -36,10 +36,10 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
           // (44px in App) rather than painting over it like no other screen does.
           position: 'absolute', top: '44px', left: 0, right: 0, bottom: 0, zIndex: 41,
           background: 'var(--color-bg)', display: 'flex', flexDirection: 'column',
-          // A plain fade, not a slide. A translateY entrance offsets the panel
-          // (and its nav) from the home screen showing through during the fade,
-          // which ghosts and settles -- read as a "shake" on open.
-          animation: 'rh-panel-in 0.18s ease',
+          // Grows out of the bottom-centre  rather than sliding: a translate
+          // would offset the panel's own nav against the home screen behind it.
+          transformOrigin: '50% 100%',
+          animation: 'rh-panel-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1)',
         }}
       >
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', flexShrink: 0 }}>
@@ -65,7 +65,7 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
             imported opens in the form for you to check first.
           </p>
 
-          <button onClick={() => go('import-social')} style={wideCard}>
+          <button onClick={() => go('import-social')} style={{ ...wideCard, animationDelay: '60ms' }} className="rh-rise">
             <SocialIcons />
             <div style={{ textAlign: 'left', minWidth: 0 }}>
               <p style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>
@@ -78,10 +78,18 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
           </button>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
-            <Tile icon={<Image size={19} color={GREEN} />} label="Import from photo" hint="Read a recipe card" onClick={() => go('import-photo')} />
-            <Tile icon={<Type size={19} color={GREEN} />} label="Import from text" hint="Paste and tidy" onClick={() => go('import-text')} />
-            <Tile icon={<Link2 size={19} color={GREEN} />} label="Import from web" hint="From a recipe page" onClick={() => go('import-web')} />
-            <Tile icon={<PenLine size={19} color={GREEN} />} label="Write from scratch" hint="A blank form" onClick={() => go('add-recipe', { fromAddPanel: true })} />
+            <div className="rh-rise" style={{ animationDelay: '100ms', minWidth: 0 }}>
+              <Tile icon={<Image size={19} color={GREEN} />} label="Import from photo" hint="Read a recipe card" onClick={() => go('import-photo')} />
+            </div>
+            <div className="rh-rise" style={{ animationDelay: '150ms', minWidth: 0 }}>
+              <Tile icon={<Type size={19} color={GREEN} />} label="Import from text" hint="Paste and tidy" onClick={() => go('import-text')} />
+            </div>
+            <div className="rh-rise" style={{ animationDelay: '200ms', minWidth: 0 }}>
+              <Tile icon={<Link2 size={19} color={GREEN} />} label="Import from web" hint="From a recipe page" onClick={() => go('import-web')} />
+            </div>
+            <div className="rh-rise" style={{ animationDelay: '250ms', minWidth: 0 }}>
+              <Tile icon={<PenLine size={19} color={GREEN} />} label="Write from scratch" hint="A blank form" onClick={() => go('add-recipe', { fromAddPanel: true })} />
+            </div>
           </div>
         </div>
 
@@ -94,7 +102,10 @@ export function AddRecipeSheet({ open, onClose, onNavigate }: Props) {
       </div>
 
       <style>{`
-        @keyframes rh-panel-in { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes rh-panel-in { from { opacity: 0; transform: scale(0.97) } to { opacity: 1; transform: none } }
+        @keyframes rh-rise { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+        .rh-rise { animation: rh-rise 0.36s cubic-bezier(0.2, 0.8, 0.2, 1) both }
+        @media (prefers-reduced-motion: reduce) { .rh-rise, [role=dialog] { animation: none !important } }
       `}</style>
     </>
   )
@@ -105,6 +116,7 @@ function Tile({ icon, label, hint, onClick }: { icon: React.ReactNode; label: st
     <button
       onClick={onClick}
       style={{
+        width: '100%', 
         display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px',
         padding: '16px', background: 'var(--color-card)', border: '1px solid var(--color-subtle)',
         borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',

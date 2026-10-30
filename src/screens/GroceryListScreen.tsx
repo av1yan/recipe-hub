@@ -534,7 +534,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
                     <button
                       key={list.id}
                       onClick={() => setSelectedListId(list.id)}
-                      style={{ padding: '7px 14px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'transparent', color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+                      style={{ padding: '7px 14px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'transparent', color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
                     >
                       {list.name}
                     </button>
@@ -820,7 +820,7 @@ export default function GroceryListScreen({ onNavigate }: Props) {
             <span style={{ fontSize: '14px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Removed {undoItem.name}</span>
             <button
               onClick={undoDelete}
-              style={{ flexShrink: 0, background: 'rgba(244,184,96,0.16)', border: 'none', color: '#f4b860', fontSize: '13.5px', fontWeight: '800', cursor: 'pointer', fontFamily: 'inherit', padding: '7px 14px', borderRadius: '999px' }}
+              style={{ flexShrink: 0, background: 'rgba(244,184,96,0.16)', border: 'none', color: '#f4b860', fontSize: '13.5px', fontWeight: '800', cursor: 'pointer', fontFamily: 'inherit', padding: '7px 14px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)' }}
             >
               Undo
             </button>

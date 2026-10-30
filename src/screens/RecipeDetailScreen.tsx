@@ -374,7 +374,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                           key={g}
                           onClick={() => runAdapt(g)}
                           disabled={adaptLoading}
-                          style={{ padding: '7px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? 'var(--color-primary)' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: adaptLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+                          style={{ padding: '7px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', border: '1.5px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'), background: on ? 'var(--color-primary-bg)' : 'var(--color-card)', color: on ? 'var(--color-primary)' : 'var(--color-text)', fontSize: '13px', fontWeight: '600', cursor: adaptLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
                         >
                           {g}
                         </button>
@@ -455,7 +455,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
               {/* Servings scaler — amounts below follow this. */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-border)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--color-border)', borderRadius: '999px', boxShadow: 'var(--shadow-hero)' }}>
                     <button onClick={() => setServings(s => Math.max(1, s - 1))} aria-label="Fewer servings" style={stepBtn}><Minus size={15} /></button>
                     <span style={{ minWidth: '26px', textAlign: 'center', fontSize: '15px', fontWeight: '700', color: 'var(--color-text)' }}>{servings}</span>
                     <button onClick={() => setServings(s => s + 1)} aria-label="More servings" style={stepBtn}><Plus size={15} /></button>

@@ -181,7 +181,7 @@ export default function App() {
       setLoading(false)
     }
 
-    setTimeout(checkAuth, 2000) // Splash screen delay
+    checkAuth()
   }, [])
 
   const handleNavigation = (nextScreen: Screen, data?: any) => {
@@ -400,7 +400,7 @@ export default function App() {
   )
 
   return (
-    <AppProvider user={user} openAddSheet={openAddSheet}>
+    <AppProvider user={user} openAddSheet={openAddSheet} addSheetOpen={addSheetOpen}>
       {/* Sizing/responsive rules live in global.css so the frame can collapse to
           full-bleed on a real phone -- see .phone-desk / .phone-frame. */}
       <div className="phone-desk">

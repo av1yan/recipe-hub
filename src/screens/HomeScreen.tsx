@@ -206,7 +206,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '22px', boxShadow: 'var(--shadow-hero)', padding: '18px 18px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-              <span style={{ fontSize: '11px', fontWeight: '600', letterSpacing: '0.08em', color: 'var(--color-text-muted)' }}>
+              <span style={{ fontSize: '16px', fontWeight: '600', letterSpacing: '0.08em', color: 'var(--color-text-muted)' }}>
                 {getDateLabel()}
               </span>
             </div>
@@ -224,7 +224,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             {getGreeting()}{displayName ? `, ${displayName}` : ''}{' \u{1F44B}'}
           </h1>
           {/* A fresh quirky one-liner each time Home opens. */}
-          <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: '6px 0 0', lineHeight: 1.45 }}>
+          <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', margin: '6px 0 0', lineHeight: 1.45 }}>
             {joke}
           </p>
           </div>
@@ -243,7 +243,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 <button
                   key={a.label}
                   onClick={() => onNavigate(a.screen)}
-                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '38px', borderRadius: '999px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', background: 'var(--color-card)', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '38px', borderRadius: '999px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-hero)', background: 'var(--color-card)', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
                 >
                   <a.icon size={15} color="var(--color-primary)" />
                   <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text-secondary)' }}>{a.label}</span>
@@ -299,7 +299,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               MEALS.some(cfg => !filledSlots.has(cfg.key)) && (
                 <button
                   onClick={() => setAddingSlot(MEALS.find(cfg => !filledSlots.has(cfg.key))!.key)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: todayMeals.length > 0 ? '14px' : '10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', color: 'var(--color-primary-dark)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', padding: '9px 16px', fontFamily: 'inherit' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: todayMeals.length > 0 ? '14px' : '10px', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', color: 'var(--color-primary-dark)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', padding: '9px 16px', fontFamily: 'inherit' }}
                 >
                   <Plus size={14} /> Add a meal
                 </button>
@@ -311,7 +311,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <button
                       key={cfg.key}
                       onClick={() => setAddingSlot(cfg.key)}
-                      style={{ padding: '5px 11px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid ' + (addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-border)'), background: addingSlot === cfg.key ? 'var(--color-primary)' : 'transparent', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
+                      style={{ padding: '5px 11px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', border: '1px solid ' + (addingSlot === cfg.key ? 'var(--color-primary)' : 'var(--color-border)'), background: addingSlot === cfg.key ? 'var(--color-primary)' : 'transparent', color: addingSlot === cfg.key ? '#fff' : 'var(--color-text-secondary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}
                     >
                       {cfg.label}
                     </button>

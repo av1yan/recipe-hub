@@ -147,7 +147,7 @@ export default function InsightsScreen({ onNavigate }: Props) {
           <div style={{ marginTop: '14px', textAlign: 'center', padding: '32px 20px 28px', color: 'var(--color-text-muted)', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', boxShadow: 'var(--shadow-md)' }}>
             <div style={{ fontSize: '34px', marginBottom: '8px' }}>🗓️</div>
             <p style={{ fontSize: '14px', margin: '0 0 16px', lineHeight: 1.5 }}>Plan a few meals this week and I'll have something to say.</p>
-            <button onClick={() => onNavigate('meal-plan')} style={{ padding: '11px 20px', borderRadius: '999px', border: 'none', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
+            <button onClick={() => onNavigate('meal-plan')} style={{ padding: '11px 20px', borderRadius: '999px', border: 'none', background: 'var(--color-primary)', boxShadow: 'var(--shadow-hero)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }}>
               Plan your week
             </button>
           </div>
@@ -188,7 +188,7 @@ export default function InsightsScreen({ onNavigate }: Props) {
             <button
               onClick={askAI}
               disabled={aiLoading}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', boxShadow: 'var(--shadow-sm)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '14px', fontWeight: '700', cursor: aiLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '999px', border: '1px solid var(--color-primary-border)', boxShadow: 'var(--shadow-hero)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-dark)', fontSize: '14px', fontWeight: '700', cursor: aiLoading ? 'default' : 'pointer', fontFamily: 'inherit' }}
             >
               {aiLoading ? <><Loader2 size={16} className="rh-spin" /> Thinking…</> : <><Sparkles size={16} /> Ask AI for a deeper read</>}
             </button>

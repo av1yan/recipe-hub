@@ -213,12 +213,21 @@ export default function MealPlanScreen({ onNavigate }: Props) {
   async function addMealToPlan(recipeId: string, mealType: string) {
     if (!selectedDay) return
     try {
-      // Create the week's plan lazily, on the first meal added to it.
+      // Create the week's plan lazily, on the first meal added to it. Re-read the
+      // plans first: a plan made on another screen or device may already exist
+      // for this week, and a second one would split the week's meals.
       let planId = currentPlan?.id
       if (!planId) {
-        const plan = await mealPlanAPI.create(viewWeek)
-        setMealPlans(prev => [...prev, plan])
-        planId = plan.id
+        const latest: MealPlan[] = await mealPlanAPI.list()
+        setMealPlans(latest)
+        const existing = latest.find(p => sameWeek(p.weekStart, viewWeek))
+        if (existing) {
+          planId = existing.id
+        } else {
+          const plan = await mealPlanAPI.create(viewWeek)
+          setMealPlans(prev => [...prev, plan])
+          planId = plan.id
+        }
       }
       await mealPlanAPI.addMeal(planId, recipeId, selectedDay, mealType)
       setRecentIds(pushRecent(recipeId))
@@ -483,7 +492,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
       {/* Week / Month segmented control, with the month label beside it. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '12px' }}>
         <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>{monthLabel}</span>
-        <div role="tablist" style={{ display: 'flex', padding: '3px', borderRadius: '999px', border: '1px solid var(--color-border)', background: 'var(--color-card)', boxShadow: 'var(--shadow-sm)' }}>
+        <div role="tablist" style={{ display: 'flex', gap: '10px' }}>
           {(['Week', 'Month'] as const).map(mode => {
             const selected = mode === 'Month' ? expanded : !expanded
             return (
@@ -493,11 +502,12 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                 aria-selected={selected}
                 onClick={() => { if (selected) return; toggleExpanded() }}
                 style={{
-                  padding: '6px 14px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                  fontSize: '13px', fontWeight: '700',
-                  background: selected ? 'var(--color-primary-bg)' : 'transparent',
+                  padding: '8px 18px', borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: '13px', fontWeight: '700', minWidth: '84px',
+                  border: `1px solid ${selected ? 'var(--color-primary-border)' : 'var(--color-border)'}`,
+                  background: selected ? 'var(--color-primary-bg)' : 'var(--color-card)',
                   color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                  boxShadow: selected ? 'var(--shadow-pill)' : 'none',
+                  boxShadow: selected ? 'var(--shadow-pill)' : 'var(--shadow-hero)',
                   transition: 'background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
                 }}
               >
@@ -642,7 +652,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
           <div style={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '20px', padding: '14px 16px', marginBottom: '20px', boxShadow: 'var(--shadow-md)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
               <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Nutrition goals · {selectedDay}</span>
-              <button onClick={() => onNavigate('settings')} style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', color: 'var(--color-primary-dark)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', fontFamily: 'inherit' }}>Edit goals</button>
+              <button onClick={() => onNavigate('settings')} style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', color: 'var(--color-primary-dark)', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', padding: '6px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', fontFamily: 'inherit' }}>Edit goals</button>
             </div>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '6px 0 12px', lineHeight: 1.45 }}>
               {(() => {
@@ -768,7 +778,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
             <span style={{ fontSize: '14px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{undoLabel}</span>
             <button
               onClick={undoGroceryAdd}
-              style={{ flexShrink: 0, background: 'rgba(244,184,96,0.16)', border: 'none', color: '#f4b860', fontSize: '13.5px', fontWeight: '800', cursor: 'pointer', fontFamily: 'inherit', padding: '7px 14px', borderRadius: '999px' }}
+              style={{ flexShrink: 0, background: 'rgba(244,184,96,0.16)', border: 'none', color: '#f4b860', fontSize: '13.5px', fontWeight: '800', cursor: 'pointer', fontFamily: 'inherit', padding: '7px 14px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)' }}
             >
               Undo
             </button>
@@ -902,7 +912,7 @@ function RecipePicker({ recipes: allRecipes, meal, current, remainingCal, onPick
             {[listingAll ? SLOT_LABELS[slotTypeOf(r)] : null, r.cuisine, timeDisplay, nut ? `${nut.cal} cal` : null, nut && nut.protein ? `${nut.protein}g protein` : null].filter(Boolean).join(' · ')}
           </div>
         </div>
-        {fits && <span style={{ flexShrink: 0, fontSize: '11px', fontWeight: '700', color: 'var(--color-primary-dark)', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', padding: '3px 8px' }}>Fits</span>}
+        {fits && <span style={{ flexShrink: 0, fontSize: '11px', fontWeight: '700', color: 'var(--color-primary-dark)', background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary-border)', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', padding: '3px 8px' }}>Fits</span>}
         {selected && <Check size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />}
       </button>
     )

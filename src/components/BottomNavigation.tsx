@@ -30,7 +30,7 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid, sidebar = f
   // The panel itself lives at the app level (App renders one AddRecipeSheet);
   // the "+" just asks to open it. That's what lets Back on an import screen
   // bring the panel back rather than only ever landing on Home.
-  const { openAddSheet } = useApp()
+  const { openAddSheet, addSheetOpen } = useApp()
   const handleAdd = onAdd ?? openAddSheet
 
   const navBg = solid ? 'var(--color-card)' : 'var(--color-nav-bg)'
@@ -69,13 +69,15 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid, sidebar = f
                   border: 'none', background: 'none', cursor: 'pointer',
                 }}
               >
-                <div style={{
+                <div className="rh-add-btn" style={{
                   width: '46px', height: '46px', borderRadius: '15px',
                   background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   boxShadow: '0 4px 12px rgba(107, 163, 86, 0.4)',
                 }}>
-                  <Plus size={22} color="#fff" strokeWidth={2.5} />
+                  <span className={addSheetOpen ? 'rh-add-icon rh-add-icon--open' : 'rh-add-icon'} style={{ display: 'flex' }}>
+                    <Plus size={22} color="#fff" strokeWidth={2.5} />
+                  </span>
                 </div>
               </button>
             )
@@ -144,13 +146,15 @@ export function BottomNavigation({ active, onNavigate, onAdd, solid, sidebar = f
                 border: 'none', background: 'none', cursor: 'pointer',
               }}
             >
-              <div style={{
+              <div className="rh-add-btn" style={{
                 width: '42px', height: '42px', borderRadius: '14px',
                 background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 4px 12px rgba(107, 163, 86, 0.4)',
               }}>
-                <Plus size={20} color="#fff" strokeWidth={2.5} />
+                <span className={addSheetOpen ? 'rh-add-icon rh-add-icon--open' : 'rh-add-icon'} style={{ display: 'flex' }}>
+                  <Plus size={20} color="#fff" strokeWidth={2.5} />
+                </span>
               </div>
             </button>
           )

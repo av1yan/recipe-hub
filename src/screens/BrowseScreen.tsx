@@ -102,7 +102,7 @@ function chipStyle(on: boolean): CSSProperties {
   return {
     padding: '7px 13px',
     borderRadius: '999px',
-    boxShadow: on ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
+    boxShadow: 'var(--shadow-hero)',
     border: '1px solid ' + (on ? 'var(--color-primary)' : 'var(--color-border)'),
     background: on ? 'var(--color-primary-bg)' : 'transparent',
     color: on ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
@@ -282,7 +282,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 border: `1px solid ${selected ? 'var(--color-primary-border)' : 'var(--color-border)'}`,
                 background: selected ? 'var(--color-primary-bg)' : 'var(--color-card)',
                 color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                boxShadow: selected ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
+                boxShadow: 'var(--shadow-hero)',
                 transition: 'background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease',
               }}
             >
@@ -339,7 +339,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                       <button
                         key={opt.id}
                         onClick={() => toggleAllergy(opt.id)}
-                        style={{ padding: '7px 13px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', border: '1px solid ' + (on ? '#d1584f' : 'var(--color-border)'), background: on ? 'rgba(209,88,79,0.12)' : 'transparent', color: on ? '#d1584f' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
+                        style={{ padding: '7px 13px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', border: '1px solid ' + (on ? '#d1584f' : 'var(--color-border)'), background: on ? 'rgba(209,88,79,0.12)' : 'transparent', color: on ? '#d1584f' : 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}
                       >
                         {opt.label}
                       </button>
@@ -385,7 +385,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
           <span style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: 'var(--color-text-muted)', flexShrink: 0 }}>DIET</span>
           <div style={{ display: 'flex', gap: '6px', flex: 1 }}>
             {dietPrefs.map(pref => (
-              <span key={pref} style={{ flexShrink: 0, boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-primary-border)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '600', padding: '4px 11px', borderRadius: '999px' }}>
+              <span key={pref} style={{ flexShrink: 0, boxShadow: 'var(--shadow-hero)', border: '1px solid var(--color-primary-border)', color: 'var(--color-primary)', fontSize: '12px', fontWeight: '600', padding: '4px 11px', borderRadius: '999px' }}>
                 {DIET_LABELS[pref] || pref}
               </span>
             ))}
@@ -519,9 +519,9 @@ export default function BrowseScreen({ onNavigate }: Props) {
           <div style={{ padding: '16px 24px 24px' }}>
             {activeFilter && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', padding: '5px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', fontSize: '13px', fontWeight: '600', padding: '5px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', textTransform: activeFilter.kind === 'mealType' ? 'capitalize' : 'none' }}>
                   {activeFilter.label}
-                  <button onClick={() => setActiveFilter(null)} aria-label="Remove filter" style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', display: 'flex', padding: 0 }}>
+                  <button onClick={() => setActiveFilter(null)} aria-label="Remove filter" style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', margin: '-12px -12px -12px -6px', padding: 0 }}>
                     <X size={13} />
                   </button>
                 </span>

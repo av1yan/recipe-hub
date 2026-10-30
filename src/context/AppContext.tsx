@@ -6,6 +6,8 @@ interface AppContextType {
   /** Open the "Add a recipe" panel. Held at the app level so it can be
       reopened from anywhere -- e.g. Back on an import sub-screen. */
   openAddSheet: () => void
+  /** Whether the "Add a recipe" panel is showing, so the "+" can morph into a close. */
+  addSheetOpen: boolean
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -13,14 +15,16 @@ const AppContext = createContext<AppContextType | undefined>(undefined)
 export function AppProvider({
   user,
   openAddSheet,
+  addSheetOpen,
   children,
 }: {
   user: User | null
   openAddSheet: () => void
+  addSheetOpen: boolean
   children: ReactNode
 }) {
   return (
-    <AppContext.Provider value={{ user, openAddSheet }}>
+    <AppContext.Provider value={{ user, openAddSheet, addSheetOpen }}>
       {children}
     </AppContext.Provider>
   )

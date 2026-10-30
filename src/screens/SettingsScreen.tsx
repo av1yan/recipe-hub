@@ -305,7 +305,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
   // Diet and allergy pills persist the moment they're tapped (like onboarding),
   // so Browse picks them up without needing Save.
   const pill = (active: boolean, accent: string): React.CSSProperties => ({
-    padding: '6px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-sm)',
+    padding: '6px 12px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)',
     border: `1.5px solid ${active ? accent : 'var(--color-border)'}`,
     background: active ? accent : 'var(--color-card)',
     color: active ? '#fff' : 'var(--color-text-secondary)',
@@ -535,7 +535,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0' }}>
               <Moon size={18} color="var(--color-text-secondary)" />
               <span style={{ flex: 1, fontSize: '15px', color: 'var(--color-text)', fontWeight: '500' }}>Theme</span>
-              <div style={{ display: 'flex', background: 'var(--color-subtle)', borderRadius: '999px', boxShadow: 'var(--shadow-sm)', padding: '3px' }}>
+              <div style={{ display: 'flex', background: 'var(--color-subtle)', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', padding: '3px' }}>
                 {(['light', 'dark'] as Theme[]).map(t => (
                   <button
                     key={t}
@@ -547,7 +547,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
                       background: theme === t ? 'var(--color-card)' : 'transparent',
                       color: theme === t ? 'var(--color-text)' : 'var(--color-text-muted)',
                       fontSize: '13px', fontWeight: '700',
-                      boxShadow: theme === t ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
+                      boxShadow: 'var(--shadow-hero)',
                     }}
                   >
                     {t === 'light' ? <Sun size={14} /> : <Moon size={14} />}
