@@ -443,7 +443,8 @@ function HelpPage({ onBack }: { onBack: () => void }) {
 function InvitePage({ onBack }: { onBack: () => void }) {
   const linkRef = useRef<HTMLParagraphElement>(null)
   const { toast, show } = useToast()
-  const link = window.location.origin
+  // window.location.origin is capacitor://localhost inside the iOS app, so share the public web address.
+  const link = 'https://recipe-hub-orcin-ten.vercel.app'
 
   const copyLink = async () => {
     const ok = await copyText(link)
@@ -535,25 +536,28 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0' }}>
               <Moon size={18} color="var(--color-text-secondary)" />
               <span style={{ flex: 1, fontSize: '15px', color: 'var(--color-text)', fontWeight: '500' }}>Theme</span>
-              <div style={{ display: 'flex', background: 'var(--color-subtle)', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', padding: '3px' }}>
-                {(['light', 'dark'] as Theme[]).map(t => (
-                  <button
-                    key={t}
-                    onClick={() => chooseTheme(t)}
-                    aria-pressed={theme === t}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px',
-                      borderRadius: '999px', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                      background: theme === t ? 'var(--color-card)' : 'transparent',
-                      color: theme === t ? 'var(--color-text)' : 'var(--color-text-muted)',
-                      fontSize: '13px', fontWeight: '700',
-                      boxShadow: 'var(--shadow-hero)',
-                    }}
-                  >
-                    {t === 'light' ? <Sun size={14} /> : <Moon size={14} />}
-                    {t === 'light' ? 'Light' : 'Dark'}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {(['light', 'dark'] as Theme[]).map(t => {
+                  const selected = theme === t
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => chooseTheme(t)}
+                      aria-pressed={selected}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', minHeight: '44px',
+                        borderRadius: '999px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: '700',
+                        border: `1px solid ${selected ? 'var(--color-primary-border)' : 'var(--color-border)'}`,
+                        background: selected ? 'var(--color-primary-bg)' : 'var(--color-card)',
+                        color: selected ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                        boxShadow: selected ? 'var(--shadow-pill)' : 'var(--shadow-sm)',
+                      }}
+                    >
+                      {t === 'light' ? <Sun size={14} /> : <Moon size={14} />}
+                      {t === 'light' ? 'Light' : 'Dark'}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           </div>
