@@ -497,7 +497,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
                         {ing.name}
                       </span>
                       <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>
-                        {(() => { const c = convertMeasurement((ing.quantity || 0) * scale, ing.unit, unitPref); return `${fmtQty(c.quantity)} ${c.unit}` })()}
+                        {(() => { const c = convertMeasurement((ing.quantity || 0) * scale, ing.unit, unitPref); return c.quantity ? `${fmtQty(c.quantity)} ${c.unit}` : '' })()}
                       </span>
                     </div>
                   )

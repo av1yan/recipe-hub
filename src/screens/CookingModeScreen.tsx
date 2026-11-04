@@ -164,7 +164,7 @@ export default function CookingModeScreen({ recipe, onNavigate }: Props) {
                 {(recipe as any).ingredients.map((ing: any, i: number) => (
                   <div key={ing.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '14px 0', borderTop: i > 0 ? '1px solid var(--color-subtle)' : 'none' }}>
                     <span style={{ fontSize: '15px', fontWeight: '500', color: 'var(--color-text)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ing.name}</span>
-                    <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>{(() => { const c = convertMeasurement(ing.quantity || 0, ing.unit, unitPref); return `${c.quantity} ${c.unit}` })()}</span>
+                    <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600', flexShrink: 0 }}>{(() => { const c = convertMeasurement(ing.quantity || 0, ing.unit, unitPref); return c.quantity ? `${c.quantity} ${c.unit}` : '' })()}</span>
                   </div>
                 ))}
               </div>

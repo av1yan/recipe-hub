@@ -168,7 +168,8 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
 
     const cleanIngredients = ingredients
       .filter(ing => ing.name.trim())
-      .map(ing => ({ name: ing.name.trim(), quantity: parseFloat(ing.quantity) || 1, unit: ing.unit.trim() }))
+      // A blank amount means no amount (0), which the recipe view hides.
+      .map(ing => ({ name: ing.name.trim(), quantity: parseFloat(ing.quantity) || 0, unit: ing.unit.trim() }))
 
     const cleanInstructions = instructions
       .filter(step => step.text.trim())
