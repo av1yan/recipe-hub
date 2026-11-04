@@ -99,7 +99,8 @@ export default function SignInScreen({ onSignIn, onSignUp, onAppleNative, onOAut
   }
 
   // Native Google: Google blocks its consent screen inside a WebView, so run the
-  // flow in the system browser and take the token back through the deep link.
+  // flow in the secure sign-in sheet (ASWebAuthenticationSession) and take the
+  // token back from its redirect.
   const handleGoogleNative = async () => {
     setError('')
     setLoading(true)

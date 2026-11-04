@@ -33,9 +33,10 @@ export async function signInWithProviderNative(provider: string): Promise<Native
     if (token) return { token }
     return { error: params.get('oauth_error') || 'Sign-in failed' }
   } catch (err) {
-    // The session rejects when the person closes it before finishing.
+    // Closing the sheet rejects with iOS's canceled-login error (code 1 in
+    // ASWebAuthenticationSessionError), whose text doesn't say "cancel".
     const message = err instanceof Error ? err.message : String(err)
-    if (/cancel/i.test(message)) return { cancelled: true }
+    if (/cancel|WebAuthenticationSession error 1\b/i.test(message)) return { cancelled: true }
     return { error: 'Could not open the sign-in window' }
   }
 }
