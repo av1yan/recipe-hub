@@ -1,3 +1,4 @@
+import { timeLabel } from '../utils/recipeTime'
 import { useState, useEffect, type CSSProperties } from 'react'
 import { Plus, X, ChefHat, Lightbulb, Users } from 'lucide-react'
 import type { Screen } from '../types'
@@ -363,7 +364,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                       leftBadge={{ label: (recipe.cuisine || 'Fav').slice(0, 3).toUpperCase(), value: '❤️' }}
                       title={recipe.name}
                       subtitle={recipe.cuisine || 'Recipe'}
-                      rightInfo={`${time} min`}
+                      rightInfo={timeLabel(recipe) || undefined}
                       onClick={() => onNavigate('recipe', { recipe })}
                     />
                   )

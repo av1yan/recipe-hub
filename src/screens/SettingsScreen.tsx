@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import type { Screen } from '../types'
 import { Toast, useToast } from '../components/Toast'
+import { App as CapacitorApp } from '@capacitor/app'
 import { authAPI } from '../utils/api'
 import { activeTheme, setTheme, type Theme } from '../utils/theme'
 import { getDietPrefs, DIET_OPTIONS, DIET_PREFS_KEY } from './DietPreferencesScreen'
@@ -124,6 +125,8 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
   const [pwSaved, setPwSaved] = useState(false)
   const [pwError, setPwError] = useState('')
   const [pwBusy, setPwBusy] = useState(false)
+  // Google/Apple-only accounts have no password to change.
+  const [hasPassword, setHasPassword] = useState(true)
   const [showDelete, setShowDelete] = useState(false)
   const [deleteBusy, setDeleteBusy] = useState(false)
   const [deleteError, setDeleteError] = useState('')
@@ -134,6 +137,7 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
         setName(p?.name || '')
         setUsername(p?.username || '')
         setEmail(p?.email || '')
+        setHasPassword(p?.hasPassword !== false)
       })
       .catch(err => console.error('Failed to load profile:', err))
   }, [])
@@ -225,6 +229,7 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
           <SaveButton onClick={saveProfile} saved={profileSaved} />
         </div>
 
+        {hasPassword && (<>
         <SectionHeader label="CHANGE PASSWORD" />
         <div style={cardStyle}>
           {[
@@ -240,6 +245,7 @@ function AccountPage({ onBack, onSignOut }: { onBack: () => void; onSignOut: () 
           {pwError && <p style={{ fontSize: '13px', color: '#ef4444', margin: 0 }}>{pwError}</p>}
           <SaveButton onClick={savePassword} saved={pwSaved} />
         </div>
+        </>)}
 
         <SectionHeader label="DANGER ZONE" />
         <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid var(--color-subtle)' }}>
@@ -278,8 +284,7 @@ function Preferences({ onBack }: { onBack: () => void }) {
   const [goal, setGoalState] = useState(() => getCalorieGoal())
   const [macros, setMacrosState] = useState(() => getMacroGoals())
   const [saved, setSaved] = useState(false)
-  // Calorie/macro goals feed Insights and the meal-plan nutrition bar — both
-  // Pro — so the whole section only shows once Pro is active.
+  // Calorie/macro goals feed Insights and the meal-plan nutrition bar.
 
   // Units, default servings and the calorie goal persist the moment they change,
   // so recipes and Insights reflect them straight away.
@@ -503,7 +508,13 @@ function InvitePage({ onBack }: { onBack: () => void }) {
 export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
   const [subPage, setSubPage] = useState<SubPage>(null)
   const [theme, setThemeState] = useState<Theme>(activeTheme())
+  const [appVersion, setAppVersion] = useState('')
   const chooseTheme = (t: Theme) => { setTheme(t); setThemeState(t) }
+
+  // The version the installed app reports, so Settings never goes stale.
+  useEffect(() => {
+    CapacitorApp.getInfo().then(info => setAppVersion(info.version)).catch(() => {})
+  }, [])
 
   if (subPage === 'account') return <AccountPage onBack={() => setSubPage(null)} onSignOut={onSignOut} />
   if (subPage === 'preferences') return <Preferences onBack={() => setSubPage(null)} />
@@ -575,7 +586,7 @@ export default function SettingsScreen({ onNavigate, onSignOut }: Props) {
           </button>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--color-text-muted)', marginBottom: '24px' }}>Version 1.0.0</p>
+        <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--color-text-muted)', marginBottom: '24px' }}>{appVersion && `Version ${appVersion}`}</p>
 
       </div>
     </div>

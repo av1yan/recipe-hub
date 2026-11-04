@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { ArrowLeft, Users, Crown, Plus, X, Check, Copy, Share2, RefreshCw, LogOut, Trash2 } from 'lucide-react'
+import { ArrowLeft, Users, Plus, X, Check, Copy, Share2, RefreshCw, LogOut, Trash2 } from 'lucide-react'
 import type { Screen } from '../types'
 import { householdAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
@@ -323,8 +323,8 @@ export default function HouseholdScreen({ onNavigate }: Props) {
                       {m.name}{m.isYou ? ' (you)' : ''}
                     </span>
                     {m.role === 'owner' && (
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '10px', fontWeight: '800', color: 'var(--color-pro-badge)', background: 'rgba(244,184,96,0.16)', padding: '3px 8px', borderRadius: '999px', boxShadow: 'var(--shadow-hero)', letterSpacing: '0.04em' }}>
-                        <Crown size={10} /> OWNER
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--color-text-muted)', padding: '3px 8px', borderRadius: '999px', border: '1px solid var(--color-border)', letterSpacing: '0.04em' }}>
+                        OWNER
                       </span>
                     )}
                   </div>

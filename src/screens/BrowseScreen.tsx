@@ -1,4 +1,5 @@
 import { slotTypeOf, SLOT_EMOJIS } from '../utils/mealType'
+import { timeLabel } from '../utils/recipeTime'
 import { useState, useEffect, type CSSProperties } from 'react'
 import { Search, SlidersHorizontal, X, ChevronRight, Info } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
@@ -182,9 +183,9 @@ export default function BrowseScreen({ onNavigate }: Props) {
   const safeRecipes = recipes.filter(r => !recipeHasAllergen(r, allergies))
   const rotd = safeRecipes.length ? safeRecipes[Math.floor(Date.now() / 86400000) % safeRecipes.length] : null
   const browsing = !q && !activeFilter
-
+  // Trending skips the featured dish, so the same recipe isn't shown twice.
   const trending = [...safeRecipes]
-    .filter(r => r.createdAt)
+    .filter(r => r.createdAt && r.id !== rotd?.id)
     .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
     .slice(0, 6)
 
@@ -419,7 +420,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                       {rotd.name}
                     </h2>
                     <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
-                      {[rotd.cuisine, `${(rotd.prepTime || 0) + (rotd.cookTime || 0)} min`, rotd.calories ? `${rotd.calories} cal` : ''].filter(Boolean).join(' · ')}
+                      {[rotd.cuisine, timeLabel(rotd), rotd.calories ? `${rotd.calories} cal` : ''].filter(Boolean).join(' · ')}
                     </p>
                   </div>
                 </div>
@@ -433,7 +434,6 @@ export default function BrowseScreen({ onNavigate }: Props) {
                 </div>
                 <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '16px 24px 16px', scrollbarWidth: 'none' }}>
                   {trending.map(recipe => {
-                    const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
                     return (
                       <div key={recipe.id} onClick={() => onNavigate('recipe', { recipe })} style={{ flex: '0 0 160px', cursor: 'pointer', background: 'var(--color-card)', border: '1px solid var(--color-border)', borderRadius: '18px', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
                         <div style={{ height: '96px', background: 'linear-gradient(135deg, var(--color-primary-bg), var(--color-subtle))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>
@@ -446,7 +446,7 @@ export default function BrowseScreen({ onNavigate }: Props) {
                             {recipe.name}
                           </p>
                           <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', margin: '4px 0 0' }}>
-                            {[recipe.cuisine, `${time} min`].filter(Boolean).join(' · ')}
+                            {[recipe.cuisine, timeLabel(recipe)].filter(Boolean).join(' · ')}
                           </p>
                         </div>
                       </div>
@@ -569,15 +569,15 @@ function RecipeList({ recipes, onNavigate }: { recipes: Recipe[]; onNavigate: (s
     <div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {recipes.map((recipe) => {
-          const time = (recipe.prepTime || 0) + (recipe.cookTime || 0)
-          const meta = [recipe.cuisine, `${time} min`].filter(Boolean).join(' · ')
+          const total = (recipe.prepTime || 0) + (recipe.cookTime || 0)
+          const meta = [recipe.cuisine, timeLabel(recipe)].filter(Boolean).join(' · ')
           return (
             <InfoCard
               key={recipe.id}
               leftBadge={{ label: '', value: CUISINE_EMOJI[recipe.cuisine] ?? '🍽️' }}
               title={recipe.name}
               subtitle={meta}
-              rightInfo={`${time}m`}
+              rightInfo={total > 0 ? `${total}m` : undefined}
               onClick={() => onNavigate('recipe', { recipe })}
             />
           )

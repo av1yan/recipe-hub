@@ -18,6 +18,8 @@ interface Props {
   /** When Add Recipe is opened from inside a cookbook, that cookbook is
       pre-selected so the new recipe files into it. */
   presetCookbookId?: string | null
+  /** The saved recipe being edited. When set, the form updates it in place. */
+  editing?: any | null
 }
 
 /** A small section heading, so the long form reads as groups not one list. */
@@ -80,30 +82,34 @@ const stepBadge: React.CSSProperties = {
   fontSize: '14px', fontWeight: '700', marginTop: '5px',
 }
 
-export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', reopenPanelOnBack = false, presetCookbookId = null }: Props) {
+export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', reopenPanelOnBack = false, presetCookbookId = null, editing = null }: Props) {
+  // Editing starts from the saved recipe, whose tags come back as {tag} rows.
+  const seed: any = editing
+    ? { ...editing, tags: (editing.tags ?? []).map((t: any) => t.tag ?? t) }
+    : draft
   // An import arrives here as a draft to be checked over. Seeding useState
   // rather than assigning in an effect means the fields are already filled on
   // first paint, and stay editable like any other.
-  const [name, setName] = useState(draft?.name ?? '')
-  const [cuisine, setCuisine] = useState(inList(draft?.cuisine, CUISINES, 'Italian'))
-  const [mealType, setMealType] = useState(inList(draft?.mealType, MEAL_TYPES, 'lunch'))
-  const [difficulty, setDifficulty] = useState(inList(draft?.difficulty, ['easy', 'medium', 'hard'], 'easy'))
-  const [prepTime, setPrepTime] = useState(numField(draft?.prepTime))
-  const [cookTime, setCookTime] = useState(numField(draft?.cookTime))
-  const [servings, setServings] = useState(numField(draft?.servings) || '2')
-  const [calories, setCalories] = useState(numField(draft?.calories))
-  const [imageUrl, setImageUrl] = useState(draft?.imageUrl ?? '')
+  const [name, setName] = useState(seed?.name ?? '')
+  const [cuisine, setCuisine] = useState(inList(seed?.cuisine, CUISINES, 'Italian'))
+  const [mealType, setMealType] = useState(inList(seed?.mealType, MEAL_TYPES, 'lunch'))
+  const [difficulty, setDifficulty] = useState(inList(seed?.difficulty, ['easy', 'medium', 'hard'], 'easy'))
+  const [prepTime, setPrepTime] = useState(numField(seed?.prepTime))
+  const [cookTime, setCookTime] = useState(numField(seed?.cookTime))
+  const [servings, setServings] = useState(numField(seed?.servings) || '2')
+  const [calories, setCalories] = useState(numField(seed?.calories))
+  const [imageUrl, setImageUrl] = useState(seed?.imageUrl ?? '')
   // Where an import came from. Kept so the recipe can credit its source.
-  const [sourceUrl] = useState<string | null>(draft?.sourceUrl ?? null)
-  const [tags, setTags] = useState<string[]>(draft?.tags ?? [])
+  const [sourceUrl] = useState<string | null>(seed?.sourceUrl ?? null)
+  const [tags, setTags] = useState<string[]>(seed?.tags ?? [])
   const [ingredients, setIngredients] = useState<IngredientRow[]>(
-    draft?.ingredients?.length
-      ? draft.ingredients.map((i: any) => ({ name: i.name, quantity: numField(i.quantity), unit: i.unit ?? '' }))
+    seed?.ingredients?.length
+      ? seed.ingredients.map((i: any) => ({ name: i.name, quantity: numField(i.quantity), unit: i.unit ?? '' }))
       : [{ name: '', quantity: '', unit: '' }]
   )
   const [instructions, setInstructions] = useState<InstructionRow[]>(
-    draft?.instructions?.length
-      ? draft.instructions.map((i: any) => ({ text: i.text, duration: numField(i.duration) }))
+    seed?.instructions?.length
+      ? seed.instructions.map((i: any) => ({ text: i.text, duration: numField(i.duration) }))
       : [{ text: '', duration: '' }]
   )
   // Cookbooks to file this under. '' means don't, NEW_COOKBOOK means make one.
@@ -185,6 +191,27 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
     }
 
     try {
+      if (editing) {
+        const updated: any = await recipeAPI.update(editing.id, {
+          name,
+          cuisine,
+          mealType,
+          difficulty,
+          prepTime: parseInt(prepTime) || 0,
+          cookTime: parseInt(cookTime) || 0,
+          servings: parseInt(servings) || 1,
+          calories: calories ? parseInt(calories) : null,
+          imageUrl: imageUrl.trim() || null,
+          tags,
+          ingredients: cleanIngredients,
+          instructions: cleanInstructions,
+        })
+        show('Recipe updated')
+        // Keep the favorite state the detail screen already had.
+        setTimeout(() => onNavigate('recipe', { recipe: { ...updated, isFavorite: editing.isFavorite } }), 800)
+        return
+      }
+
       const created: any = await recipeAPI.create({
         name,
         cuisine,
@@ -243,7 +270,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
         <button onClick={() => onNavigate(backTo, reopenPanelOnBack ? { openAddSheet: true } : undefined)} aria-label="Back" className="btn btn-icon" style={{ background: 'none' }}>
           <ArrowLeft size={22} />
         </button>
-        <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>{draft ? 'Review recipe' : 'Add Recipe'}</h2>
+        <h2 style={{ flex: 1, fontSize: '18px', margin: 0 }}>{editing ? 'Edit recipe' : draft ? 'Review recipe' : 'Add Recipe'}</h2>
       </header>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '18px 24px 24px' }}>
@@ -454,6 +481,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
             </p>
           </div>
 
+          {!editing && <>
           <SectionLabel>Save to a cookbook <span style={{ textTransform: 'none', fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></SectionLabel>
           <div className="field">
             <select
@@ -476,6 +504,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
               />
             )}
           </div>
+          </>}
         </form>
       </div>
 
@@ -488,7 +517,7 @@ export default function AddRecipeScreen({ onNavigate, draft, backTo = 'home', re
           disabled={loading}
           style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: loading ? 'var(--color-disabled)' : 'var(--color-primary)', color: '#fff', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}
         >
-          {loading ? 'Saving…' : draft ? 'Save recipe' : 'Create recipe'}
+          {loading ? 'Saving…' : editing ? 'Save changes' : draft ? 'Save recipe' : 'Create recipe'}
         </button>
       </div>
 

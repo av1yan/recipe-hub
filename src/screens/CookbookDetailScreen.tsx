@@ -1,3 +1,4 @@
+import { timeLabel } from '../utils/recipeTime'
 import { useState, useEffect } from 'react'
 import { ArrowLeft, BookOpen, X, Plus, Check } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
@@ -145,7 +146,7 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
                     {recipe.name}
                   </h4>
                   <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
-                    {[recipe.cuisine, `${(recipe.prepTime || 0) + (recipe.cookTime || 0)} min`].filter(Boolean).join(' · ')}
+                    {[recipe.cuisine, timeLabel(recipe)].filter(Boolean).join(' · ')}
                   </p>
                 </div>
                 <button
@@ -198,7 +199,7 @@ export default function CookbookDetailScreen({ cookbookId, onNavigate }: Props) 
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--color-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
-                        <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, `${(r.prepTime || 0) + (r.cookTime || 0)} min`].filter(Boolean).join(' · ')}</div>
+                        <div style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', marginTop: '2px' }}>{[r.cuisine, timeLabel(r)].filter(Boolean).join(' · ')}</div>
                       </div>
                       <span style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '15px', background: 'var(--color-primary)', boxShadow: 'var(--shadow-pill)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {busy ? <Check size={16} /> : <Plus size={17} />}

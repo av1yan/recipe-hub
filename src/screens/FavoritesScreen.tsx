@@ -1,3 +1,4 @@
+import { timeLabel } from '../utils/recipeTime'
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Heart } from 'lucide-react'
 import type { Screen } from '../types'
@@ -107,7 +108,7 @@ export default function FavoritesScreen({ onNavigate }: Props) {
                       {recipe.name}
                     </h4>
                     <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
-                      {[recipe.cuisine, `${time} min`].filter(Boolean).join(' · ')}
+                      {[recipe.cuisine, timeLabel(recipe)].filter(Boolean).join(' · ')}
                     </p>
                   </div>
                   <button

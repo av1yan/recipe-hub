@@ -112,6 +112,8 @@ export default function App() {
   // A cookbook to pre-select when Add Recipe is opened from inside a cookbook,
   // so the new recipe files straight into it.
   const [addRecipeCookbook, setAddRecipeCookbook] = useState<string | null>(null)
+  // The saved recipe the form is editing, or null when adding a new one.
+  const [editRecipe, setEditRecipe] = useState<any>(null)
   // The "Add a recipe" panel, held here so it can be reopened from anywhere --
   // Back on an import sub-screen brings it back instead of dumping you on Home.
   const [addSheetOpen, setAddSheetOpen] = useState(false)
@@ -191,7 +193,8 @@ export default function App() {
     if (nextScreen === 'recipe' && data?.recipe) {
       setCurrentRecipe(data.recipe)
       // 'recipe' -> 'recipe' would strand you; cooking-mode returns here itself.
-      if (screen !== 'recipe') setRecipeOrigin(screen)
+      // Saving an edit returns from the form, which must not become the origin.
+      if (screen !== 'recipe' && screen !== 'add-recipe') setRecipeOrigin(screen)
     }
     // Only carry a draft into the form when one was just parsed; opening the
     // form any other way must start blank.
@@ -201,6 +204,7 @@ export default function App() {
       if (screen !== 'add-recipe') setAddRecipeOrigin(screen)
       setAddRecipeFromPanel(Boolean(data?.fromAddPanel))
       setAddRecipeCookbook(data?.cookbookId ?? null)
+      setEditRecipe(data?.editRecipe ?? null)
     }
     if (nextScreen === 'cookbook' && data?.cookbookId) {
       setCookbookId(data.cookbookId)
@@ -354,9 +358,9 @@ export default function App() {
       case 'browse':
         return <BrowseScreen onNavigate={handleNavigation} />
       case 'recipe':
-        return <RecipeDetailScreen recipe={currentRecipe} backTo={recipeOrigin} onNavigate={handleNavigation} />
+        return <RecipeDetailScreen recipe={currentRecipe} backTo={recipeOrigin} onNavigate={handleNavigation} canEdit={Boolean(user && (currentRecipe as any)?.userId === user.id)} />
       case 'add-recipe':
-        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} reopenPanelOnBack={addRecipeFromPanel} presetCookbookId={addRecipeCookbook} />
+        return <AddRecipeScreen onNavigate={handleNavigation} draft={draft} backTo={addRecipeOrigin} reopenPanelOnBack={addRecipeFromPanel} presetCookbookId={addRecipeCookbook} editing={editRecipe} />
       case 'import-web':
         return <ImportRecipeScreen mode="web" onNavigate={handleNavigation} backTo={addSheetOrigin} initialValue={sharedImport?.screen === 'import-web' ? sharedImport.value : ''} autoStart={sharedImport?.screen === 'import-web'} />
       case 'import-text':

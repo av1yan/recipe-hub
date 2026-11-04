@@ -1,3 +1,4 @@
+import { timeLabel } from '../utils/recipeTime'
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Trash2, Check, ChevronDown, ChevronLeft, ChevronRight, ShoppingCart, Share2, Clock, Info, Plus } from 'lucide-react'
 import type { Screen, MealPlan, Recipe } from '../types'
@@ -771,7 +772,7 @@ export default function MealPlanScreen({ onNavigate }: Props) {
                   <>
                     <h4 style={{ fontSize: '15.5px', fontWeight: '600', color: 'var(--color-text)', margin: '3px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meal.name}</h4>
                     <p style={{ fontSize: '12.5px', color: 'var(--color-text-muted)', margin: '3px 0 0' }}>
-                      {(meal.prepTime || 0) + (meal.cookTime || 0)} min · {servings} serving{servings === 1 ? '' : 's'}
+                      {[timeLabel(meal), `${servings} serving${servings === 1 ? '' : 's'}`].filter(Boolean).join(' · ')}
                     </p>
                   </>
                 ) : (

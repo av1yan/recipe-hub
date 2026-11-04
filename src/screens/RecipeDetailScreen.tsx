@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles, BookmarkPlus, Check, Info } from 'lucide-react'
+import { ArrowLeft, Clock, ChefHat, Heart, ExternalLink, Minus, Plus, ShoppingCart, CalendarPlus, Share2, Sparkles, BookmarkPlus, Check, Info, Pencil } from 'lucide-react'
 import type { Screen, Recipe } from '../types'
 import { recipeAPI, groceryAPI, mealPlanAPI, insightsAPI } from '../utils/api'
 import { Toast, useToast } from '../components/Toast'
@@ -14,6 +14,8 @@ interface Props {
   onNavigate: (screen: Screen, data?: any) => void
   /** Where the back button goes — wherever this recipe was opened from. */
   backTo?: Screen
+  /** True when the signed-in person owns this recipe, so they can edit it. */
+  canEdit?: boolean
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -42,7 +44,7 @@ function sourceLabel(url: string): string {
   }
 }
 
-export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'browse' }: Props) {
+export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'browse', canEdit = false }: Props) {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set())
   const [isFavorited, setIsFavorited] = useState(recipe?.isFavorite || false)
   const [favBusy, setFavBusy] = useState(false)
@@ -352,6 +354,7 @@ export default function RecipeDetailScreen({ recipe, onNavigate, backTo = 'brows
             <ActionButton icon={<ShoppingCart size={18} />} label="Groceries" onClick={addToGroceries} busy={actionBusy === 'groceries'} />
             <ActionButton icon={<CalendarPlus size={18} />} label="Meal Plan" onClick={addToMealPlan} busy={actionBusy === 'mealplan'} />
             <ActionButton icon={<Share2 size={18} />} label="Share" onClick={share} />
+            {canEdit && <ActionButton icon={<Pencil size={18} />} label="Edit" onClick={() => onNavigate('add-recipe', { editRecipe: recipe })} />}
           </div>
 
           {/* AI cooking assistant. Adapt the recipe to a goal. */}
